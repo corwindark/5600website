@@ -1,0 +1,44 @@
+{
+  "index.qmd": {
+    "index.html": "23b5c26c"
+  },
+  "about.qmd": {
+    "about.html": "00782d3d"
+  },
+  "about me.qmd": {
+    "about me.html": "d460fdb2"
+  },
+  "ARIMAX SARIMAX VAR.qmd": {
+    "ARIMAX SARIMAX VAR.html": "46e211d9"
+  },
+  "ARMA ARIMA SARIMA Models.qmd": {
+    "ARMA ARIMA SARIMA Models.html": "106e7ba2"
+  },
+  "Conclusions.qmd": {
+    "Conclusions.html": "1b8415d3"
+  },
+  "Data Sources.qmd": {
+    "Data Sources.html": "88cdd08e"
+  },
+  "Data Visualization.qmd": {
+    "Data Visualization.html": "ae25aa13"
+  },
+  "Deep Learning for TS.qmd": {
+    "Deep Learning for TS.html": "bebe48ce"
+  },
+  "Exploratory Data Analysis.qmd": {
+    "Exploratory Data Analysis.html": "feb3dfa0"
+  },
+  "Financial Time Series Models (ARCH GARCH).qmd": {
+    "Financial Time Series Models (ARCH GARCH).html": "026a9d2e"
+  },
+  "Introduction.qmd": {
+    "Introduction.html": "d3678f1c"
+  },
+  "Spectral Analysis and Filtering.qmd": {
+    "Spectral Analysis and Filtering.html": "1e115165"
+  },
+  "dv.qmd": {
+    "dv.html": "fa4e0582"
+  }
+}

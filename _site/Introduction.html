@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Corwin Dark">
+
+<title>Corwin Dark - Introduction</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Corwin Dark</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about me.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./Introduction.html" rel="" target="" aria-current="page">
+ <span class="menu-text">Introduction</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Data Sources.html" rel="" target="">
+ <span class="menu-text">Data Sources</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Data Visualization.html" rel="" target="">
+ <span class="menu-text">Data Visualization</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Exploratory Data Analysis.html" rel="" target="">
+ <span class="menu-text">Exploratory Data Analysis</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./ARMA ARIMA SARIMA Models.html" rel="" target="">
+ <span class="menu-text">ARMA ARIMA SARIMA Models.html</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./ARIMAX SARIMAX VAR.html" rel="" target="">
+ <span class="menu-text">ARIMAX SARIMAX VAR.html</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Spectral Analysis and Filtering.html" rel="" target="">
+ <span class="menu-text">Spectral Analysis and Filtering</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Financial Time Series Models (ARCH GARCH).html" rel="" target="">
+ <span class="menu-text">Financial Time Series Models (ARCH GARCH)</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Deep Learning for TS.html" rel="" target="">
+ <span class="menu-text">Deep Learning for TS</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Conclusions.html" rel="" target="">
+ <span class="menu-text">Conclusions</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./dv.html" rel="" target="">
+ <span class="menu-text">Data Vizes in TS</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#topic-explanation" id="toc-topic-explanation" class="nav-link active" data-scroll-target="#topic-explanation">Topic Explanation:</a></li>
+  <li><a href="#the-big-picture" id="toc-the-big-picture" class="nav-link" data-scroll-target="#the-big-picture">The Big Picture:</a></li>
+  <li><a href="#analytical-angles" id="toc-analytical-angles" class="nav-link" data-scroll-target="#analytical-angles">Analytical Angles:</a></li>
+  <li><a href="#literature-review" id="toc-literature-review" class="nav-link" data-scroll-target="#literature-review">Literature Review:</a></li>
+  <li><a href="#guiding-questions" id="toc-guiding-questions" class="nav-link" data-scroll-target="#guiding-questions">Guiding Questions:</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Introduction</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Corwin Dark </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="topic-explanation" class="level2">
+<h2 class="anchored" data-anchor-id="topic-explanation">Topic Explanation:</h2>
+<p>For this project the time series I will be studying are major stock market indices, specifically the DJIA and S&amp;P 500. The purpose of this project is to understand the factors driving the price of these indices, looking at climate events such as wildfires and hurricanes, investor confidence, and the impacts of COVID-19. I will use the statistical models we learn in class to investigate the relationships of these factors on stock market prices.</p>
+</section>
+<section id="the-big-picture" class="level2">
+<h2 class="anchored" data-anchor-id="the-big-picture">The Big Picture:</h2>
+<p>Financial markets are directly important to the well-being of everyday Americans. While the stock market is often seen as exclusive to a small circle of elite investors, in reality millions of Americans have exposure to the markets through retirement funds, which are made up of many different kinds of investments. If we can become better at predicting the course of financial markets, particularly in relation to external forces like climate change, it could promise to reduce volatility and inefficiency in the market. In turn, this would help everyday people build up their savings to enjoy a better quality of life, retire sooner, or have more security.</p>
+<p>Further, understanding the movements of financial markets is important in controlling sentiment. In cases like the onset of the COVID-19 pandemic, stock market crashes could snowball into businesses cutting more jobs than needed, which would again directly impact everyday peoples’ livelihoods. With the hope of understanding these phenomena better, this project will look directly at investor sentiment and the impact of COVID-19.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="bigpicture.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Big Picture</figcaption>
+</figure>
+</div>
+</section>
+<section id="analytical-angles" class="level2">
+<h2 class="anchored" data-anchor-id="analytical-angles">Analytical Angles:</h2>
+<p>First, looking at stock prices as individual univariate time series. Conceptually, we are studying any intrinsic characteristics or patterns that publicly-traded stocks might have. This focuses on the properties of stocks themselves, and not how they react to external stimuli. Second, understanding stock prices as objects which are reflective of individuals actions and preferences. In this case, the individuals in question are investors, and we will look at investor sentiment and see how it might affect prices in financial markets. Third, viewing changes in stock prices in the context of external stimuli. From this analytical perspective, the stock market is a closed system, which is disrupted by external forces from time-to-time that cause unexpected behaviour. Studying the impact of climate events and economic data releasing will pertain to this point. Fourth, using stocks at output variables, which are a tool to investigate the impact of serious events like COVID-19. In this case, we are interested in looking at how the onset of COVID rippled through the stock market, and what we could learn from stock prices to help ameliorate similar disasters in the future.</p>
+</section>
+<section id="literature-review" class="level2">
+<h2 class="anchored" data-anchor-id="literature-review">Literature Review:</h2>
+<p>Many of the factors this project seeks to investigate have previously been reviewed by academics. For instance, the consequence of investor sentiment on the stock market has been widely studied, in terms of how it impacts stock market crises <span class="citation" data-cites="zouaoui_how_2011">(<a href="#ref-zouaoui_how_2011" role="doc-biblioref">Zouaoui, Nouyrigat, and Beer 2011</a>)</span>, trading volume <span class="citation" data-cites="so_relationship_2015">(<a href="#ref-so_relationship_2015" role="doc-biblioref">So and Lei 2015</a>)</span>, and especially returns <span class="citation" data-cites="smales_importance_2017">(<a href="#ref-smales_importance_2017" role="doc-biblioref">Smales 2017</a>)</span>. Further, authors have previously found an impact of climate events, such as hurricanes <span class="citation" data-cites="liu_hurricanes_2021">(<a href="#ref-liu_hurricanes_2021" role="doc-biblioref">Liu, Ferreira, and Karali 2021</a>)</span> on stock prices of particular companies. The fact that these issues have been studied previously is encouraging, because in each case the authors chose a specific group of time and company limited stock market data. This project might extend their results to other stock market datasets, and might hope to incorporate these relationships into new statistical models</p>
+</section>
+<section id="guiding-questions" class="level2">
+<h2 class="anchored" data-anchor-id="guiding-questions">Guiding Questions:</h2>
+<ol type="1">
+<li>How do markets react in anticipation of the release of macroeconomic data?</li>
+<li>How do markets react when their predictions about macroeconomic data are more or less accurate?</li>
+<li>How does investor confidence impact markets?</li>
+<li>Can time series data from financial markets tell us anything about future levels of investor confidence?</li>
+<li>How does the stock market react to the increasing prevalence of climate events such as hurricanes, wildfires?</li>
+<li>Which securities are most impacted by climate events?</li>
+<li>How has COVID changed stock prices in the months and years after the onset of the pandemic?</li>
+<li>Can we predict the impact of future black swan events on the stock market by looking at COVID’s example?</li>
+<li>How do the prices of different securities impact eachother?</li>
+<li>How have the relationships between the prices of securities changed over time?</li>
+</ol>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-liu_hurricanes_2021" class="csl-entry" role="listitem">
+Liu, Haiyan, Susana Ferreira, and Berna Karali. 2021. <span>“Hurricanes as News? <span>Assessing</span> the Impact of Hurricanes on the Stock Market Returns of Energy Companies.”</span> <em>International Journal of Disaster Risk Reduction</em> 66 (December): 102572. <a href="https://doi.org/10.1016/j.ijdrr.2021.102572">https://doi.org/10.1016/j.ijdrr.2021.102572</a>.
+</div>
+<div id="ref-smales_importance_2017" class="csl-entry" role="listitem">
+Smales, L. A. 2017. <span>“The Importance of Fear: Investor Sentiment and Stock Market Returns.”</span> <em>Applied Economics</em> 49 (34): 3395–3421. <a href="https://doi.org/10.1080/00036846.2016.1259754">https://doi.org/10.1080/00036846.2016.1259754</a>.
+</div>
+<div id="ref-so_relationship_2015" class="csl-entry" role="listitem">
+So, Simon Man Shing, and Violet U. T. Lei. 2015. <span>“On the Relationship Between Investor Sentiment, <span>VIX</span> and Trading Volume.”</span> <em>Risk Governance and Control: Financial Markets and Institutions</em> 5 (4): 114–22. <a href="https://doi.org/10.22495/rgcv5i4c1art1">https://doi.org/10.22495/rgcv5i4c1art1</a>.
+</div>
+<div id="ref-zouaoui_how_2011" class="csl-entry" role="listitem">
+Zouaoui, Mohamed, Geneviève Nouyrigat, and Francisca Beer. 2011. <span>“How <span>Does</span> <span>Investor</span> <span>Sentiment</span> <span>Affect</span> <span>Stock</span> <span>Market</span> <span>Crises</span>? <span>Evidence</span> from <span>Panel</span> <span>Data</span>.”</span> <em>Financial Review</em> 46 (4): 723–47. <a href="https://doi.org/10.1111/j.1540-6288.2011.00318.x">https://doi.org/10.1111/j.1540-6288.2011.00318.x</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

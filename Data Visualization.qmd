@@ -1,0 +1,86 @@
+---
+title: "Data Visualization"
+---
+
+
+The central question of this research project is about stock market volatility. As such the following visualizations will explore this subject in different areas. To start with, let's define the outcome variables in question:
+
+For each security: S&P 500, QQQ Pro-Shares ETF, and Russell 200 index, we have several metrics
+1. Price
+2. Standard deviation (10 day window)
+3. True range (intraday difference between highest and lowest price/previous closing value)
+4. Trading volume
+
+The window of our investigation is January 1st 2021 - September 30th 2023.
+
+``` {r}
+library(tidyverse)
+library(quantmod)
+
+spyIn <- quantmod::getSymbols("SPY", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+qqqIn <- quantmod::getSymbols("QQQ", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+iwmIn <- quantmod::getSymbols("IWM", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+
+head(spyIn)
+head(qqqIn)
+head(iwmIn)
+
+
+```
+
+
+Let's start by simply seeing the absolute prices of these securities over time:
+```{r}
+library(plotly)
+
+combinedCloses <- cbind(spyIn$SPY.Close, qqqIn$QQQ.Close, iwmIn$IWM.Close)
+
+
+ts.plot(combinedCloses, gpars = list(col = rainbow(3)))
+
+legend("topleft", legend = c("SPY", "QQQ", "IWM"), col = 1:3, lty = 1)
+```
+
+
+In these charts, we can see that the overall trend for all three securities has been somewhat of a decline since the start of the time window. We can also see that QQQ and IWM have moved further in their trends than SPY, which makes sense as that is the most stable index of the three.
+
+
+
+Now, let us look at the intraday range volatility measure. 
+``` {r}
+
+spyIn$spyRange <- (spyIn$SPY.High - spyIn$SPY.Low)/ spyIn$SPY.Open
+qqqIn$qqqRange <- (qqqIn$QQQ.High - qqqIn$QQQ.Low)/ qqqIn$QQQ.Open
+iwmIn$iwmRange <- (iwmIn$IWM.High - iwmIn$IWM.Low)/ iwmIn$IWM.Open
+
+combinedIntradayPercentRange <- cbind(spyIn$spyRange, qqqIn$qqqRange, iwmIn$iwmRange)
+
+head(qqqIn$pctRange)
+ts.plot(combinedIntradayPercentRange, gpars = list(col = rainbow(3)))
+
+legend("topleft", legend = c("SPY", "QQQ", "IWM"), col = 1:3, lty = 1)
+
+title("Daily High-Low Range as Percent of Open Price")
+
+
+```
+
+In this chart, we can see that the three indices tended to move together, with the midpoint of the time window having a higher average range in daily prices than the beginning or end for all of the securities. However, we can also see again that volatility is not even between them, with SPY and IWM having higher daily ranges than QQQ on average (at least according to the naked eye).
+
+
+Now, let's review the trends in the federal funds rate:
+``` {r}
+library(lubridate)
+
+dff <- read.csv("./dff.csv")
+
+dff <- dff %>%
+    mutate(DATE = ymd(DATE)) %>%
+    filter(DATE >= ymd("2021-01-01"))
+
+plot3 <- ggplot(dff, aes(x = DATE, y = DFF)) + geom_line() + labs(y = "Daily Federal Fund Rate", x = "Time", title = "Daily Federal Funds Rate over Time")
+ggplotly(plot3)
+
+
+
+```

@@ -1,0 +1,128 @@
+---
+title: "Data Vizes in TS"
+---
+
+```{r, echo=FALSE, messages = FALSE, warnings = FALSE}
+
+library(tidyverse)
+#install.packages(plotly)
+#devtools::install_github("ropensci/plotly")
+library(quantmod)
+library(plotly)
+
+# using the code from the example, but with new tickers, and adjusting to start in 2019 because one of the companies only has data through 2019 (IPO I would presume)
+options("getSymbols.warning4.0"=FALSE)
+options("getSymbols.yahoo.warning"=FALSE)
+
+tickers = c("AMGN","PFE","ABBV", "MRNA", "GILD")
+for (i in tickers){
+  getSymbols(i,
+             from = "2019-10-01",
+             to = "2022-12-01")}
+
+x <- list(
+  title = "date"
+)
+y <- list(
+  title = "value"
+)
+
+stock <- data.frame(AMGN$AMGN.Adjusted,
+                    PFE$PFE.Adjusted,
+                    ABBV$ABBV.Adjusted,
+                    MRNA$MRNA.Adjusted,
+                    GILD$GILD.Adjusted)
+
+
+stock <- data.frame(stock,rownames(stock))
+colnames(stock) <- append(tickers,'Dates')
+
+stock$date<-as.Date(stock$Dates,"%Y-%m-%d")
+#head(stock)
+
+plot1 <- ggplot(stock, aes(x=date)) +
+    geom_line(aes(y=AMGN, colour="AMGN"))+
+    geom_line(aes(y=PFE, colour="PFE"))+
+    geom_line(aes(y=ABBV, colour="ABBV"))+
+    geom_line(aes(y=MRNA, colour="MRNA"))+
+    geom_line(aes(y=GILD, colour="GILD"))+
+    labs(
+        title = "Stock Prices for the Tech Companies",
+        subtitle = "From 2019-2022",
+        x = "Date",
+        y = "Adjusted Closing Prices")+
+        theme(panel.background = element_rect(fill = "white", colour = "grey50"))+
+        guides(colour=guide_legend(title="Big Pharma Companies"))
+
+ggplotly(plot1) %>%
+  layout(hovermode = "x")
+```
+
+This chart shows the extreme volatility of Moderna's stock price compared to its peers. The stock has gone from the cheapest of the 5 per share, to the most expensive by a factor of 2, back down to the 2nd most expensive, in the 3-year window visible. Meanwhile, the other 4 stocks have followed a roughly slow and steady upward trend, with Abbivie and Amgen having the greatest progression during the time period.
+
+
+```{r, echo=FALSE}
+
+# Again, using the code from the example to create the chart
+bitc <- getSymbols("BTC",auto.assign = FALSE, from = "2021-09-15",src="yahoo") 
+bitc=data.frame(bitc)
+bitc <- data.frame(bitc,rownames(bitc))
+
+colnames(bitc)[7] = "date"
+bitc$date<-as.Date(bitc$date,"%Y-%m-%d")
+visual2 <- bitc %>%
+  ggplot()+
+  geom_line(aes(y=BTC.Adjusted,x=date),color="blue")
+
+ggplotly(visual2)
+```
+
+Here, we see a steep downward trend in BTC price before Winter 2022, however BTC price has recovered from the low and roughly stabalized after that inflection point.
+
+
+
+
+```{r, echo=FALSE}
+df <- tail(bitc, 30)
+
+figc <- df %>% plot_ly(x = ~date, type="candlestick",
+          open = ~BTC.Open, close = ~BTC.Close,
+          high = ~BTC.High, low = ~BTC.Low) 
+figc <- figc %>% layout(title = "Basic Candlestick Chart")
+
+figc
+
+```
+
+The  candlestick chart shows how volatile bitcoins price can be in each day of the window studied. The candlesticks show wide intraday ranges in price.
+
+
+```{r, echo=FALSE}
+library(lubridate)
+
+climate <- read.csv("climate.csv")
+head(climate)
+
+
+climate$DATE <- ymd(climate$DATE)
+
+visual4 <- ggplot(data = climate, aes(x = month(DATE), y = PRCP, color = STATION, fill = STATION)) + geom_bar(position = "stack", stat = "identity") + labs(title = "Total Precipitation by Month and Station")
+ggplotly(visual4)
+
+```
+
+this chart shows the total precipitation recorded at 7 stations by month of the year. We can see the USC00182325 has a substantially higher total precipitation amount in August and September than all the other months. It is dubious, however, that the same station records no precipitation from October to December, and it leads me to wonder about whether the data is faulty. Secondly, we can see August has the highest total amount of precipitation recorded in the dataset.
+
+
+
+```{r, echo=FALSE}
+cpi <- read.csv("CPIAUCSL.csv")
+cpi$DATE <- ymd(cpi$DATE)
+visual5 <- ggplot(data = cpi, aes(x = DATE, y = CPIAUCSL)) + geom_line() + scale_y_log10() + labs(title = "CPI in Urban Areas Over Time", xlab = "Year", ylab = "CPI") 
+ggplotly(visual5)
+
+```
+
+Here, we can see the CPI index has increased steadily since the 1940s, with a slower period of increase between 1960 and 1970, and a higher period of increase between 1970 and 1980, followed by a marked jump after 2020.
+
+

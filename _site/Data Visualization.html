@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Corwin Dark - Data Visualization</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.10.2.9000/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Corwin Dark</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about me.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Introduction.html" rel="" target="">
+ <span class="menu-text">Introduction</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Data Sources.html" rel="" target="">
+ <span class="menu-text">Data Sources</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./Data Visualization.html" rel="" target="" aria-current="page">
+ <span class="menu-text">Data Visualization</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Exploratory Data Analysis.html" rel="" target="">
+ <span class="menu-text">Exploratory Data Analysis</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./ARMA ARIMA SARIMA Models.html" rel="" target="">
+ <span class="menu-text">ARMA ARIMA SARIMA Models.html</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./ARIMAX SARIMAX VAR.html" rel="" target="">
+ <span class="menu-text">ARIMAX SARIMAX VAR.html</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Spectral Analysis and Filtering.html" rel="" target="">
+ <span class="menu-text">Spectral Analysis and Filtering</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Financial Time Series Models (ARCH GARCH).html" rel="" target="">
+ <span class="menu-text">Financial Time Series Models (ARCH GARCH)</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Deep Learning for TS.html" rel="" target="">
+ <span class="menu-text">Deep Learning for TS</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Conclusions.html" rel="" target="">
+ <span class="menu-text">Conclusions</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./dv.html" rel="" target="">
+ <span class="menu-text">Data Vizes in TS</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Data Visualization</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>The central question of this research project is about stock market volatility. As such the following visualizations will explore this subject in different areas. To start with, let’s define the outcome variables in question:</p>
+<p>For each security: S&amp;P 500, QQQ Pro-Shares ETF, and Russell 200 index, we have several metrics 1. Price 2. Standard deviation (10 day window) 3. True range (intraday difference between highest and lowest price/previous closing value) 4. Trading volume</p>
+<p>The window of our investigation is January 1st 2021 - September 30th 2023.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>-- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>v ggplot2 3.3.5     v purrr   0.3.4
+v tibble  3.2.1     v dplyr   1.1.2
+v tidyr   1.2.0     v stringr 1.4.0
+v readr   2.1.2     v forcats 0.5.1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>-- Conflicts ------------------------------------------ tidyverse_conflicts() --
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantmod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: xts</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: zoo</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'zoo'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    as.Date, as.Date.numeric</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+######################### Warning from 'xts' package ##########################
+#                                                                             #
+# The dplyr lag() function breaks how base R's lag() function is supposed to  #
+# work, which breaks lag(my_xts). Calls to lag(my_xts) that you type or       #
+# source() into this session won't work correctly.                            #
+#                                                                             #
+# Use stats::lag() to make sure you're not using dplyr::lag(), or you can add #
+# conflictRules('dplyr', exclude = 'lag') to your .Rprofile to stop           #
+# dplyr from breaking base R's lag() function.                                #
+#                                                                             #
+# Code in packages is not affected. It's protected by R's namespace mechanism #
+# Set `options(xts.warn_dplyr_breaks_lag = FALSE)` to suppress this warning.  #
+#                                                                             #
+###############################################################################</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'xts'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:dplyr':
+
+    first, last</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: TTR</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>spyIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"SPY"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>qqqIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"QQQ"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>iwmIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"IWM"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(spyIn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           SPY.Open SPY.High SPY.Low SPY.Close SPY.Volume SPY.Adjusted
+2021-01-04   375.31   375.45  364.82    368.79  110210800     354.1974
+2021-01-05   368.10   372.50  368.05    371.33   66426200     356.6369
+2021-01-06   369.71   376.98  369.12    373.55  107997700     358.7691
+2021-01-07   376.10   379.90  375.91    379.10   68766800     364.0995
+2021-01-08   380.59   381.49  377.10    381.26   71677200     366.1740
+2021-01-11   377.85   380.58  377.72    378.69   51034700     363.7057</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(qqqIn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           QQQ.Open QQQ.High QQQ.Low QQQ.Close QQQ.Volume QQQ.Adjusted
+2021-01-04   315.11   315.29  305.18    309.31   45305900     304.2444
+2021-01-05   308.29   312.14  308.29    311.86   29323400     306.7526
+2021-01-06   307.00   311.88  305.98    307.54   52809600     302.5034
+2021-01-07   310.28   315.84  310.25    314.98   30394800     309.8215
+2021-01-08   317.34   319.39  315.08    319.03   33955800     313.8051
+2021-01-11   315.98   317.19  313.75    314.42   32746400     309.2707</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(iwmIn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           IWM.Open IWM.High IWM.Low IWM.Close IWM.Volume IWM.Adjusted
+2021-01-04   197.54   197.89  190.94    193.50   33664200     186.8583
+2021-01-05   193.09   197.62  193.07    196.49   27442900     189.7456
+2021-01-06   199.48   206.78  199.16    204.53   52952200     197.5097
+2021-01-07   205.71   208.52  205.70    208.17   24031400     201.0247
+2021-01-08   209.32   209.77  204.66    207.72   29017000     200.5902
+2021-01-11   205.09   208.12  204.83    207.54   20945100     200.4164</code></pre>
+</div>
+</div>
+<p>Let’s start by simply seeing the absolute prices of these securities over time:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'plotly'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:ggplot2':
+
+    last_plot</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    filter</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:graphics':
+
+    layout</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>combinedCloses <span class="ot">&lt;-</span> <span class="fu">cbind</span>(spyIn<span class="sc">$</span>SPY.Close, qqqIn<span class="sc">$</span>QQQ.Close, iwmIn<span class="sc">$</span>IWM.Close)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ts.plot</span>(combinedCloses, <span class="at">gpars =</span> <span class="fu">list</span>(<span class="at">col =</span> <span class="fu">rainbow</span>(<span class="dv">3</span>)))</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"SPY"</span>, <span class="st">"QQQ"</span>, <span class="st">"IWM"</span>), <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Data-Visualization_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In these charts, we can see that the overall trend for all three securities has been somewhat of a decline since the start of the time window. We can also see that QQQ and IWM have moved further in their trends than SPY, which makes sense as that is the most stable index of the three.</p>
+<p>Now, let us look at the intraday range volatility measure.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>spyIn<span class="sc">$</span>spyRange <span class="ot">&lt;-</span> (spyIn<span class="sc">$</span>SPY.High <span class="sc">-</span> spyIn<span class="sc">$</span>SPY.Low)<span class="sc">/</span> spyIn<span class="sc">$</span>SPY.Open</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>qqqIn<span class="sc">$</span>qqqRange <span class="ot">&lt;-</span> (qqqIn<span class="sc">$</span>QQQ.High <span class="sc">-</span> qqqIn<span class="sc">$</span>QQQ.Low)<span class="sc">/</span> qqqIn<span class="sc">$</span>QQQ.Open</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>iwmIn<span class="sc">$</span>iwmRange <span class="ot">&lt;-</span> (iwmIn<span class="sc">$</span>IWM.High <span class="sc">-</span> iwmIn<span class="sc">$</span>IWM.Low)<span class="sc">/</span> iwmIn<span class="sc">$</span>IWM.Open</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>combinedIntradayPercentRange <span class="ot">&lt;-</span> <span class="fu">cbind</span>(spyIn<span class="sc">$</span>spyRange, qqqIn<span class="sc">$</span>qqqRange, iwmIn<span class="sc">$</span>iwmRange)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(qqqIn<span class="sc">$</span>pctRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NULL</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ts.plot</span>(combinedIntradayPercentRange, <span class="at">gpars =</span> <span class="fu">list</span>(<span class="at">col =</span> <span class="fu">rainbow</span>(<span class="dv">3</span>)))</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"SPY"</span>, <span class="st">"QQQ"</span>, <span class="st">"IWM"</span>), <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">1</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span>(<span class="st">"Daily High-Low Range as Percent of Open Price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Data-Visualization_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In this chart, we can see that the three indices tended to move together, with the midpoint of the time window having a higher average range in daily prices than the beginning or end for all of the securities. However, we can also see again that volatility is not even between them, with SPY and IWM having higher daily ranges than QQQ on average (at least according to the naked eye).</p>
+<p>Now, let’s review the trends in the federal funds rate:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'lubridate'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>dff <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"./dff.csv"</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>dff <span class="ot">&lt;-</span> dff <span class="sc">%&gt;%</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">DATE =</span> <span class="fu">ymd</span>(DATE)) <span class="sc">%&gt;%</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(DATE <span class="sc">&gt;=</span> <span class="fu">ymd</span>(<span class="st">"2021-01-01"</span>))</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>plot3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(dff, <span class="fu">aes</span>(<span class="at">x =</span> DATE, <span class="at">y =</span> DFF)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Daily Federal Fund Rate"</span>, <span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">title =</span> <span class="st">"Daily Federal Funds Rate over Time"</span>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(plot3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-03b20c075b2a0beb1915" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-03b20c075b2a0beb1915">{"x":{"data":[{"x":[18628,18629,18630,18631,18632,18633,18634,18635,18636,18637,18638,18639,18640,18641,18642,18643,18644,18645,18646,18647,18648,18649,18650,18651,18652,18653,18654,18655,18656,18657,18658,18659,18660,18661,18662,18663,18664,18665,18666,18667,18668,18669,18670,18671,18672,18673,18674,18675,18676,18677,18678,18679,18680,18681,18682,18683,18684,18685,18686,18687,18688,18689,18690,18691,18692,18693,18694,18695,18696,18697,18698,18699,18700,18701,18702,18703,18704,18705,18706,18707,18708,18709,18710,18711,18712,18713,18714,18715,18716,18717,18718,18719,18720,18721,18722,18723,18724,18725,18726,18727,18728,18729,18730,18731,18732,18733,18734,18735,18736,18737,18738,18739,18740,18741,18742,18743,18744,18745,18746,18747,18748,18749,18750,18751,18752,18753,18754,18755,18756,18757,18758,18759,18760,18761,18762,18763,18764,18765,18766,18767,18768,18769,18770,18771,18772,18773,18774,18775,18776,18777,18778,18779,18780,18781,18782,18783,18784,18785,18786,18787,18788,18789,18790,18791,18792,18793,18794,18795,18796,18797,18798,18799,18800,18801,18802,18803,18804,18805,18806,18807,18808,18809,18810,18811,18812,18813,18814,18815,18816,18817,18818,18819,18820,18821,18822,18823,18824,18825,18826,18827,18828,18829,18830,18831,18832,18833,18834,18835,18836,18837,18838,18839,18840,18841,18842,18843,18844,18845,18846,18847,18848,18849,18850,18851,18852,18853,18854,18855,18856,18857,18858,18859,18860,18861,18862,18863,18864,18865,18866,18867,18868,18869,18870,18871,18872,18873,18874,18875,18876,18877,18878,18879,18880,18881,18882,18883,18884,18885,18886,18887,18888,18889,18890,18891,18892,18893,18894,18895,18896,18897,18898,18899,18900,18901,18902,18903,18904,18905,18906,18907,18908,18909,18910,18911,18912,18913,18914,18915,18916,18917,18918,18919,18920,18921,18922,18923,18924,18925,18926,18927,18928,18929,18930,18931,18932,18933,18934,18935,18936,18937,18938,18939,18940,18941,18942,18943,18944,18945,18946,18947,18948,18949,18950,18951,18952,18953,18954,18955,18956,18957,18958,18959,18960,18961,18962,18963,18964,18965,18966,18967,18968,18969,18970,18971,18972,18973,18974,18975,18976,18977,18978,18979,18980,18981,18982,18983,18984,18985,18986,18987,18988,18989,18990,18991,18992,18993,18994,18995,18996,18997,18998,18999,19000,19001,19002,19003,19004,19005,19006,19007,19008,19009,19010,19011,19012,19013,19014,19015,19016,19017,19018,19019,19020,19021,19022,19023,19024,19025,19026,19027,19028,19029,19030,19031,19032,19033,19034,19035,19036,19037,19038,19039,19040,19041,19042,19043,19044,19045,19046,19047,19048,19049,19050,19051,19052,19053,19054,19055,19056,19057,19058,19059,19060,19061,19062,19063,19064,19065,19066,19067,19068,19069,19070,19071,19072,19073,19074,19075,19076,19077,19078,19079,19080,19081,19082,19083,19084,19085,19086,19087,19088,19089,19090,19091,19092,19093,19094,19095,19096,19097,19098,19099,19100,19101,19102,19103,19104,19105,19106,19107,19108,19109,19110,19111,19112,19113,19114,19115,19116,19117,19118,19119,19120,19121,19122,19123,19124,19125,19126,19127,19128,19129,19130,19131,19132,19133,19134,19135,19136,19137,19138,19139,19140,19141,19142,19143,19144,19145,19146,19147,19148,19149,19150,19151,19152,19153,19154,19155,19156,19157,19158,19159,19160,19161,19162,19163,19164,19165,19166,19167,19168,19169,19170,19171,19172,19173,19174,19175,19176,19177,19178,19179,19180,19181,19182,19183,19184,19185,19186,19187,19188,19189,19190,19191,19192,19193,19194,19195,19196,19197,19198,19199,19200,19201,19202,19203,19204,19205,19206,19207,19208,19209,19210,19211,19212,19213,19214,19215,19216,19217,19218,19219,19220,19221,19222,19223,19224,19225,19226,19227,19228,19229,19230,19231,19232,19233,19234,19235,19236,19237,19238,19239,19240,19241,19242,19243,19244,19245,19246,19247,19248,19249,19250,19251,19252,19253,19254,19255,19256,19257,19258,19259,19260,19261,19262,19263,19264,19265,19266,19267,19268,19269,19270,19271,19272,19273,19274,19275,19276,19277,19278,19279,19280,19281,19282,19283,19284,19285,19286,19287,19288,19289,19290,19291,19292,19293,19294,19295,19296,19297,19298,19299,19300,19301,19302,19303,19304,19305,19306,19307,19308,19309,19310,19311,19312,19313,19314,19315,19316,19317,19318,19319,19320,19321,19322,19323,19324,19325,19326,19327,19328,19329,19330,19331,19332,19333,19334,19335,19336,19337,19338,19339,19340,19341,19342,19343,19344,19345,19346,19347,19348,19349,19350,19351,19352,19353,19354,19355,19356,19357,19358,19359,19360,19361,19362,19363,19364,19365,19366,19367,19368,19369,19370,19371,19372,19373,19374,19375,19376,19377,19378,19379,19380,19381,19382,19383,19384,19385,19386,19387,19388,19389,19390,19391,19392,19393,19394,19395,19396,19397,19398,19399,19400,19401,19402,19403,19404,19405,19406,19407,19408,19409,19410,19411,19412,19413,19414,19415,19416,19417,19418,19419,19420,19421,19422,19423,19424,19425,19426,19427,19428,19429,19430,19431,19432,19433,19434,19435,19436,19437,19438,19439,19440,19441,19442,19443,19444,19445,19446,19447,19448,19449,19450,19451,19452,19453,19454,19455,19456,19457,19458,19459,19460,19461,19462,19463,19464,19465,19466,19467,19468,19469,19470,19471,19472,19473,19474,19475,19476,19477,19478,19479,19480,19481,19482,19483,19484,19485,19486,19487,19488,19489,19490,19491,19492,19493,19494,19495,19496,19497,19498,19499,19500,19501,19502,19503,19504,19505,19506,19507,19508,19509,19510,19511,19512,19513,19514,19515,19516,19517,19518,19519,19520,19521,19522,19523,19524,19525,19526,19527,19528,19529,19530,19531,19532,19533,19534,19535,19536,19537,19538,19539,19540,19541,19542,19543,19544,19545,19546,19547,19548,19549,19550,19551,19552,19553,19554,19555,19556,19557,19558,19559,19560,19561,19562,19563,19564,19565,19566,19567,19568,19569,19570,19571,19572,19573,19574,19575,19576,19577,19578,19579,19580,19581,19582,19583,19584,19585,19586,19587,19588,19589,19590,19591,19592,19593,19594,19595,19596,19597,19598,19599,19600,19601,19602,19603,19604,19605,19606,19607,19608,19609,19610,19611,19612,19613,19614,19615,19616,19617,19618,19619,19620,19621,19622,19623,19624,19625,19626,19627,19628,19629,19630,19631,19632,19633],"y":[0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.070000000000000007,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.059999999999999998,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.059999999999999998,0.050000000000000003,0.050000000000000003,0.050000000000000003,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.050000000000000003,0.050000000000000003,0.050000000000000003,0.050000000000000003,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.059999999999999998,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.080000000000000002,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.10000000000000001,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.089999999999999997,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.059999999999999998,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.059999999999999998,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.070000000000000007,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.070000000000000007,0.070000000000000007,0.070000000000000007,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.080000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.33000000000000002,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,0.82999999999999996,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,1.5800000000000001,2.3300000000000001,2.3199999999999998,2.3199999999999998,2.3199999999999998,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,2.3300000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.0800000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,3.8300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.3300000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5700000000000003,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5700000000000003,4.5700000000000003,4.5800000000000001,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5700000000000003,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.5800000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,4.8300000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0700000000000003,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0700000000000003,5.0700000000000003,5.0700000000000003,5.0700000000000003,5.0700000000000003,5.0700000000000003,5.0700000000000003,5.0700000000000003,5.0700000000000003,5.0700000000000003,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0700000000000003,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.0800000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001,5.3300000000000001],"text":["DATE: 2021-01-01<br />DFF: 0.09","DATE: 2021-01-02<br />DFF: 0.09","DATE: 2021-01-03<br />DFF: 0.09","DATE: 2021-01-04<br />DFF: 0.09","DATE: 2021-01-05<br />DFF: 0.09","DATE: 2021-01-06<br />DFF: 0.09","DATE: 2021-01-07<br />DFF: 0.09","DATE: 2021-01-08<br />DFF: 0.09","DATE: 2021-01-09<br />DFF: 0.09","DATE: 2021-01-10<br />DFF: 0.09","DATE: 2021-01-11<br />DFF: 0.09","DATE: 2021-01-12<br />DFF: 0.09","DATE: 2021-01-13<br />DFF: 0.09","DATE: 2021-01-14<br />DFF: 0.09","DATE: 2021-01-15<br />DFF: 0.09","DATE: 2021-01-16<br />DFF: 0.09","DATE: 2021-01-17<br />DFF: 0.09","DATE: 2021-01-18<br />DFF: 0.09","DATE: 2021-01-19<br />DFF: 0.09","DATE: 2021-01-20<br />DFF: 0.09","DATE: 2021-01-21<br />DFF: 0.08","DATE: 2021-01-22<br />DFF: 0.08","DATE: 2021-01-23<br />DFF: 0.08","DATE: 2021-01-24<br />DFF: 0.08","DATE: 2021-01-25<br />DFF: 0.08","DATE: 2021-01-26<br />DFF: 0.08","DATE: 2021-01-27<br />DFF: 0.08","DATE: 2021-01-28<br />DFF: 0.07","DATE: 2021-01-29<br />DFF: 0.07","DATE: 2021-01-30<br />DFF: 0.07","DATE: 2021-01-31<br />DFF: 0.07","DATE: 2021-02-01<br />DFF: 0.08","DATE: 2021-02-02<br />DFF: 0.08","DATE: 2021-02-03<br />DFF: 0.08","DATE: 2021-02-04<br />DFF: 0.08","DATE: 2021-02-05<br />DFF: 0.08","DATE: 2021-02-06<br />DFF: 0.08","DATE: 2021-02-07<br />DFF: 0.08","DATE: 2021-02-08<br />DFF: 0.07","DATE: 2021-02-09<br />DFF: 0.08","DATE: 2021-02-10<br />DFF: 0.08","DATE: 2021-02-11<br />DFF: 0.08","DATE: 2021-02-12<br />DFF: 0.08","DATE: 2021-02-13<br />DFF: 0.08","DATE: 2021-02-14<br />DFF: 0.08","DATE: 2021-02-15<br />DFF: 0.08","DATE: 2021-02-16<br />DFF: 0.08","DATE: 2021-02-17<br />DFF: 0.08","DATE: 2021-02-18<br />DFF: 0.07","DATE: 2021-02-19<br />DFF: 0.07","DATE: 2021-02-20<br />DFF: 0.07","DATE: 2021-02-21<br />DFF: 0.07","DATE: 2021-02-22<br />DFF: 0.07","DATE: 2021-02-23<br />DFF: 0.07","DATE: 2021-02-24<br />DFF: 0.07","DATE: 2021-02-25<br />DFF: 0.07","DATE: 2021-02-26<br />DFF: 0.07","DATE: 2021-02-27<br />DFF: 0.07","DATE: 2021-02-28<br />DFF: 0.07","DATE: 2021-03-01<br />DFF: 0.07","DATE: 2021-03-02<br />DFF: 0.07","DATE: 2021-03-03<br />DFF: 0.07","DATE: 2021-03-04<br />DFF: 0.07","DATE: 2021-03-05<br />DFF: 0.07","DATE: 2021-03-06<br />DFF: 0.07","DATE: 2021-03-07<br />DFF: 0.07","DATE: 2021-03-08<br />DFF: 0.07","DATE: 2021-03-09<br />DFF: 0.07","DATE: 2021-03-10<br />DFF: 0.07","DATE: 2021-03-11<br />DFF: 0.07","DATE: 2021-03-12<br />DFF: 0.07","DATE: 2021-03-13<br />DFF: 0.07","DATE: 2021-03-14<br />DFF: 0.07","DATE: 2021-03-15<br />DFF: 0.07","DATE: 2021-03-16<br />DFF: 0.07","DATE: 2021-03-17<br />DFF: 0.07","DATE: 2021-03-18<br />DFF: 0.07","DATE: 2021-03-19<br />DFF: 0.07","DATE: 2021-03-20<br />DFF: 0.07","DATE: 2021-03-21<br />DFF: 0.07","DATE: 2021-03-22<br />DFF: 0.07","DATE: 2021-03-23<br />DFF: 0.07","DATE: 2021-03-24<br />DFF: 0.07","DATE: 2021-03-25<br />DFF: 0.07","DATE: 2021-03-26<br />DFF: 0.07","DATE: 2021-03-27<br />DFF: 0.07","DATE: 2021-03-28<br />DFF: 0.07","DATE: 2021-03-29<br />DFF: 0.07","DATE: 2021-03-30<br />DFF: 0.07","DATE: 2021-03-31<br />DFF: 0.06","DATE: 2021-04-01<br />DFF: 0.07","DATE: 2021-04-02<br />DFF: 0.07","DATE: 2021-04-03<br />DFF: 0.07","DATE: 2021-04-04<br />DFF: 0.07","DATE: 2021-04-05<br />DFF: 0.07","DATE: 2021-04-06<br />DFF: 0.07","DATE: 2021-04-07<br />DFF: 0.07","DATE: 2021-04-08<br />DFF: 0.07","DATE: 2021-04-09<br />DFF: 0.07","DATE: 2021-04-10<br />DFF: 0.07","DATE: 2021-04-11<br />DFF: 0.07","DATE: 2021-04-12<br />DFF: 0.07","DATE: 2021-04-13<br />DFF: 0.07","DATE: 2021-04-14<br />DFF: 0.07","DATE: 2021-04-15<br />DFF: 0.07","DATE: 2021-04-16<br />DFF: 0.07","DATE: 2021-04-17<br />DFF: 0.07","DATE: 2021-04-18<br />DFF: 0.07","DATE: 2021-04-19<br />DFF: 0.07","DATE: 2021-04-20<br />DFF: 0.07","DATE: 2021-04-21<br />DFF: 0.07","DATE: 2021-04-22<br />DFF: 0.07","DATE: 2021-04-23<br />DFF: 0.07","DATE: 2021-04-24<br />DFF: 0.07","DATE: 2021-04-25<br />DFF: 0.07","DATE: 2021-04-26<br />DFF: 0.07","DATE: 2021-04-27<br />DFF: 0.07","DATE: 2021-04-28<br />DFF: 0.07","DATE: 2021-04-29<br />DFF: 0.06","DATE: 2021-04-30<br />DFF: 0.05","DATE: 2021-05-01<br />DFF: 0.05","DATE: 2021-05-02<br />DFF: 0.05","DATE: 2021-05-03<br />DFF: 0.06","DATE: 2021-05-04<br />DFF: 0.06","DATE: 2021-05-05<br />DFF: 0.06","DATE: 2021-05-06<br />DFF: 0.06","DATE: 2021-05-07<br />DFF: 0.06","DATE: 2021-05-08<br />DFF: 0.06","DATE: 2021-05-09<br />DFF: 0.06","DATE: 2021-05-10<br />DFF: 0.06","DATE: 2021-05-11<br />DFF: 0.06","DATE: 2021-05-12<br />DFF: 0.06","DATE: 2021-05-13<br />DFF: 0.06","DATE: 2021-05-14<br />DFF: 0.06","DATE: 2021-05-15<br />DFF: 0.06","DATE: 2021-05-16<br />DFF: 0.06","DATE: 2021-05-17<br />DFF: 0.06","DATE: 2021-05-18<br />DFF: 0.06","DATE: 2021-05-19<br />DFF: 0.06","DATE: 2021-05-20<br />DFF: 0.06","DATE: 2021-05-21<br />DFF: 0.06","DATE: 2021-05-22<br />DFF: 0.06","DATE: 2021-05-23<br />DFF: 0.06","DATE: 2021-05-24<br />DFF: 0.06","DATE: 2021-05-25<br />DFF: 0.06","DATE: 2021-05-26<br />DFF: 0.06","DATE: 2021-05-27<br />DFF: 0.06","DATE: 2021-05-28<br />DFF: 0.05","DATE: 2021-05-29<br />DFF: 0.05","DATE: 2021-05-30<br />DFF: 0.05","DATE: 2021-05-31<br />DFF: 0.05","DATE: 2021-06-01<br />DFF: 0.06","DATE: 2021-06-02<br />DFF: 0.06","DATE: 2021-06-03<br />DFF: 0.06","DATE: 2021-06-04<br />DFF: 0.06","DATE: 2021-06-05<br />DFF: 0.06","DATE: 2021-06-06<br />DFF: 0.06","DATE: 2021-06-07<br />DFF: 0.06","DATE: 2021-06-08<br />DFF: 0.06","DATE: 2021-06-09<br />DFF: 0.06","DATE: 2021-06-10<br />DFF: 0.06","DATE: 2021-06-11<br />DFF: 0.06","DATE: 2021-06-12<br />DFF: 0.06","DATE: 2021-06-13<br />DFF: 0.06","DATE: 2021-06-14<br />DFF: 0.06","DATE: 2021-06-15<br />DFF: 0.06","DATE: 2021-06-16<br />DFF: 0.06","DATE: 2021-06-17<br />DFF: 0.10","DATE: 2021-06-18<br />DFF: 0.10","DATE: 2021-06-19<br />DFF: 0.10","DATE: 2021-06-20<br />DFF: 0.10","DATE: 2021-06-21<br />DFF: 0.10","DATE: 2021-06-22<br />DFF: 0.10","DATE: 2021-06-23<br />DFF: 0.10","DATE: 2021-06-24<br />DFF: 0.10","DATE: 2021-06-25<br />DFF: 0.10","DATE: 2021-06-26<br />DFF: 0.10","DATE: 2021-06-27<br />DFF: 0.10","DATE: 2021-06-28<br />DFF: 0.10","DATE: 2021-06-29<br />DFF: 0.10","DATE: 2021-06-30<br />DFF: 0.08","DATE: 2021-07-01<br />DFF: 0.10","DATE: 2021-07-02<br />DFF: 0.10","DATE: 2021-07-03<br />DFF: 0.10","DATE: 2021-07-04<br />DFF: 0.10","DATE: 2021-07-05<br />DFF: 0.10","DATE: 2021-07-06<br />DFF: 0.10","DATE: 2021-07-07<br />DFF: 0.10","DATE: 2021-07-08<br />DFF: 0.10","DATE: 2021-07-09<br />DFF: 0.10","DATE: 2021-07-10<br />DFF: 0.10","DATE: 2021-07-11<br />DFF: 0.10","DATE: 2021-07-12<br />DFF: 0.10","DATE: 2021-07-13<br />DFF: 0.10","DATE: 2021-07-14<br />DFF: 0.10","DATE: 2021-07-15<br />DFF: 0.10","DATE: 2021-07-16<br />DFF: 0.10","DATE: 2021-07-17<br />DFF: 0.10","DATE: 2021-07-18<br />DFF: 0.10","DATE: 2021-07-19<br />DFF: 0.10","DATE: 2021-07-20<br />DFF: 0.10","DATE: 2021-07-21<br />DFF: 0.10","DATE: 2021-07-22<br />DFF: 0.10","DATE: 2021-07-23<br />DFF: 0.10","DATE: 2021-07-24<br />DFF: 0.10","DATE: 2021-07-25<br />DFF: 0.10","DATE: 2021-07-26<br />DFF: 0.10","DATE: 2021-07-27<br />DFF: 0.10","DATE: 2021-07-28<br />DFF: 0.10","DATE: 2021-07-29<br />DFF: 0.10","DATE: 2021-07-30<br />DFF: 0.07","DATE: 2021-07-31<br />DFF: 0.07","DATE: 2021-08-01<br />DFF: 0.07","DATE: 2021-08-02<br />DFF: 0.10","DATE: 2021-08-03<br />DFF: 0.10","DATE: 2021-08-04<br />DFF: 0.10","DATE: 2021-08-05<br />DFF: 0.10","DATE: 2021-08-06<br />DFF: 0.10","DATE: 2021-08-07<br />DFF: 0.10","DATE: 2021-08-08<br />DFF: 0.10","DATE: 2021-08-09<br />DFF: 0.10","DATE: 2021-08-10<br />DFF: 0.10","DATE: 2021-08-11<br />DFF: 0.10","DATE: 2021-08-12<br />DFF: 0.10","DATE: 2021-08-13<br />DFF: 0.10","DATE: 2021-08-14<br />DFF: 0.10","DATE: 2021-08-15<br />DFF: 0.10","DATE: 2021-08-16<br />DFF: 0.10","DATE: 2021-08-17<br />DFF: 0.10","DATE: 2021-08-18<br />DFF: 0.09","DATE: 2021-08-19<br />DFF: 0.09","DATE: 2021-08-20<br />DFF: 0.09","DATE: 2021-08-21<br />DFF: 0.09","DATE: 2021-08-22<br />DFF: 0.09","DATE: 2021-08-23<br />DFF: 0.09","DATE: 2021-08-24<br />DFF: 0.09","DATE: 2021-08-25<br />DFF: 0.09","DATE: 2021-08-26<br />DFF: 0.09","DATE: 2021-08-27<br />DFF: 0.08","DATE: 2021-08-28<br />DFF: 0.08","DATE: 2021-08-29<br />DFF: 0.08","DATE: 2021-08-30<br />DFF: 0.08","DATE: 2021-08-31<br />DFF: 0.06","DATE: 2021-09-01<br />DFF: 0.08","DATE: 2021-09-02<br />DFF: 0.08","DATE: 2021-09-03<br />DFF: 0.08","DATE: 2021-09-04<br />DFF: 0.08","DATE: 2021-09-05<br />DFF: 0.08","DATE: 2021-09-06<br />DFF: 0.08","DATE: 2021-09-07<br />DFF: 0.08","DATE: 2021-09-08<br />DFF: 0.08","DATE: 2021-09-09<br />DFF: 0.08","DATE: 2021-09-10<br />DFF: 0.08","DATE: 2021-09-11<br />DFF: 0.08","DATE: 2021-09-12<br />DFF: 0.08","DATE: 2021-09-13<br />DFF: 0.08","DATE: 2021-09-14<br />DFF: 0.08","DATE: 2021-09-15<br />DFF: 0.08","DATE: 2021-09-16<br />DFF: 0.08","DATE: 2021-09-17<br />DFF: 0.08","DATE: 2021-09-18<br />DFF: 0.08","DATE: 2021-09-19<br />DFF: 0.08","DATE: 2021-09-20<br />DFF: 0.08","DATE: 2021-09-21<br />DFF: 0.08","DATE: 2021-09-22<br />DFF: 0.08","DATE: 2021-09-23<br />DFF: 0.08","DATE: 2021-09-24<br />DFF: 0.08","DATE: 2021-09-25<br />DFF: 0.08","DATE: 2021-09-26<br />DFF: 0.08","DATE: 2021-09-27<br />DFF: 0.08","DATE: 2021-09-28<br />DFF: 0.08","DATE: 2021-09-29<br />DFF: 0.08","DATE: 2021-09-30<br />DFF: 0.06","DATE: 2021-10-01<br />DFF: 0.08","DATE: 2021-10-02<br />DFF: 0.08","DATE: 2021-10-03<br />DFF: 0.08","DATE: 2021-10-04<br />DFF: 0.08","DATE: 2021-10-05<br />DFF: 0.08","DATE: 2021-10-06<br />DFF: 0.08","DATE: 2021-10-07<br />DFF: 0.08","DATE: 2021-10-08<br />DFF: 0.08","DATE: 2021-10-09<br />DFF: 0.08","DATE: 2021-10-10<br />DFF: 0.08","DATE: 2021-10-11<br />DFF: 0.08","DATE: 2021-10-12<br />DFF: 0.08","DATE: 2021-10-13<br />DFF: 0.08","DATE: 2021-10-14<br />DFF: 0.08","DATE: 2021-10-15<br />DFF: 0.08","DATE: 2021-10-16<br />DFF: 0.08","DATE: 2021-10-17<br />DFF: 0.08","DATE: 2021-10-18<br />DFF: 0.08","DATE: 2021-10-19<br />DFF: 0.08","DATE: 2021-10-20<br />DFF: 0.08","DATE: 2021-10-21<br />DFF: 0.08","DATE: 2021-10-22<br />DFF: 0.08","DATE: 2021-10-23<br />DFF: 0.08","DATE: 2021-10-24<br />DFF: 0.08","DATE: 2021-10-25<br />DFF: 0.08","DATE: 2021-10-26<br />DFF: 0.08","DATE: 2021-10-27<br />DFF: 0.08","DATE: 2021-10-28<br />DFF: 0.08","DATE: 2021-10-29<br />DFF: 0.07","DATE: 2021-10-30<br />DFF: 0.07","DATE: 2021-10-31<br />DFF: 0.07","DATE: 2021-11-01<br />DFF: 0.08","DATE: 2021-11-02<br />DFF: 0.08","DATE: 2021-11-03<br />DFF: 0.08","DATE: 2021-11-04<br />DFF: 0.08","DATE: 2021-11-05<br />DFF: 0.08","DATE: 2021-11-06<br />DFF: 0.08","DATE: 2021-11-07<br />DFF: 0.08","DATE: 2021-11-08<br />DFF: 0.08","DATE: 2021-11-09<br />DFF: 0.08","DATE: 2021-11-10<br />DFF: 0.08","DATE: 2021-11-11<br />DFF: 0.08","DATE: 2021-11-12<br />DFF: 0.08","DATE: 2021-11-13<br />DFF: 0.08","DATE: 2021-11-14<br />DFF: 0.08","DATE: 2021-11-15<br />DFF: 0.08","DATE: 2021-11-16<br />DFF: 0.08","DATE: 2021-11-17<br />DFF: 0.08","DATE: 2021-11-18<br />DFF: 0.08","DATE: 2021-11-19<br />DFF: 0.08","DATE: 2021-11-20<br />DFF: 0.08","DATE: 2021-11-21<br />DFF: 0.08","DATE: 2021-11-22<br />DFF: 0.08","DATE: 2021-11-23<br />DFF: 0.08","DATE: 2021-11-24<br />DFF: 0.08","DATE: 2021-11-25<br />DFF: 0.08","DATE: 2021-11-26<br />DFF: 0.08","DATE: 2021-11-27<br />DFF: 0.08","DATE: 2021-11-28<br />DFF: 0.08","DATE: 2021-11-29<br />DFF: 0.08","DATE: 2021-11-30<br />DFF: 0.07","DATE: 2021-12-01<br />DFF: 0.08","DATE: 2021-12-02<br />DFF: 0.08","DATE: 2021-12-03<br />DFF: 0.08","DATE: 2021-12-04<br />DFF: 0.08","DATE: 2021-12-05<br />DFF: 0.08","DATE: 2021-12-06<br />DFF: 0.08","DATE: 2021-12-07<br />DFF: 0.08","DATE: 2021-12-08<br />DFF: 0.08","DATE: 2021-12-09<br />DFF: 0.08","DATE: 2021-12-10<br />DFF: 0.08","DATE: 2021-12-11<br />DFF: 0.08","DATE: 2021-12-12<br />DFF: 0.08","DATE: 2021-12-13<br />DFF: 0.08","DATE: 2021-12-14<br />DFF: 0.08","DATE: 2021-12-15<br />DFF: 0.08","DATE: 2021-12-16<br />DFF: 0.08","DATE: 2021-12-17<br />DFF: 0.08","DATE: 2021-12-18<br />DFF: 0.08","DATE: 2021-12-19<br />DFF: 0.08","DATE: 2021-12-20<br />DFF: 0.08","DATE: 2021-12-21<br />DFF: 0.08","DATE: 2021-12-22<br />DFF: 0.08","DATE: 2021-12-23<br />DFF: 0.08","DATE: 2021-12-24<br />DFF: 0.08","DATE: 2021-12-25<br />DFF: 0.08","DATE: 2021-12-26<br />DFF: 0.08","DATE: 2021-12-27<br />DFF: 0.08","DATE: 2021-12-28<br />DFF: 0.08","DATE: 2021-12-29<br />DFF: 0.08","DATE: 2021-12-30<br />DFF: 0.08","DATE: 2021-12-31<br />DFF: 0.07","DATE: 2022-01-01<br />DFF: 0.07","DATE: 2022-01-02<br />DFF: 0.07","DATE: 2022-01-03<br />DFF: 0.08","DATE: 2022-01-04<br />DFF: 0.08","DATE: 2022-01-05<br />DFF: 0.08","DATE: 2022-01-06<br />DFF: 0.08","DATE: 2022-01-07<br />DFF: 0.08","DATE: 2022-01-08<br />DFF: 0.08","DATE: 2022-01-09<br />DFF: 0.08","DATE: 2022-01-10<br />DFF: 0.08","DATE: 2022-01-11<br />DFF: 0.08","DATE: 2022-01-12<br />DFF: 0.08","DATE: 2022-01-13<br />DFF: 0.08","DATE: 2022-01-14<br />DFF: 0.08","DATE: 2022-01-15<br />DFF: 0.08","DATE: 2022-01-16<br />DFF: 0.08","DATE: 2022-01-17<br />DFF: 0.08","DATE: 2022-01-18<br />DFF: 0.08","DATE: 2022-01-19<br />DFF: 0.08","DATE: 2022-01-20<br />DFF: 0.08","DATE: 2022-01-21<br />DFF: 0.08","DATE: 2022-01-22<br />DFF: 0.08","DATE: 2022-01-23<br />DFF: 0.08","DATE: 2022-01-24<br />DFF: 0.08","DATE: 2022-01-25<br />DFF: 0.08","DATE: 2022-01-26<br />DFF: 0.08","DATE: 2022-01-27<br />DFF: 0.08","DATE: 2022-01-28<br />DFF: 0.08","DATE: 2022-01-29<br />DFF: 0.08","DATE: 2022-01-30<br />DFF: 0.08","DATE: 2022-01-31<br />DFF: 0.08","DATE: 2022-02-01<br />DFF: 0.08","DATE: 2022-02-02<br />DFF: 0.08","DATE: 2022-02-03<br />DFF: 0.08","DATE: 2022-02-04<br />DFF: 0.08","DATE: 2022-02-05<br />DFF: 0.08","DATE: 2022-02-06<br />DFF: 0.08","DATE: 2022-02-07<br />DFF: 0.08","DATE: 2022-02-08<br />DFF: 0.08","DATE: 2022-02-09<br />DFF: 0.08","DATE: 2022-02-10<br />DFF: 0.08","DATE: 2022-02-11<br />DFF: 0.08","DATE: 2022-02-12<br />DFF: 0.08","DATE: 2022-02-13<br />DFF: 0.08","DATE: 2022-02-14<br />DFF: 0.08","DATE: 2022-02-15<br />DFF: 0.08","DATE: 2022-02-16<br />DFF: 0.08","DATE: 2022-02-17<br />DFF: 0.08","DATE: 2022-02-18<br />DFF: 0.08","DATE: 2022-02-19<br />DFF: 0.08","DATE: 2022-02-20<br />DFF: 0.08","DATE: 2022-02-21<br />DFF: 0.08","DATE: 2022-02-22<br />DFF: 0.08","DATE: 2022-02-23<br />DFF: 0.08","DATE: 2022-02-24<br />DFF: 0.08","DATE: 2022-02-25<br />DFF: 0.08","DATE: 2022-02-26<br />DFF: 0.08","DATE: 2022-02-27<br />DFF: 0.08","DATE: 2022-02-28<br />DFF: 0.08","DATE: 2022-03-01<br />DFF: 0.08","DATE: 2022-03-02<br />DFF: 0.08","DATE: 2022-03-03<br />DFF: 0.08","DATE: 2022-03-04<br />DFF: 0.08","DATE: 2022-03-05<br />DFF: 0.08","DATE: 2022-03-06<br />DFF: 0.08","DATE: 2022-03-07<br />DFF: 0.08","DATE: 2022-03-08<br />DFF: 0.08","DATE: 2022-03-09<br />DFF: 0.08","DATE: 2022-03-10<br />DFF: 0.08","DATE: 2022-03-11<br />DFF: 0.08","DATE: 2022-03-12<br />DFF: 0.08","DATE: 2022-03-13<br />DFF: 0.08","DATE: 2022-03-14<br />DFF: 0.08","DATE: 2022-03-15<br />DFF: 0.08","DATE: 2022-03-16<br />DFF: 0.08","DATE: 2022-03-17<br />DFF: 0.33","DATE: 2022-03-18<br />DFF: 0.33","DATE: 2022-03-19<br />DFF: 0.33","DATE: 2022-03-20<br />DFF: 0.33","DATE: 2022-03-21<br />DFF: 0.33","DATE: 2022-03-22<br />DFF: 0.33","DATE: 2022-03-23<br />DFF: 0.33","DATE: 2022-03-24<br />DFF: 0.33","DATE: 2022-03-25<br />DFF: 0.33","DATE: 2022-03-26<br />DFF: 0.33","DATE: 2022-03-27<br />DFF: 0.33","DATE: 2022-03-28<br />DFF: 0.33","DATE: 2022-03-29<br />DFF: 0.33","DATE: 2022-03-30<br />DFF: 0.33","DATE: 2022-03-31<br />DFF: 0.33","DATE: 2022-04-01<br />DFF: 0.33","DATE: 2022-04-02<br />DFF: 0.33","DATE: 2022-04-03<br />DFF: 0.33","DATE: 2022-04-04<br />DFF: 0.33","DATE: 2022-04-05<br />DFF: 0.33","DATE: 2022-04-06<br />DFF: 0.33","DATE: 2022-04-07<br />DFF: 0.33","DATE: 2022-04-08<br />DFF: 0.33","DATE: 2022-04-09<br />DFF: 0.33","DATE: 2022-04-10<br />DFF: 0.33","DATE: 2022-04-11<br />DFF: 0.33","DATE: 2022-04-12<br />DFF: 0.33","DATE: 2022-04-13<br />DFF: 0.33","DATE: 2022-04-14<br />DFF: 0.33","DATE: 2022-04-15<br />DFF: 0.33","DATE: 2022-04-16<br />DFF: 0.33","DATE: 2022-04-17<br />DFF: 0.33","DATE: 2022-04-18<br />DFF: 0.33","DATE: 2022-04-19<br />DFF: 0.33","DATE: 2022-04-20<br />DFF: 0.33","DATE: 2022-04-21<br />DFF: 0.33","DATE: 2022-04-22<br />DFF: 0.33","DATE: 2022-04-23<br />DFF: 0.33","DATE: 2022-04-24<br />DFF: 0.33","DATE: 2022-04-25<br />DFF: 0.33","DATE: 2022-04-26<br />DFF: 0.33","DATE: 2022-04-27<br />DFF: 0.33","DATE: 2022-04-28<br />DFF: 0.33","DATE: 2022-04-29<br />DFF: 0.33","DATE: 2022-04-30<br />DFF: 0.33","DATE: 2022-05-01<br />DFF: 0.33","DATE: 2022-05-02<br />DFF: 0.33","DATE: 2022-05-03<br />DFF: 0.33","DATE: 2022-05-04<br />DFF: 0.33","DATE: 2022-05-05<br />DFF: 0.83","DATE: 2022-05-06<br />DFF: 0.83","DATE: 2022-05-07<br />DFF: 0.83","DATE: 2022-05-08<br />DFF: 0.83","DATE: 2022-05-09<br />DFF: 0.83","DATE: 2022-05-10<br />DFF: 0.83","DATE: 2022-05-11<br />DFF: 0.83","DATE: 2022-05-12<br />DFF: 0.83","DATE: 2022-05-13<br />DFF: 0.83","DATE: 2022-05-14<br />DFF: 0.83","DATE: 2022-05-15<br />DFF: 0.83","DATE: 2022-05-16<br />DFF: 0.83","DATE: 2022-05-17<br />DFF: 0.83","DATE: 2022-05-18<br />DFF: 0.83","DATE: 2022-05-19<br />DFF: 0.83","DATE: 2022-05-20<br />DFF: 0.83","DATE: 2022-05-21<br />DFF: 0.83","DATE: 2022-05-22<br />DFF: 0.83","DATE: 2022-05-23<br />DFF: 0.83","DATE: 2022-05-24<br />DFF: 0.83","DATE: 2022-05-25<br />DFF: 0.83","DATE: 2022-05-26<br />DFF: 0.83","DATE: 2022-05-27<br />DFF: 0.83","DATE: 2022-05-28<br />DFF: 0.83","DATE: 2022-05-29<br />DFF: 0.83","DATE: 2022-05-30<br />DFF: 0.83","DATE: 2022-05-31<br />DFF: 0.83","DATE: 2022-06-01<br />DFF: 0.83","DATE: 2022-06-02<br />DFF: 0.83","DATE: 2022-06-03<br />DFF: 0.83","DATE: 2022-06-04<br />DFF: 0.83","DATE: 2022-06-05<br />DFF: 0.83","DATE: 2022-06-06<br />DFF: 0.83","DATE: 2022-06-07<br />DFF: 0.83","DATE: 2022-06-08<br />DFF: 0.83","DATE: 2022-06-09<br />DFF: 0.83","DATE: 2022-06-10<br />DFF: 0.83","DATE: 2022-06-11<br />DFF: 0.83","DATE: 2022-06-12<br />DFF: 0.83","DATE: 2022-06-13<br />DFF: 0.83","DATE: 2022-06-14<br />DFF: 0.83","DATE: 2022-06-15<br />DFF: 0.83","DATE: 2022-06-16<br />DFF: 1.58","DATE: 2022-06-17<br />DFF: 1.58","DATE: 2022-06-18<br />DFF: 1.58","DATE: 2022-06-19<br />DFF: 1.58","DATE: 2022-06-20<br />DFF: 1.58","DATE: 2022-06-21<br />DFF: 1.58","DATE: 2022-06-22<br />DFF: 1.58","DATE: 2022-06-23<br />DFF: 1.58","DATE: 2022-06-24<br />DFF: 1.58","DATE: 2022-06-25<br />DFF: 1.58","DATE: 2022-06-26<br />DFF: 1.58","DATE: 2022-06-27<br />DFF: 1.58","DATE: 2022-06-28<br />DFF: 1.58","DATE: 2022-06-29<br />DFF: 1.58","DATE: 2022-06-30<br />DFF: 1.58","DATE: 2022-07-01<br />DFF: 1.58","DATE: 2022-07-02<br />DFF: 1.58","DATE: 2022-07-03<br />DFF: 1.58","DATE: 2022-07-04<br />DFF: 1.58","DATE: 2022-07-05<br />DFF: 1.58","DATE: 2022-07-06<br />DFF: 1.58","DATE: 2022-07-07<br />DFF: 1.58","DATE: 2022-07-08<br />DFF: 1.58","DATE: 2022-07-09<br />DFF: 1.58","DATE: 2022-07-10<br />DFF: 1.58","DATE: 2022-07-11<br />DFF: 1.58","DATE: 2022-07-12<br />DFF: 1.58","DATE: 2022-07-13<br />DFF: 1.58","DATE: 2022-07-14<br />DFF: 1.58","DATE: 2022-07-15<br />DFF: 1.58","DATE: 2022-07-16<br />DFF: 1.58","DATE: 2022-07-17<br />DFF: 1.58","DATE: 2022-07-18<br />DFF: 1.58","DATE: 2022-07-19<br />DFF: 1.58","DATE: 2022-07-20<br />DFF: 1.58","DATE: 2022-07-21<br />DFF: 1.58","DATE: 2022-07-22<br />DFF: 1.58","DATE: 2022-07-23<br />DFF: 1.58","DATE: 2022-07-24<br />DFF: 1.58","DATE: 2022-07-25<br />DFF: 1.58","DATE: 2022-07-26<br />DFF: 1.58","DATE: 2022-07-27<br />DFF: 1.58","DATE: 2022-07-28<br />DFF: 2.33","DATE: 2022-07-29<br />DFF: 2.32","DATE: 2022-07-30<br />DFF: 2.32","DATE: 2022-07-31<br />DFF: 2.32","DATE: 2022-08-01<br />DFF: 2.33","DATE: 2022-08-02<br />DFF: 2.33","DATE: 2022-08-03<br />DFF: 2.33","DATE: 2022-08-04<br />DFF: 2.33","DATE: 2022-08-05<br />DFF: 2.33","DATE: 2022-08-06<br />DFF: 2.33","DATE: 2022-08-07<br />DFF: 2.33","DATE: 2022-08-08<br />DFF: 2.33","DATE: 2022-08-09<br />DFF: 2.33","DATE: 2022-08-10<br />DFF: 2.33","DATE: 2022-08-11<br />DFF: 2.33","DATE: 2022-08-12<br />DFF: 2.33","DATE: 2022-08-13<br />DFF: 2.33","DATE: 2022-08-14<br />DFF: 2.33","DATE: 2022-08-15<br />DFF: 2.33","DATE: 2022-08-16<br />DFF: 2.33","DATE: 2022-08-17<br />DFF: 2.33","DATE: 2022-08-18<br />DFF: 2.33","DATE: 2022-08-19<br />DFF: 2.33","DATE: 2022-08-20<br />DFF: 2.33","DATE: 2022-08-21<br />DFF: 2.33","DATE: 2022-08-22<br />DFF: 2.33","DATE: 2022-08-23<br />DFF: 2.33","DATE: 2022-08-24<br />DFF: 2.33","DATE: 2022-08-25<br />DFF: 2.33","DATE: 2022-08-26<br />DFF: 2.33","DATE: 2022-08-27<br />DFF: 2.33","DATE: 2022-08-28<br />DFF: 2.33","DATE: 2022-08-29<br />DFF: 2.33","DATE: 2022-08-30<br />DFF: 2.33","DATE: 2022-08-31<br />DFF: 2.33","DATE: 2022-09-01<br />DFF: 2.33","DATE: 2022-09-02<br />DFF: 2.33","DATE: 2022-09-03<br />DFF: 2.33","DATE: 2022-09-04<br />DFF: 2.33","DATE: 2022-09-05<br />DFF: 2.33","DATE: 2022-09-06<br />DFF: 2.33","DATE: 2022-09-07<br />DFF: 2.33","DATE: 2022-09-08<br />DFF: 2.33","DATE: 2022-09-09<br />DFF: 2.33","DATE: 2022-09-10<br />DFF: 2.33","DATE: 2022-09-11<br />DFF: 2.33","DATE: 2022-09-12<br />DFF: 2.33","DATE: 2022-09-13<br />DFF: 2.33","DATE: 2022-09-14<br />DFF: 2.33","DATE: 2022-09-15<br />DFF: 2.33","DATE: 2022-09-16<br />DFF: 2.33","DATE: 2022-09-17<br />DFF: 2.33","DATE: 2022-09-18<br />DFF: 2.33","DATE: 2022-09-19<br />DFF: 2.33","DATE: 2022-09-20<br />DFF: 2.33","DATE: 2022-09-21<br />DFF: 2.33","DATE: 2022-09-22<br />DFF: 3.08","DATE: 2022-09-23<br />DFF: 3.08","DATE: 2022-09-24<br />DFF: 3.08","DATE: 2022-09-25<br />DFF: 3.08","DATE: 2022-09-26<br />DFF: 3.08","DATE: 2022-09-27<br />DFF: 3.08","DATE: 2022-09-28<br />DFF: 3.08","DATE: 2022-09-29<br />DFF: 3.08","DATE: 2022-09-30<br />DFF: 3.08","DATE: 2022-10-01<br />DFF: 3.08","DATE: 2022-10-02<br />DFF: 3.08","DATE: 2022-10-03<br />DFF: 3.08","DATE: 2022-10-04<br />DFF: 3.08","DATE: 2022-10-05<br />DFF: 3.08","DATE: 2022-10-06<br />DFF: 3.08","DATE: 2022-10-07<br />DFF: 3.08","DATE: 2022-10-08<br />DFF: 3.08","DATE: 2022-10-09<br />DFF: 3.08","DATE: 2022-10-10<br />DFF: 3.08","DATE: 2022-10-11<br />DFF: 3.08","DATE: 2022-10-12<br />DFF: 3.08","DATE: 2022-10-13<br />DFF: 3.08","DATE: 2022-10-14<br />DFF: 3.08","DATE: 2022-10-15<br />DFF: 3.08","DATE: 2022-10-16<br />DFF: 3.08","DATE: 2022-10-17<br />DFF: 3.08","DATE: 2022-10-18<br />DFF: 3.08","DATE: 2022-10-19<br />DFF: 3.08","DATE: 2022-10-20<br />DFF: 3.08","DATE: 2022-10-21<br />DFF: 3.08","DATE: 2022-10-22<br />DFF: 3.08","DATE: 2022-10-23<br />DFF: 3.08","DATE: 2022-10-24<br />DFF: 3.08","DATE: 2022-10-25<br />DFF: 3.08","DATE: 2022-10-26<br />DFF: 3.08","DATE: 2022-10-27<br />DFF: 3.08","DATE: 2022-10-28<br />DFF: 3.08","DATE: 2022-10-29<br />DFF: 3.08","DATE: 2022-10-30<br />DFF: 3.08","DATE: 2022-10-31<br />DFF: 3.08","DATE: 2022-11-01<br />DFF: 3.08","DATE: 2022-11-02<br />DFF: 3.08","DATE: 2022-11-03<br />DFF: 3.83","DATE: 2022-11-04<br />DFF: 3.83","DATE: 2022-11-05<br />DFF: 3.83","DATE: 2022-11-06<br />DFF: 3.83","DATE: 2022-11-07<br />DFF: 3.83","DATE: 2022-11-08<br />DFF: 3.83","DATE: 2022-11-09<br />DFF: 3.83","DATE: 2022-11-10<br />DFF: 3.83","DATE: 2022-11-11<br />DFF: 3.83","DATE: 2022-11-12<br />DFF: 3.83","DATE: 2022-11-13<br />DFF: 3.83","DATE: 2022-11-14<br />DFF: 3.83","DATE: 2022-11-15<br />DFF: 3.83","DATE: 2022-11-16<br />DFF: 3.83","DATE: 2022-11-17<br />DFF: 3.83","DATE: 2022-11-18<br />DFF: 3.83","DATE: 2022-11-19<br />DFF: 3.83","DATE: 2022-11-20<br />DFF: 3.83","DATE: 2022-11-21<br />DFF: 3.83","DATE: 2022-11-22<br />DFF: 3.83","DATE: 2022-11-23<br />DFF: 3.83","DATE: 2022-11-24<br />DFF: 3.83","DATE: 2022-11-25<br />DFF: 3.83","DATE: 2022-11-26<br />DFF: 3.83","DATE: 2022-11-27<br />DFF: 3.83","DATE: 2022-11-28<br />DFF: 3.83","DATE: 2022-11-29<br />DFF: 3.83","DATE: 2022-11-30<br />DFF: 3.83","DATE: 2022-12-01<br />DFF: 3.83","DATE: 2022-12-02<br />DFF: 3.83","DATE: 2022-12-03<br />DFF: 3.83","DATE: 2022-12-04<br />DFF: 3.83","DATE: 2022-12-05<br />DFF: 3.83","DATE: 2022-12-06<br />DFF: 3.83","DATE: 2022-12-07<br />DFF: 3.83","DATE: 2022-12-08<br />DFF: 3.83","DATE: 2022-12-09<br />DFF: 3.83","DATE: 2022-12-10<br />DFF: 3.83","DATE: 2022-12-11<br />DFF: 3.83","DATE: 2022-12-12<br />DFF: 3.83","DATE: 2022-12-13<br />DFF: 3.83","DATE: 2022-12-14<br />DFF: 3.83","DATE: 2022-12-15<br />DFF: 4.33","DATE: 2022-12-16<br />DFF: 4.33","DATE: 2022-12-17<br />DFF: 4.33","DATE: 2022-12-18<br />DFF: 4.33","DATE: 2022-12-19<br />DFF: 4.33","DATE: 2022-12-20<br />DFF: 4.33","DATE: 2022-12-21<br />DFF: 4.33","DATE: 2022-12-22<br />DFF: 4.33","DATE: 2022-12-23<br />DFF: 4.33","DATE: 2022-12-24<br />DFF: 4.33","DATE: 2022-12-25<br />DFF: 4.33","DATE: 2022-12-26<br />DFF: 4.33","DATE: 2022-12-27<br />DFF: 4.33","DATE: 2022-12-28<br />DFF: 4.33","DATE: 2022-12-29<br />DFF: 4.33","DATE: 2022-12-30<br />DFF: 4.33","DATE: 2022-12-31<br />DFF: 4.33","DATE: 2023-01-01<br />DFF: 4.33","DATE: 2023-01-02<br />DFF: 4.33","DATE: 2023-01-03<br />DFF: 4.33","DATE: 2023-01-04<br />DFF: 4.33","DATE: 2023-01-05<br />DFF: 4.33","DATE: 2023-01-06<br />DFF: 4.33","DATE: 2023-01-07<br />DFF: 4.33","DATE: 2023-01-08<br />DFF: 4.33","DATE: 2023-01-09<br />DFF: 4.33","DATE: 2023-01-10<br />DFF: 4.33","DATE: 2023-01-11<br />DFF: 4.33","DATE: 2023-01-12<br />DFF: 4.33","DATE: 2023-01-13<br />DFF: 4.33","DATE: 2023-01-14<br />DFF: 4.33","DATE: 2023-01-15<br />DFF: 4.33","DATE: 2023-01-16<br />DFF: 4.33","DATE: 2023-01-17<br />DFF: 4.33","DATE: 2023-01-18<br />DFF: 4.33","DATE: 2023-01-19<br />DFF: 4.33","DATE: 2023-01-20<br />DFF: 4.33","DATE: 2023-01-21<br />DFF: 4.33","DATE: 2023-01-22<br />DFF: 4.33","DATE: 2023-01-23<br />DFF: 4.33","DATE: 2023-01-24<br />DFF: 4.33","DATE: 2023-01-25<br />DFF: 4.33","DATE: 2023-01-26<br />DFF: 4.33","DATE: 2023-01-27<br />DFF: 4.33","DATE: 2023-01-28<br />DFF: 4.33","DATE: 2023-01-29<br />DFF: 4.33","DATE: 2023-01-30<br />DFF: 4.33","DATE: 2023-01-31<br />DFF: 4.33","DATE: 2023-02-01<br />DFF: 4.33","DATE: 2023-02-02<br />DFF: 4.58","DATE: 2023-02-03<br />DFF: 4.58","DATE: 2023-02-04<br />DFF: 4.58","DATE: 2023-02-05<br />DFF: 4.58","DATE: 2023-02-06<br />DFF: 4.58","DATE: 2023-02-07<br />DFF: 4.58","DATE: 2023-02-08<br />DFF: 4.58","DATE: 2023-02-09<br />DFF: 4.57","DATE: 2023-02-10<br />DFF: 4.58","DATE: 2023-02-11<br />DFF: 4.58","DATE: 2023-02-12<br />DFF: 4.58","DATE: 2023-02-13<br />DFF: 4.58","DATE: 2023-02-14<br />DFF: 4.58","DATE: 2023-02-15<br />DFF: 4.58","DATE: 2023-02-16<br />DFF: 4.58","DATE: 2023-02-17<br />DFF: 4.58","DATE: 2023-02-18<br />DFF: 4.58","DATE: 2023-02-19<br />DFF: 4.58","DATE: 2023-02-20<br />DFF: 4.58","DATE: 2023-02-21<br />DFF: 4.58","DATE: 2023-02-22<br />DFF: 4.58","DATE: 2023-02-23<br />DFF: 4.58","DATE: 2023-02-24<br />DFF: 4.58","DATE: 2023-02-25<br />DFF: 4.58","DATE: 2023-02-26<br />DFF: 4.58","DATE: 2023-02-27<br />DFF: 4.57","DATE: 2023-02-28<br />DFF: 4.57","DATE: 2023-03-01<br />DFF: 4.58","DATE: 2023-03-02<br />DFF: 4.57","DATE: 2023-03-03<br />DFF: 4.57","DATE: 2023-03-04<br />DFF: 4.57","DATE: 2023-03-05<br />DFF: 4.57","DATE: 2023-03-06<br />DFF: 4.57","DATE: 2023-03-07<br />DFF: 4.57","DATE: 2023-03-08<br />DFF: 4.57","DATE: 2023-03-09<br />DFF: 4.57","DATE: 2023-03-10<br />DFF: 4.57","DATE: 2023-03-11<br />DFF: 4.57","DATE: 2023-03-12<br />DFF: 4.57","DATE: 2023-03-13<br />DFF: 4.58","DATE: 2023-03-14<br />DFF: 4.58","DATE: 2023-03-15<br />DFF: 4.58","DATE: 2023-03-16<br />DFF: 4.58","DATE: 2023-03-17<br />DFF: 4.58","DATE: 2023-03-18<br />DFF: 4.58","DATE: 2023-03-19<br />DFF: 4.58","DATE: 2023-03-20<br />DFF: 4.58","DATE: 2023-03-21<br />DFF: 4.58","DATE: 2023-03-22<br />DFF: 4.58","DATE: 2023-03-23<br />DFF: 4.83","DATE: 2023-03-24<br />DFF: 4.83","DATE: 2023-03-25<br />DFF: 4.83","DATE: 2023-03-26<br />DFF: 4.83","DATE: 2023-03-27<br />DFF: 4.83","DATE: 2023-03-28<br />DFF: 4.83","DATE: 2023-03-29<br />DFF: 4.83","DATE: 2023-03-30<br />DFF: 4.83","DATE: 2023-03-31<br />DFF: 4.83","DATE: 2023-04-01<br />DFF: 4.83","DATE: 2023-04-02<br />DFF: 4.83","DATE: 2023-04-03<br />DFF: 4.83","DATE: 2023-04-04<br />DFF: 4.83","DATE: 2023-04-05<br />DFF: 4.83","DATE: 2023-04-06<br />DFF: 4.83","DATE: 2023-04-07<br />DFF: 4.83","DATE: 2023-04-08<br />DFF: 4.83","DATE: 2023-04-09<br />DFF: 4.83","DATE: 2023-04-10<br />DFF: 4.83","DATE: 2023-04-11<br />DFF: 4.83","DATE: 2023-04-12<br />DFF: 4.83","DATE: 2023-04-13<br />DFF: 4.83","DATE: 2023-04-14<br />DFF: 4.83","DATE: 2023-04-15<br />DFF: 4.83","DATE: 2023-04-16<br />DFF: 4.83","DATE: 2023-04-17<br />DFF: 4.83","DATE: 2023-04-18<br />DFF: 4.83","DATE: 2023-04-19<br />DFF: 4.83","DATE: 2023-04-20<br />DFF: 4.83","DATE: 2023-04-21<br />DFF: 4.83","DATE: 2023-04-22<br />DFF: 4.83","DATE: 2023-04-23<br />DFF: 4.83","DATE: 2023-04-24<br />DFF: 4.83","DATE: 2023-04-25<br />DFF: 4.83","DATE: 2023-04-26<br />DFF: 4.83","DATE: 2023-04-27<br />DFF: 4.83","DATE: 2023-04-28<br />DFF: 4.83","DATE: 2023-04-29<br />DFF: 4.83","DATE: 2023-04-30<br />DFF: 4.83","DATE: 2023-05-01<br />DFF: 4.83","DATE: 2023-05-02<br />DFF: 4.83","DATE: 2023-05-03<br />DFF: 4.83","DATE: 2023-05-04<br />DFF: 5.08","DATE: 2023-05-05<br />DFF: 5.08","DATE: 2023-05-06<br />DFF: 5.08","DATE: 2023-05-07<br />DFF: 5.08","DATE: 2023-05-08<br />DFF: 5.08","DATE: 2023-05-09<br />DFF: 5.08","DATE: 2023-05-10<br />DFF: 5.08","DATE: 2023-05-11<br />DFF: 5.08","DATE: 2023-05-12<br />DFF: 5.08","DATE: 2023-05-13<br />DFF: 5.08","DATE: 2023-05-14<br />DFF: 5.08","DATE: 2023-05-15<br />DFF: 5.08","DATE: 2023-05-16<br />DFF: 5.08","DATE: 2023-05-17<br />DFF: 5.08","DATE: 2023-05-18<br />DFF: 5.08","DATE: 2023-05-19<br />DFF: 5.08","DATE: 2023-05-20<br />DFF: 5.08","DATE: 2023-05-21<br />DFF: 5.08","DATE: 2023-05-22<br />DFF: 5.08","DATE: 2023-05-23<br />DFF: 5.08","DATE: 2023-05-24<br />DFF: 5.08","DATE: 2023-05-25<br />DFF: 5.08","DATE: 2023-05-26<br />DFF: 5.08","DATE: 2023-05-27<br />DFF: 5.08","DATE: 2023-05-28<br />DFF: 5.08","DATE: 2023-05-29<br />DFF: 5.08","DATE: 2023-05-30<br />DFF: 5.08","DATE: 2023-05-31<br />DFF: 5.08","DATE: 2023-06-01<br />DFF: 5.08","DATE: 2023-06-02<br />DFF: 5.08","DATE: 2023-06-03<br />DFF: 5.08","DATE: 2023-06-04<br />DFF: 5.08","DATE: 2023-06-05<br />DFF: 5.08","DATE: 2023-06-06<br />DFF: 5.08","DATE: 2023-06-07<br />DFF: 5.08","DATE: 2023-06-08<br />DFF: 5.08","DATE: 2023-06-09<br />DFF: 5.08","DATE: 2023-06-10<br />DFF: 5.08","DATE: 2023-06-11<br />DFF: 5.08","DATE: 2023-06-12<br />DFF: 5.08","DATE: 2023-06-13<br />DFF: 5.08","DATE: 2023-06-14<br />DFF: 5.08","DATE: 2023-06-15<br />DFF: 5.07","DATE: 2023-06-16<br />DFF: 5.08","DATE: 2023-06-17<br />DFF: 5.08","DATE: 2023-06-18<br />DFF: 5.08","DATE: 2023-06-19<br />DFF: 5.08","DATE: 2023-06-20<br />DFF: 5.07","DATE: 2023-06-21<br />DFF: 5.07","DATE: 2023-06-22<br />DFF: 5.07","DATE: 2023-06-23<br />DFF: 5.07","DATE: 2023-06-24<br />DFF: 5.07","DATE: 2023-06-25<br />DFF: 5.07","DATE: 2023-06-26<br />DFF: 5.07","DATE: 2023-06-27<br />DFF: 5.07","DATE: 2023-06-28<br />DFF: 5.07","DATE: 2023-06-29<br />DFF: 5.07","DATE: 2023-06-30<br />DFF: 5.08","DATE: 2023-07-01<br />DFF: 5.08","DATE: 2023-07-02<br />DFF: 5.08","DATE: 2023-07-03<br />DFF: 5.08","DATE: 2023-07-04<br />DFF: 5.08","DATE: 2023-07-05<br />DFF: 5.08","DATE: 2023-07-06<br />DFF: 5.08","DATE: 2023-07-07<br />DFF: 5.08","DATE: 2023-07-08<br />DFF: 5.08","DATE: 2023-07-09<br />DFF: 5.08","DATE: 2023-07-10<br />DFF: 5.07","DATE: 2023-07-11<br />DFF: 5.08","DATE: 2023-07-12<br />DFF: 5.08","DATE: 2023-07-13<br />DFF: 5.08","DATE: 2023-07-14<br />DFF: 5.08","DATE: 2023-07-15<br />DFF: 5.08","DATE: 2023-07-16<br />DFF: 5.08","DATE: 2023-07-17<br />DFF: 5.08","DATE: 2023-07-18<br />DFF: 5.08","DATE: 2023-07-19<br />DFF: 5.08","DATE: 2023-07-20<br />DFF: 5.08","DATE: 2023-07-21<br />DFF: 5.08","DATE: 2023-07-22<br />DFF: 5.08","DATE: 2023-07-23<br />DFF: 5.08","DATE: 2023-07-24<br />DFF: 5.08","DATE: 2023-07-25<br />DFF: 5.08","DATE: 2023-07-26<br />DFF: 5.08","DATE: 2023-07-27<br />DFF: 5.33","DATE: 2023-07-28<br />DFF: 5.33","DATE: 2023-07-29<br />DFF: 5.33","DATE: 2023-07-30<br />DFF: 5.33","DATE: 2023-07-31<br />DFF: 5.33","DATE: 2023-08-01<br />DFF: 5.33","DATE: 2023-08-02<br />DFF: 5.33","DATE: 2023-08-03<br />DFF: 5.33","DATE: 2023-08-04<br />DFF: 5.33","DATE: 2023-08-05<br />DFF: 5.33","DATE: 2023-08-06<br />DFF: 5.33","DATE: 2023-08-07<br />DFF: 5.33","DATE: 2023-08-08<br />DFF: 5.33","DATE: 2023-08-09<br />DFF: 5.33","DATE: 2023-08-10<br />DFF: 5.33","DATE: 2023-08-11<br />DFF: 5.33","DATE: 2023-08-12<br />DFF: 5.33","DATE: 2023-08-13<br />DFF: 5.33","DATE: 2023-08-14<br />DFF: 5.33","DATE: 2023-08-15<br />DFF: 5.33","DATE: 2023-08-16<br />DFF: 5.33","DATE: 2023-08-17<br />DFF: 5.33","DATE: 2023-08-18<br />DFF: 5.33","DATE: 2023-08-19<br />DFF: 5.33","DATE: 2023-08-20<br />DFF: 5.33","DATE: 2023-08-21<br />DFF: 5.33","DATE: 2023-08-22<br />DFF: 5.33","DATE: 2023-08-23<br />DFF: 5.33","DATE: 2023-08-24<br />DFF: 5.33","DATE: 2023-08-25<br />DFF: 5.33","DATE: 2023-08-26<br />DFF: 5.33","DATE: 2023-08-27<br />DFF: 5.33","DATE: 2023-08-28<br />DFF: 5.33","DATE: 2023-08-29<br />DFF: 5.33","DATE: 2023-08-30<br />DFF: 5.33","DATE: 2023-08-31<br />DFF: 5.33","DATE: 2023-09-01<br />DFF: 5.33","DATE: 2023-09-02<br />DFF: 5.33","DATE: 2023-09-03<br />DFF: 5.33","DATE: 2023-09-04<br />DFF: 5.33","DATE: 2023-09-05<br />DFF: 5.33","DATE: 2023-09-06<br />DFF: 5.33","DATE: 2023-09-07<br />DFF: 5.33","DATE: 2023-09-08<br />DFF: 5.33","DATE: 2023-09-09<br />DFF: 5.33","DATE: 2023-09-10<br />DFF: 5.33","DATE: 2023-09-11<br />DFF: 5.33","DATE: 2023-09-12<br />DFF: 5.33","DATE: 2023-09-13<br />DFF: 5.33","DATE: 2023-09-14<br />DFF: 5.33","DATE: 2023-09-15<br />DFF: 5.33","DATE: 2023-09-16<br />DFF: 5.33","DATE: 2023-09-17<br />DFF: 5.33","DATE: 2023-09-18<br />DFF: 5.33","DATE: 2023-09-19<br />DFF: 5.33","DATE: 2023-09-20<br />DFF: 5.33","DATE: 2023-09-21<br />DFF: 5.33","DATE: 2023-09-22<br />DFF: 5.33","DATE: 2023-09-23<br />DFF: 5.33","DATE: 2023-09-24<br />DFF: 5.33","DATE: 2023-09-25<br />DFF: 5.33","DATE: 2023-09-26<br />DFF: 5.33","DATE: 2023-09-27<br />DFF: 5.33","DATE: 2023-09-28<br />DFF: 5.33","DATE: 2023-09-29<br />DFF: 5.33","DATE: 2023-09-30<br />DFF: 5.33","DATE: 2023-10-01<br />DFF: 5.33","DATE: 2023-10-02<br />DFF: 5.33","DATE: 2023-10-03<br />DFF: 5.33"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.762557077625573,"r":7.3059360730593621,"b":40.182648401826491,"l":31.415525114155255},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Daily Federal Funds Rate over Time","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[18577.75,19683.25],"tickmode":"array","ticktext":["2021","2022","2023"],"tickvals":[18628,18993,19358],"categoryorder":"array","categoryarray":["2021","2022","2023"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Time","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.21400000000000002,5.5940000000000003],"tickmode":"array","ticktext":["0","2","4"],"tickvals":[0,2,4],"categoryorder":"array","categoryarray":["0","2","4"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Daily Federal Fund Rate","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.8897637795275593,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"8728126b5a":{"x":{},"y":{},"type":"scatter"}},"cur_data":"8728126b5a","visdat":{"8728126b5a":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

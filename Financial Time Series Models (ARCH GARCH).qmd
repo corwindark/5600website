@@ -1,0 +1,3 @@
+---
+title: "Financial Time Series Models (ARCH GARCH)"
+---

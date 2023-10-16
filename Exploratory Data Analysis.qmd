@@ -1,0 +1,69 @@
+---
+title: "Exploratory Data Analysis"
+---
+
+<h2>  Time Series Analysis   </h2>
+
+
+Let's start with the intraday range data. First with the S&P 500.
+
+``` {r}
+library(tidyverse)
+library(quantmod)
+
+spyIn <- quantmod::getSymbols("SPY", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+qqqIn <- quantmod::getSymbols("QQQ", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+iwmIn <- quantmod::getSymbols("IWM", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+
+
+spyIn$spyRange <- (spyIn$SPY.High - spyIn$SPY.Low)/ spyIn$SPY.Open
+qqqIn$qqqRange <- (qqqIn$QQQ.High - qqqIn$QQQ.Low)/ qqqIn$QQQ.Open
+iwmIn$iwmRange <- (iwmIn$IWM.High - iwmIn$IWM.Low)/ iwmIn$IWM.Open
+
+
+#decomposedSPY <- decompose(spyIn$spyRange)
+
+##decompedSPY = HoltWinters(spyIn$spyRange,beta = FALSE,gamma = FALSE)
+#plot(decompedSPY)
+
+autoplot(spyIn$spyRange)
+acf(spyIn$spyRange)
+pacf(spyIn$spyRange)
+
+```
+
+
+Upon initial review of the SPY intraday range data, it appears that there is some trend, but no seasonality. The decomposition function would not work on the data as it could not recognize periodicity. As a next step, we can difference the data.
+
+``` {r}
+library(forecast)
+
+
+diff1 <- diff(spyIn$spyRange)
+#auto.arima(spyIn$spyRange)
+plot(diff1)
+```
+
+After differencing, the data appears to have lost its trend. However, there is still visible heteroskedacticity in the differences between intraday ranges.
+
+
+``` {r}
+acf(diff1,    na.action = na.exclude)
+
+pacf(diff1,    na.action = na.exclude)
+
+```
+
+After differencing, we see 2 lags being significant in the ACF plot. In the PACF plot, we see about 4 lags being significant. This is a marked departure from the original plots, where the ACF showed clear non-stationarity and the PACF had many significant lags.
+
+``` {r}
+library(tseries)
+
+diffnoNA <- diff1$spyRange[!is.na(diff1$spyRange)]
+adf.test(diffnoNA)
+
+
+```
+
+
+With dickey fuller test result of 0.01, we can reject the null hypothesis and conclude the series is stationary. 
