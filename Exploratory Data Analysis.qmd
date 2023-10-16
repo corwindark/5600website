@@ -62,7 +62,7 @@ library(tseries)
 diffnoNA <- diff1$spyRange[!is.na(diff1$spyRange)]
 adf.test(diffnoNA)
 
-
+#
 ```
 
 
