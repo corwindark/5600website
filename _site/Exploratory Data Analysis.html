@@ -141,7 +141,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./ARMA ARIMA SARIMA Models.html" rel="" target="">
- <span class="menu-text">ARMA ARIMA SARIMA Models.html</span></a>
+ <span class="menu-text">ARMA ARIMA SARIMA MODELS</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./ARIMAX SARIMAX VAR.html" rel="" target="">
@@ -204,7 +204,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored">
 Time Series Analysis
 </h2>
-<p>Let’s start with the intraday range data. First with the S&amp;P 500.</p>
+<p>Let’s start with reading in the intraday range data. First with the S&amp;P 500.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -305,8 +305,12 @@ Attaching package: 'xts'</code></pre>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>diff1 <span class="ot">&lt;-</span> <span class="fu">diff</span>(spyIn<span class="sc">$</span>spyRange)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co">#auto.arima(spyIn$spyRange)</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co">#write.csv(diff1SPY, "/data/spyDiff.csv")</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co">#auto.arima(spyIn$spyRange)</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -341,6 +345,42 @@ alternative hypothesis: stationary</code></pre>
 </div>
 </div>
 <p>With dickey fuller test result of 0.01, we can reject the null hypothesis and conclude the series is stationary.</p>
+<h3 class="anchored">
+Moving Average Smoothing
+</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>spyDiff1 <span class="ot">&lt;-</span> <span class="fu">as.ts</span>(diffnoNA)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>spyAvg3Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">3</span>))</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>spyAvg5Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>, <span class="dv">5</span>))</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>spyAvg30Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">30</span>, <span class="dv">30</span>))</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>spyAvg50Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">50</span>, <span class="dv">50</span>))</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>spyAvg100Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="dv">100</span>))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg3Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg5Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg30Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg50Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg100Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-5.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Overall the effect of the moving average at higher numbers is to reveal seasonality in the data. At lower smoothing levels (3 and 5 days), the time series looked almost unchanged, and still highly variant. Only at a 30 day average window did the seasonality start to appear, with clear periods in the data and a repeating pattern. Notably, even with a repeating pattern the data still showed obvious heteroskedasticity, with periods of increased varianced. The 50 and 100 day moving average windows began to obfuscate the periods, while keeping the heteroskedacticity, although they did have smaller variations and were nearer to 0 on average. In adition, the 50 and 100 days had discernable trends in the data.</p>
 
 
 

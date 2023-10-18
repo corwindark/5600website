@@ -7,7 +7,7 @@ bibliography: reference.bib
 
 ## Topic Explanation:
 
-For this project the time series I will be studying are major stock market indices, specifically the DJIA and S&P 500. The purpose of this project is to understand the factors driving the price of these indices, looking at climate events such as wildfires and hurricanes, investor confidence, and the impacts of COVID-19. I will use the statistical models we learn in class to investigate the relationships of these factors on stock market prices.
+For this project the time series I will be studying are major stock market indices, specifically the S&P 500, the Russel 2000, and the Nasdaq 100 (QQQ). The purpose of this project is to understand the factors driving the price of these indices, looking at climate events such as wildfires and hurricanes, investor confidence, macroeconomic data, and the impacts of COVID-19. I will use the statistical models we learn in class to investigate the relationships of these factors on stock market prices.
 
 
 

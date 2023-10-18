@@ -1,0 +1,128 @@
+---
+title: "ARMA ARIMA SARIMA MODELS"
+
+---
+
+Loading packages
+
+``` {r}
+library(tidyverse)
+library(quantmod)
+library(forecast)
+library(tseries)
+
+```
+
+
+
+Bringing the data into this tab as well:
+
+``` {r}
+
+spyIn <- quantmod::getSymbols("SPY", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+qqqIn <- quantmod::getSymbols("QQQ", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+iwmIn <- quantmod::getSymbols("IWM", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+
+
+spyIn$spyRange <- (spyIn$SPY.High - spyIn$SPY.Low)/ spyIn$SPY.Open
+qqqIn$qqqRange <- (qqqIn$QQQ.High - qqqIn$QQQ.Low)/ qqqIn$QQQ.Open
+iwmIn$iwmRange <- (iwmIn$IWM.High - iwmIn$IWM.Low)/ iwmIn$IWM.Open
+
+
+diff1SPY <- diff(spyIn$spyRange)
+diff1QQQ <- diff(qqqIn$qqqRange)
+diff1IWM <- diff(iwmIn$iwmRange)
+
+```
+
+
+
+<h2> Stationarity of the time series </h2>
+
+Based on previous results, and the fact that I am using "pseudo-differenced data" in that I am taking the percentage range in prices, in addition to a single differencing, means that the time series are stationary
+
+
+<h2> Building ARIMA Model <h2>
+
+Since I did some of this work with SPY data on the EDA tab, I will focus on QQQ range data here.
+
+``` {r}
+#print(diff1QQQ)
+acf(diff1QQQ, na.action = na.exclude)
+pacf(diff1QQQ, na.action = na.exclude)
+
+```
+
+Based on these charts the order I would pick for QQQ is: ARIMA(2,1,0)
+
+``` {r}
+
+modelQQQ1 <- arima(diff1QQQ, order = c(2,1,0))
+summary(modelQQQ1)
+```
+
+5. Equation is x = -1.0034x(t-1) - 0.4832x(t-2) + error
+
+6. Model Diagnostic:
+``` {r}
+
+stats::tsdiag(modelQQQ1)
+
+```
+
+The Ljung Box statistics look cood, although the ACF of the residuals does have 1 significant term.
+
+I originally tried a (4,1,2) model, however the ljung box statistics were highly correlated, and I suspected overfitting. After reducing the parametrization greatly, the new model performed mnuch better.
+
+7.
+``` {r}
+
+autoQQQ <- auto.arima(diff1QQQ)
+summary(autoQQQ)
+```
+
+The auto.arima method chose an ARIMA(1,0,1) model. However, this model did not perform as well in terms of AIC, with the Auto arima model having a score of -4799 while my model had a score of -4292.
+
+
+8. Forecasting with my model
+
+``` {r}
+plot(forecast(modelQQQ1, 10), xlim = c(650,750))   
+
+```
+
+
+Forecasting with auto arima model
+``` {r}
+plot(forecast(autoQQQ, 10), xlim = c(650,750))
+
+```
+
+Overall, my model has a slightly more dynamic prediction than the auto arima function, which quicly levels out to 0. However, my model also has a much wider uncertainty band.
+
+
+9. Compare ARIMA model with benchmarks
+```{r}
+
+naiveModelQQQ <- naive(diff1QQQ, h=1)
+snaiveModelQQQ <- snaive(diff1QQQ, h=1)
+
+summary(naiveModelQQQ)
+summary(snaiveModelQQQ)
+summary(modelQQQ1)
+
+```
+
+I fit a naive and seasonal naive model. On RMSE my model had the best performance, with 0.011, while the naive and snaive models had 0.017 rmse each (since there was no seasonal period I realized they were the same model). On MAE my arima model had 0.008 while the seasonal naive models had 0.0122.
+
+Let's compare forecasts:
+```{r}
+plot(forecast(modelQQQ1, 10), xlim = c(650,750)) 
+```
+
+```{r}
+plot(forecast(naiveModelQQQ, 10), xlim = c(650,750))   
+```
+
+
+Here, the naive method can only forecast 1 observation into the future, since the seasonal period is one. Which is an advantage to my model, but realistically means the naive model should be evaluated with cross validation.

@@ -1,15 +1,17 @@
 ---
 title: "Exploratory Data Analysis"
+
 ---
 
 <h2>  Time Series Analysis   </h2>
 
 
-Let's start with the intraday range data. First with the S&P 500.
+Let's start with reading in the intraday range data. First with the S&P 500.
 
 ``` {r}
 library(tidyverse)
 library(quantmod)
+
 
 spyIn <- quantmod::getSymbols("SPY", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
 qqqIn <- quantmod::getSymbols("QQQ", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
@@ -40,6 +42,10 @@ library(forecast)
 
 
 diff1 <- diff(spyIn$spyRange)
+
+
+
+#write.csv(diff1SPY, "/data/spyDiff.csv")
 #auto.arima(spyIn$spyRange)
 plot(diff1)
 ```
@@ -62,8 +68,42 @@ library(tseries)
 diffnoNA <- diff1$spyRange[!is.na(diff1$spyRange)]
 adf.test(diffnoNA)
 
-
 ```
 
 
 With dickey fuller test result of 0.01, we can reject the null hypothesis and conclude the series is stationary. 
+
+
+
+<h3> Moving Average Smoothing </h3>
+
+```{r}
+
+spyDiff1 <- as.ts(diffnoNA)
+
+spyAvg3Diff1 <- stats::filter(spyDiff1, sides = 1, rep(1/3, 3))
+spyAvg5Diff1 <- stats::filter(spyDiff1, sides = 1, rep(1/5, 5))
+spyAvg30Diff1 <- stats::filter(spyDiff1, sides = 1, rep(1/30, 30))
+spyAvg50Diff1 <- stats::filter(spyDiff1, sides = 1, rep(1/50, 50))
+
+spyAvg100Diff1 <- stats::filter(spyDiff1, sides = 1, rep(1/100, 100))
+
+
+autoplot(spyAvg3Diff1)
+
+autoplot(spyAvg5Diff1)
+
+
+autoplot(spyAvg30Diff1)
+
+
+autoplot(spyAvg50Diff1)
+
+autoplot(spyAvg100Diff1)
+
+```
+
+
+Overall the effect of the moving average at higher numbers is to reveal seasonality in the data. At lower smoothing levels (3 and 5 days), the time series looked almost unchanged, and still highly variant. Only at a 30 day average window did the seasonality start to appear, with clear periods in the data and a repeating pattern. Notably, even with a repeating pattern the data still showed obvious heteroskedasticity, with periods of increased varianced. The 50 and 100 day moving average windows began to obfuscate the periods, while keeping the heteroskedacticity, although they did have smaller variations and were nearer to 0 on average. In adition, the 50 and 100 days had discernable trends in the data.
+
+

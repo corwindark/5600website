@@ -4,17 +4,11 @@ author: "Corwin Dark"
 ---
 
 
-<h2> S&P 500 Data, Yahoo Finance</h2>
+<h2> S&P 500, Nasdaq 100, and Russel 2000, Daily Data  Yahoo Finance</h2>
 
 https://finance.yahoo.com/quote/%5EGSPC/history?p=%255EGSPC
 
-<h2> DJIA Data, Yahoo Finance</h2>
-
-https://finance.yahoo.com/quote/%5EDJI/history?p=%255EDJI
-
-Financial data from the S&P 500 and the Dow Jones Industrial Average. Data includes the open and close of stock prices for each day, as well as the highest and lowest price recorded for the day. These indices are widely used and will be a relevant outcome variable for the project to study.
-
-
+Financial data from tickers SPY, QQQ, and IWM. Data includes the open and close of stock prices for each day, as well as the highest and lowest price recorded for the day. These indices are widely used and will be a relevant outcome variable for the project to study. The main output value thaht will be calculated is the high-low range of the day.
 
 
 <h2> VIX Data, Yahoo Finance</h2>
@@ -24,30 +18,21 @@ https://finance.yahoo.com/quote/%5EVIX/history?p=%255EVIX
 The Chicago Board of Exchange (CBOE) VIX index is a widely-used tool to measure investor sentiment. The indicator itself represents the degree of volatility perceived by investors in the next month. It ranges from near zero up to about 60 in recent years, with scores at different intervals representing different levels of perceived volatility.
 
 
+<h2>  Work Stoppages  </h2>
+https://www.bls.gov/wsp/
 
-<h2> Tropical Storm and Hurricane Warning Reports, NOAA</h2>
-
-https://www.nhc.noaa.gov/TCR_StormReportsIndex.xml
-
-NOAA maintains records on each hurricane and tropical storm warning they send out for both the Atlantic and the Pacific. While a wealth of data, including GIS data, is available on NOAA’s website, not all of it is machine readable. As such, I chose the data linked above, which is an XML file that contains the names and dates of every hurricane and tropical storm in the Atlantic and Pacific since 1994. 
-
-<h2> Wildfire Data, Independent Researchers</h2>
-
-https://www.sciencebase.gov/catalog/item/61707c2ad34ea36449a6b066
-
-This dataset was gathered meticulously and over several iterations to include all wildfires in the United States from the 1800s to present. It includes many types of data about each wildfire, such as the cause and start date, as well as polygons of the area burned. 
+This dataset contains all of the major strikes recorded by the bureau of labor statistics, such that I will be able to use the number of striking workers on any given day as a variable for analysis.
 
 
+<h2>  Daily Yield Curve Next 3 Months  </h2>
+https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&field_tdr_date_value=2023
 
-<h2> Federal Funds Effective Rate, FRED</h2>
+While I originally considered the actual federal funds rate, the values did not change much day to day. Instead I would like to use the expectation of yield rates, measured through the pricing of bonds in the yield curve over the next few months. The data includes the prices of treasury bills 1, 2, and 3 months out on each date.
 
-https://fred.stlouisfed.org/series/FEDFUNDS
+<h2>  Storm Events by Day  </h2>
+https://www.ncdc.noaa.gov/stormevents/ftp.jsp
 
-The federal funds effective rate, provided here by FRED of the St. Louis Fed, measures the effective rate that financial institutions are paying to eachother overnight. The federal funds rate depends on the target federal funds rate, which is set as a matter of monetary policy, and which is used as the basis for government intervention to raise or lower the effective rate until it matches the target rate.
+NOAA maintains records on each storm warning they send out for the entire country. This dataset includes many types of storm warnings, such as for hurricanes, blizzards, flash floods, and tornadoes. Importantly, the dataset includes the day in which each weather event took place, as well as the property damage and bodily injury caused by the weather event.
 
 
-<h2> All Non-Farm Employee Payrolls, FRED </h2>
 
-https://fred.stlouisfed.org/series/PAYEMS
-
-This data measures formal employment in the US economy. The non-farm distinction is a common one to make with payrolls, as farms employ a great deal of seasonal labor. Such metrics are closely watched by investors, which is what makes them interesting, as the monthly release of numbers has a clear and immediate impact on stock market prices. Numbers are sometimes revised later, after their initial release.
