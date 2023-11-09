@@ -1,0 +1,18 @@
+---
+title: "Data Sources"
+author: "Corwin Dark"
+---
+
+
+<h2> Planning Models </h2>
+
+We have the following independent variables:
+1. Interest Rate Expectation Changes - 3 Months 
+2. Interest Rate Expectation Changes - 6 Months 
+3. Interest Rate Expectation Changes - 1 Year
+4. Extreme Weather Events - Raw Daily Number
+5. Extreme Weather Events - Daily Property Damage
+6. Extreme Weather Events - Daily Casualties
+7. Extreme Weather Events - Hurricanes
+7. Extreme Weather Events - Hurricanes
+
