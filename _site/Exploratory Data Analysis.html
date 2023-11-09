@@ -145,7 +145,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./ARIMAX SARIMAX VAR.html" rel="" target="">
- <span class="menu-text">ARIMAX SARIMAX VAR.html</span></a>
+ <span class="menu-text">Data Sources</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./Spectral Analysis and Filtering.html" rel="" target="">
@@ -343,39 +343,40 @@ data:  diffnoNA
 Dickey-Fuller = -12.455, Lag order = 8, p-value = 0.01
 alternative hypothesis: stationary</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>With dickey fuller test result of 0.01, we can reject the null hypothesis and conclude the series is stationary.</p>
 <h3 class="anchored">
 Moving Average Smoothing
 </h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>spyDiff1 <span class="ot">&lt;-</span> <span class="fu">as.ts</span>(diffnoNA)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>spyAvg3Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">3</span>))</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>spyAvg5Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>, <span class="dv">5</span>))</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>spyAvg30Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">30</span>, <span class="dv">30</span>))</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>spyAvg50Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">50</span>, <span class="dv">50</span>))</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>spyAvg100Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="dv">100</span>))</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg3Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>spyDiff1 <span class="ot">&lt;-</span> <span class="fu">as.ts</span>(diffnoNA)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>spyAvg3Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">3</span>))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>spyAvg5Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>, <span class="dv">5</span>))</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>spyAvg30Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">30</span>, <span class="dv">30</span>))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>spyAvg50Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">50</span>, <span class="dv">50</span>))</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>spyAvg100Diff1 <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(spyDiff1, <span class="at">sides =</span> <span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="dv">100</span>))</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg3Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg5Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg5Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg30Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg30Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg50Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg50Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-4.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg100Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(spyAvg100Diff1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Exploratory-Data-Analysis_files/figure-html/unnamed-chunk-5-5.png" class="img-fluid" width="672"></p>
 </div>

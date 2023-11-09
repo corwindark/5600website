@@ -145,7 +145,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./ARIMAX SARIMAX VAR.html" rel="" target="">
- <span class="menu-text">ARIMAX SARIMAX VAR.html</span></a>
+ <span class="menu-text">Data Sources</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./Spectral Analysis and Filtering.html" rel="" target="">
@@ -203,89 +203,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>Loading packages</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>-- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>v ggplot2 3.3.5     v purrr   0.3.4
-v tibble  3.2.1     v dplyr   1.1.2
-v tidyr   1.2.0     v stringr 1.4.0
-v readr   2.1.2     v forcats 0.5.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>-- Conflicts ------------------------------------------ tidyverse_conflicts() --
-x dplyr::filter() masks stats::filter()
-x dplyr::lag()    masks stats::lag()</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantmod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: xts</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: zoo</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'zoo'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    as.Date, as.Date.numeric</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-######################### Warning from 'xts' package ##########################
-#                                                                             #
-# The dplyr lag() function breaks how base R's lag() function is supposed to  #
-# work, which breaks lag(my_xts). Calls to lag(my_xts) that you type or       #
-# source() into this session won't work correctly.                            #
-#                                                                             #
-# Use stats::lag() to make sure you're not using dplyr::lag(), or you can add #
-# conflictRules('dplyr', exclude = 'lag') to your .Rprofile to stop           #
-# dplyr from breaking base R's lag() function.                                #
-#                                                                             #
-# Code in packages is not affected. It's protected by R's namespace mechanism #
-# Set `options(xts.warn_dplyr_breaks_lag = FALSE)` to suppress this warning.  #
-#                                                                             #
-###############################################################################</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'xts'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:dplyr':
-
-    first, last</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: TTR</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Registered S3 method overwritten by 'quantmod':
-  method            from
-  as.zoo.data.frame zoo </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantmod)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>Bringing the data into this tab as well:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>spyIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"SPY"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>qqqIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"QQQ"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>iwmIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"IWM"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>spyIn<span class="sc">$</span>spyRange <span class="ot">&lt;-</span> (spyIn<span class="sc">$</span>SPY.High <span class="sc">-</span> spyIn<span class="sc">$</span>SPY.Low)<span class="sc">/</span> spyIn<span class="sc">$</span>SPY.Open</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>qqqIn<span class="sc">$</span>qqqRange <span class="ot">&lt;-</span> (qqqIn<span class="sc">$</span>QQQ.High <span class="sc">-</span> qqqIn<span class="sc">$</span>QQQ.Low)<span class="sc">/</span> qqqIn<span class="sc">$</span>QQQ.Open</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>iwmIn<span class="sc">$</span>iwmRange <span class="ot">&lt;-</span> (iwmIn<span class="sc">$</span>IWM.High <span class="sc">-</span> iwmIn<span class="sc">$</span>IWM.Low)<span class="sc">/</span> iwmIn<span class="sc">$</span>IWM.Open</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>diff1SPY <span class="ot">&lt;-</span> <span class="fu">diff</span>(spyIn<span class="sc">$</span>spyRange)</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>diff1QQQ <span class="ot">&lt;-</span> <span class="fu">diff</span>(qqqIn<span class="sc">$</span>qqqRange)</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>diff1IWM <span class="ot">&lt;-</span> <span class="fu">diff</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Show Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>spyIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"SPY"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>qqqIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"QQQ"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>iwmIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"IWM"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>spyIn<span class="sc">$</span>spyRange <span class="ot">&lt;-</span> (spyIn<span class="sc">$</span>SPY.High <span class="sc">-</span> spyIn<span class="sc">$</span>SPY.Low)<span class="sc">/</span> spyIn<span class="sc">$</span>SPY.Open</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>qqqIn<span class="sc">$</span>qqqRange <span class="ot">&lt;-</span> (qqqIn<span class="sc">$</span>QQQ.High <span class="sc">-</span> qqqIn<span class="sc">$</span>QQQ.Low)<span class="sc">/</span> qqqIn<span class="sc">$</span>QQQ.Open</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>iwmIn<span class="sc">$</span>iwmRange <span class="ot">&lt;-</span> (iwmIn<span class="sc">$</span>IWM.High <span class="sc">-</span> iwmIn<span class="sc">$</span>IWM.Low)<span class="sc">/</span> iwmIn<span class="sc">$</span>IWM.Open</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>diff1SPY <span class="ot">&lt;-</span> <span class="fu">diff</span>(spyIn<span class="sc">$</span>spyRange)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>diff1QQQ <span class="ot">&lt;-</span> <span class="fu">diff</span>(qqqIn<span class="sc">$</span>qqqRange)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>diff1IWM <span class="ot">&lt;-</span> <span class="fu">diff</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <h2 class="anchored">
 Stationarity of the time series
@@ -296,20 +239,29 @@ Building ARIMA Model
 </h2><h2 class="anchored">
 <p>Since I did some of this work with SPY data on the EDA tab, I will focus on QQQ range data here.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print(diff1QQQ)</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(diff1QQQ, <span class="at">na.action =</span> na.exclude)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print(diff1QQQ)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(diff1QQQ, <span class="at">na.action =</span> na.exclude)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(diff1QQQ, <span class="at">na.action =</span> na.exclude)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(diff1QQQ, <span class="at">na.action =</span> na.exclude)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Based on these charts the order I would pick for QQQ is: ARIMA(2,1,0)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>modelQQQ1 <span class="ot">&lt;-</span> <span class="fu">arima</span>(diff1QQQ, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">0</span>))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(modelQQQ1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>modelQQQ1 <span class="ot">&lt;-</span> <span class="fu">arima</span>(diff1QQQ, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">0</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(modelQQQ1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -334,7 +286,10 @@ Training set -0.1944037</code></pre>
 <li><p>Model Diagnostic:</p></li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>stats<span class="sc">::</span><span class="fu">tsdiag</span>(modelQQQ1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>stats<span class="sc">::</span><span class="fu">tsdiag</span>(modelQQQ1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -345,8 +300,11 @@ Training set -0.1944037</code></pre>
 <li></li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>autoQQQ <span class="ot">&lt;-</span> <span class="fu">auto.arima</span>(diff1QQQ)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(autoQQQ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>autoQQQ <span class="ot">&lt;-</span> <span class="fu">auto.arima</span>(diff1QQQ)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(autoQQQ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Series: diff1QQQ 
 ARIMA(1,0,1) with zero mean 
@@ -371,14 +329,20 @@ Training set 0.003755607</code></pre>
 <li>Forecasting with my model</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(modelQQQ1, <span class="dv">10</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">650</span>,<span class="dv">750</span>))   </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(modelQQQ1, <span class="dv">10</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">650</span>,<span class="dv">750</span>))   </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Forecasting with auto arima model</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(autoQQQ, <span class="dv">10</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">650</span>,<span class="dv">750</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(autoQQQ, <span class="dv">10</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">650</span>,<span class="dv">750</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -388,10 +352,13 @@ Training set 0.003755607</code></pre>
 <li>Compare ARIMA model with benchmarks</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>naiveModelQQQ <span class="ot">&lt;-</span> <span class="fu">naive</span>(diff1QQQ, <span class="at">h=</span><span class="dv">1</span>)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>snaiveModelQQQ <span class="ot">&lt;-</span> <span class="fu">snaive</span>(diff1QQQ, <span class="at">h=</span><span class="dv">1</span>)</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(naiveModelQQQ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>naiveModelQQQ <span class="ot">&lt;-</span> <span class="fu">naive</span>(diff1QQQ, <span class="at">h=</span><span class="dv">1</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>snaiveModelQQQ <span class="ot">&lt;-</span> <span class="fu">snaive</span>(diff1QQQ, <span class="at">h=</span><span class="dv">1</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(naiveModelQQQ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Forecast method: Naive method
@@ -409,7 +376,10 @@ Forecasts:
     Point Forecast       Lo 80      Hi 80       Lo 95      Hi 95
 691   -0.003168135 -0.02429836 0.01796209 -0.03548403 0.02914776</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(snaiveModelQQQ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(snaiveModelQQQ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Forecast method: Seasonal naive method
@@ -427,7 +397,10 @@ Forecasts:
     Point Forecast       Lo 80      Hi 80       Lo 95      Hi 95
 691   -0.003168135 -0.02429836 0.01796209 -0.03548403 0.02914776</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(modelQQQ1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(modelQQQ1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -450,13 +423,19 @@ Training set -0.1944037</code></pre>
 <p>I fit a naive and seasonal naive model. On RMSE my model had the best performance, with 0.011, while the naive and snaive models had 0.017 rmse each (since there was no seasonal period I realized they were the same model). On MAE my arima model had 0.008 while the seasonal naive models had 0.0122.</p>
 <p>Let’s compare forecasts:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(modelQQQ1, <span class="dv">10</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">650</span>,<span class="dv">750</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(modelQQQ1, <span class="dv">10</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">650</span>,<span class="dv">750</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(naiveModelQQQ, <span class="dv">10</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">650</span>,<span class="dv">750</span>))   </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(naiveModelQQQ, <span class="dv">10</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">650</span>,<span class="dv">750</span>))   </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>

@@ -1,11 +1,14 @@
 ---
 title: "ARMA ARIMA SARIMA MODELS"
-
+format:
+    html:
+        code-fold: true
+        code-summary: "Show Code"
 ---
 
 Loading packages
 
-``` {r}
+``` {r message = FALSE}
 library(tidyverse)
 library(quantmod)
 library(forecast)
@@ -18,6 +21,7 @@ library(tseries)
 Bringing the data into this tab as well:
 
 ``` {r}
+#| code-summary: "Show Code"
 
 spyIn <- quantmod::getSymbols("SPY", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
 qqqIn <- quantmod::getSymbols("QQQ", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
@@ -42,7 +46,7 @@ diff1IWM <- diff(iwmIn$iwmRange)
 Based on previous results, and the fact that I am using "pseudo-differenced data" in that I am taking the percentage range in prices, in addition to a single differencing, means that the time series are stationary
 
 
-<h2> Building ARIMA Model <h2>
+<h2> Building ARIMA Model </h2>
 
 Since I did some of this work with SPY data on the EDA tab, I will focus on QQQ range data here.
 

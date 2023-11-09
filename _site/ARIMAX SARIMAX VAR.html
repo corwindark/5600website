@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Corwin Dark">
 
-<title>Corwin Dark – arimax-sarimax-var</title>
+<title>Corwin Dark - Data Sources</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -111,7 +112,7 @@ ul.task-list li input[type="checkbox"] {
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./ARIMAX SARIMAX VAR.html" rel="" target="" aria-current="page">
- <span class="menu-text">ARIMAX SARIMAX VAR.html</span></a>
+ <span class="menu-text">Data Sources</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./Spectral Analysis and Filtering.html" rel="" target="">
@@ -150,8 +151,38 @@ ul.task-list li input[type="checkbox"] {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Data Sources</h1>
+</div>
 
 
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Corwin Dark </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<h2 class="anchored">
+Planning Models
+</h2>
+<p>We have the following independent variables: 1. Interest Rate Expectation Changes - 3 Months 2. Interest Rate Expectation Changes - 6 Months 3. Interest Rate Expectation Changes - 1 Year 4. Extreme Weather Events - Daily Event Number 5. Extreme Weather Events - Daily Property Damage 6. Extreme Weather Events - Daily Casualties 7. Extreme Weather Events - Hurricanes 8. Expected Volatility (VIX) - Value 9. Expected Volatility (VIX) - Daily Change 10. Work Stoppages - Daily Striking Worker Total 11. Work Stoppages - Daily New Strike Beggining 12. Work Stoppages - Daily New Workers Striking</p>
+<p>We will combine these 12 predictors into 5 models, for SPY, QQQ, and IWM intraday volatility: 1. (ARIMAX) SPY ~ Interest Rate 1-Year + Daily Weather Property Damage + Daily VIX Change + Daily Striking Worker Total 2. (VAR) SPY ~ Interest Rate 6-Months + Daily Weather Event Number + Daily VIX Value + Daily Striking Workers 3. (ARIMAX) IWM ~ Daily New Strikes Beggining + Casualties + Hurricanes + Interest Rate 3-Months 4. (VAR/ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers 5. (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers</p>
+<h2 class="anchored">
+Preparing Exogenous Data
+</h2>
+<p>First we need to create all 12 predictors, then we can combine them to estimate the models as needed.</p>
 
 
 
