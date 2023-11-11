@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -178,11 +212,1322 @@ ul.task-list li input[type="checkbox"] {
 Planning Models
 </h2>
 <p>We have the following independent variables: 1. Interest Rate Expectation Changes - 3 Months 2. Interest Rate Expectation Changes - 6 Months 3. Interest Rate Expectation Changes - 1 Year 4. Extreme Weather Events - Daily Event Number 5. Extreme Weather Events - Daily Property Damage 6. Extreme Weather Events - Daily Casualties 7. Extreme Weather Events - Hurricanes 8. Expected Volatility (VIX) - Value 9. Expected Volatility (VIX) - Daily Change 10. Work Stoppages - Daily Striking Worker Total 11. Work Stoppages - Daily New Strike Beggining 12. Work Stoppages - Daily New Workers Striking</p>
-<p>We will combine these 12 predictors into 5 models, for SPY, QQQ, and IWM intraday volatility: 1. (ARIMAX) SPY ~ Interest Rate 1-Year + Daily Weather Property Damage + Daily VIX Change + Daily Striking Worker Total 2. (VAR) SPY ~ Interest Rate 6-Months + Daily Weather Event Number + Daily VIX Value + Daily Striking Workers 3. (ARIMAX) IWM ~ Daily New Strikes Beggining + Casualties + Hurricanes + Interest Rate 3-Months 4. (VAR/ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers 5. (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers</p>
-<h2 class="anchored">
+<h3 class="anchored">
 Preparing Exogenous Data
-</h2>
+</h3>
 <p>First we need to create all 12 predictors, then we can combine them to estimate the models as needed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>-- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>v ggplot2 3.3.5     v purrr   0.3.4
+v tibble  3.2.1     v dplyr   1.1.2
+v tidyr   1.2.0     v stringr 1.4.0
+v readr   2.1.2     v forcats 0.5.1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>-- Conflicts ------------------------------------------ tidyverse_conflicts() --
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantmod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: xts</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: zoo</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'zoo'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    as.Date, as.Date.numeric</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+######################### Warning from 'xts' package ##########################
+#                                                                             #
+# The dplyr lag() function breaks how base R's lag() function is supposed to  #
+# work, which breaks lag(my_xts). Calls to lag(my_xts) that you type or       #
+# source() into this session won't work correctly.                            #
+#                                                                             #
+# Use stats::lag() to make sure you're not using dplyr::lag(), or you can add #
+# conflictRules('dplyr', exclude = 'lag') to your .Rprofile to stop           #
+# dplyr from breaking base R's lag() function.                                #
+#                                                                             #
+# Code in packages is not affected. It's protected by R's namespace mechanism #
+# Set `options(xts.warn_dplyr_breaks_lag = FALSE)` to suppress this warning.  #
+#                                                                             #
+###############################################################################</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'xts'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:dplyr':
+
+    first, last</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: TTR</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'lubridate'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reticulate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s quickly retrieve the daily stock price ranges for the indices:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>spyIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"SPY"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>qqqIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"QQQ"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>iwmIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"IWM"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>spyIn<span class="sc">$</span>spyRange <span class="ot">&lt;-</span> (spyIn<span class="sc">$</span>SPY.High <span class="sc">-</span> spyIn<span class="sc">$</span>SPY.Low)<span class="sc">/</span> spyIn<span class="sc">$</span>SPY.Open</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>qqqIn<span class="sc">$</span>qqqRange <span class="ot">&lt;-</span> (qqqIn<span class="sc">$</span>QQQ.High <span class="sc">-</span> qqqIn<span class="sc">$</span>QQQ.Low)<span class="sc">/</span> qqqIn<span class="sc">$</span>QQQ.Open</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>iwmIn<span class="sc">$</span>iwmRange <span class="ot">&lt;-</span> (iwmIn<span class="sc">$</span>IWM.High <span class="sc">-</span> iwmIn<span class="sc">$</span>IWM.Low)<span class="sc">/</span> iwmIn<span class="sc">$</span>IWM.Open</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, let’s gather the VIX data, since it is also treated like a stock price, and should be available from the same package</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>vixIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"^VIX"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: ^VIX contains missing values. Some functions will not work if objects
+contain missing values in the middle of the series. Consider using na.omit(),
+na.approx(), na.fill(), etc to remove or replace them.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>vixIn<span class="sc">$</span>dailyChange <span class="ot">&lt;-</span> vixIn<span class="sc">$</span>VIX.Close <span class="sc">-</span> <span class="fu">lag</span>(vixIn<span class="sc">$</span>VIX.Close)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 8 is vixIn$VIX.Close</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 9 is vixIn$dailyChange</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co">#vixIn &lt;- vixIn %&gt;% </span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    mutate(date = ymd(index(vixIn)))</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(vixIn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           VIX.Open VIX.High VIX.Low VIX.Close VIX.Volume VIX.Adjusted
+2021-01-04    23.04    29.19   22.56     26.97          0        26.97
+2021-01-05    26.94    28.60   24.80     25.34          0        25.34
+2021-01-06    25.48    26.77   22.14     25.07          0        25.07
+2021-01-07    23.67    23.91   22.25     22.37          0        22.37
+2021-01-08    22.43    23.34   21.42     21.56          0        21.56
+2021-01-11    23.31    24.81   23.23     24.08          0        24.08
+           dailyChange
+2021-01-04          NA
+2021-01-05  -1.6299992
+2021-01-06  -0.2700005
+2021-01-07  -2.6999989
+2021-01-08  -0.8100014
+2021-01-11   2.5200005</code></pre>
+</div>
+</div>
+<p>We have bond yields stored in a CSV, but let’s calculate daily changes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>yieldCurve <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">'data/treasuries.csv'</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>yieldCurve<span class="sc">$</span>mo3delta <span class="ot">&lt;-</span> yieldCurve<span class="sc">$</span>X3.Mo <span class="sc">-</span> <span class="fu">lag</span>(yieldCurve<span class="sc">$</span>X3.Mo)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>yieldCurve<span class="sc">$</span>mo6delta <span class="ot">&lt;-</span> yieldCurve<span class="sc">$</span>X6.Mo <span class="sc">-</span> <span class="fu">lag</span>(yieldCurve<span class="sc">$</span>X6.Mo)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>yieldCurve<span class="sc">$</span>mo12delta <span class="ot">&lt;-</span> yieldCurve<span class="sc">$</span>X1.Yr <span class="sc">-</span> <span class="fu">lag</span>(yieldCurve<span class="sc">$</span>X1.Yr) </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>yieldCurve<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">mdy</span>(yieldCurve<span class="sc">$</span>Date)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Worth noting: Both the treasury data and the VIX data only start on January 4th.</p>
+<p>Next up, let’s prepare the weather event data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>weather_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">'data/storms_clean.csv'</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>weather_data<span class="sc">$</span>month <span class="ot">&lt;-</span> weather_data<span class="sc">$</span>BEGIN_YEARMONTH <span class="sc">%%</span> <span class="dv">100</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>weather_data <span class="ot">&lt;-</span> weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">realdate =</span> <span class="fu">make_date</span>(YEAR, month, BEGIN_DAY)) <span class="sc">%&gt;%</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">DAMAGE_PROPERTY =</span>  <span class="fu">str_replace</span>(DAMAGE_PROPERTY, <span class="st">"K"</span>, <span class="st">""</span>) )  <span class="sc">%&gt;%</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">DAMAGE_PROPERTY =</span> <span class="fu">as.numeric</span>(DAMAGE_PROPERTY)) <span class="sc">%&gt;%</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">DAMAGE_PROPERTY =</span> <span class="fu">replace_na</span>(DAMAGE_PROPERTY, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There was 1 warning in `mutate()`.
+i In argument: `DAMAGE_PROPERTY = as.numeric(DAMAGE_PROPERTY)`.
+Caused by warning:
+! NAs introduced by coercion</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily Event Number</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>daily_events <span class="ot">&lt;-</span> weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(realdate) <span class="sc">%&gt;%</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">events =</span> <span class="fu">length</span>(EPISODE_ID))</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily Property Damage</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>daily_property <span class="ot">&lt;-</span>  weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(realdate) <span class="sc">%&gt;%</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">pdam =</span> <span class="fu">sum</span>(DAMAGE_PROPERTY))</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily Daily Casualties</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>daily_casualties <span class="ot">&lt;-</span>  weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(realdate) <span class="sc">%&gt;%</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">casualties =</span> <span class="fu">sum</span>(INJURIES_DIRECT) <span class="sc">+</span> <span class="fu">sum</span>(INJURIES_INDIRECT) <span class="sc">+</span> <span class="fu">sum</span>(DEATHS_DIRECT) <span class="sc">+</span> <span class="fu">sum</span>(DEATHS_INDIRECT))</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily Hurricanes</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>daily_hurricanes <span class="ot">&lt;-</span> weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(EVENT_TYPE <span class="sc">==</span> <span class="st">"Hurricane"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(realdate) <span class="sc">%&gt;%</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">hurricaneWarnings =</span> <span class="fu">length</span>(EPISODE_ID))</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily joined data</span></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>weather_merged <span class="ot">&lt;-</span> <span class="fu">full_join</span>(daily_events, daily_property, <span class="at">by =</span> <span class="st">"realdate"</span>)</span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>weather_merged <span class="ot">&lt;-</span> <span class="fu">full_join</span>(weather_merged, daily_casualties, <span class="at">by =</span> <span class="st">'realdate'</span>)</span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>weather_merged <span class="ot">&lt;-</span> <span class="fu">full_join</span>(weather_merged, daily_hurricanes, <span class="at">by =</span> <span class="st">'realdate'</span>)</span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(weather_merged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 x 5
+  realdate   events  pdam casualties hurricaneWarnings
+  &lt;date&gt;      &lt;int&gt; &lt;dbl&gt;      &lt;int&gt;             &lt;int&gt;
+1 2021-01-01    643  918           1                NA
+2 2021-01-02     75  189.          0                NA
+3 2021-01-03     80   63           3                NA
+4 2021-01-04     44   20           0                NA
+5 2021-01-05     18    0           2                NA
+6 2021-01-06     27  850           2                NA</code></pre>
+</div>
+</div>
+<p>Finally, lets get the striking worker data ready:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>strike_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">'data/strikes.csv'</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co"># clean date format</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>strike_data<span class="sc">$</span>start <span class="ot">=</span> <span class="fu">mdy</span>(strike_data<span class="sc">$</span>Work.stoppage.beginning.date)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>strike_data<span class="sc">$</span>end <span class="ot">=</span> <span class="fu">mdy</span>(strike_data<span class="sc">$</span>Work.stoppage.ending.date)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>strike_data<span class="sc">$</span>workers <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">str_replace</span>(strike_data<span class="sc">$</span>Number.of.workers.<span class="fl">2.</span>, <span class="st">","</span>, <span class="st">""</span> ))</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(strike_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            ï..Organizations.involved Industry.code.1.
+1          Hunts Point Produce Market           445200
+2                 Columbia University            61131
+3 Allegheny Technologies Incorporated           332710
+4              Warrior Met Coal, Inc.           212112
+5                 New York University            61131
+6                         Cook County           622110
+  Work.stoppage.beginning.date Work.stoppage.ending.date Number.of.workers.2.
+1                    1/17/2021                 1/23/2021                1,400
+2                    3/15/2021                  1/7/2022                3,000
+3                    3/30/2021                 7/13/2021                1,300
+4                     4/1/2021                 3/31/2022                1,100
+5                    4/26/2021                 5/15/2021                2,200
+6                    6/25/2021                 7/12/2021                2,000
+  Days.idle..cumulative.for.this.work.stoppage.3.      start        end workers
+1                                           5,600 2021-01-17 2021-01-23    1400
+2                                         177,000 2021-03-15 2022-01-07    3000
+3                                          94,900 2021-03-30 2021-07-13    1300
+4                                         273,900 2021-04-01 2022-03-31    1100
+5                                          33,000 2021-04-26 2021-05-15    2200
+6                                          22,000 2021-06-25 2021-07-12    2000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>target_dates <span class="ot">&lt;-</span> <span class="fu">ymd</span>(<span class="fu">index</span>(spyIn))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>daily_workers <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"numeric"</span>, <span class="at">length =</span> <span class="fu">length</span>(target_dates))</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(target_dates)) {</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    tempDat <span class="ot">&lt;-</span> strike_data <span class="sc">%&gt;%</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(start <span class="sc">&lt;=</span> target_dates[i]) <span class="sc">%&gt;%</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(end <span class="sc">&gt;=</span> target_dates[i])</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    daily_workers[i] <span class="ot">=</span> <span class="fu">sum</span>(tempDat<span class="sc">$</span>workers)</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>workerDF <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="st">'workers'</span> <span class="ot">=</span> daily_workers, <span class="st">'date'</span> <span class="ot">=</span> target_dates)</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(daily_workers, <span class="at">type =</span> <span class="st">'l'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now, we can combined all of these datasets into one dataframe, joining on the date columns</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert TS objects to df, and fix the date column</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>vixDF <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(vixIn)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>vixDF<span class="sc">$</span>date <span class="ot">&lt;-</span> <span class="fu">ymd</span>(<span class="fu">index</span>(vixIn))</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>spyDF <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(spyIn)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>spyDF<span class="sc">$</span>date <span class="ot">&lt;-</span> <span class="fu">ymd</span>(<span class="fu">index</span>(spyIn))</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>qqqDF <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(qqqIn)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>qqqDF<span class="sc">$</span>date <span class="ot">&lt;-</span> <span class="fu">ymd</span>(<span class="fu">index</span>(qqqIn))</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>iwmDF <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(iwmIn)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>iwmDF<span class="sc">$</span>date <span class="ot">&lt;-</span> <span class="fu">ymd</span>(<span class="fu">index</span>(iwmIn))</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Join symbols together</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>tickers <span class="ot">&lt;-</span> <span class="fu">left_join</span>(spyDF, vixDF, <span class="at">by =</span> <span class="st">'date'</span>)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>tickers <span class="ot">&lt;-</span> <span class="fu">left_join</span>(tickers, qqqDF, <span class="at">by =</span> <span class="st">'date'</span>)</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>tickers <span class="ot">&lt;-</span> <span class="fu">left_join</span>(tickers, iwmDF, <span class="at">by =</span> <span class="st">'date'</span>)</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Join weather data</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>combinedData <span class="ot">&lt;-</span> <span class="fu">left_join</span>(tickers, weather_merged, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"date"</span> <span class="ot">=</span> <span class="st">"realdate"</span>))</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Join Bond Yields</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>combinedData <span class="ot">&lt;-</span> <span class="fu">left_join</span>(combinedData, yieldCurve, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"date"</span> <span class="ot">=</span> <span class="st">"Date"</span>))</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Join Labor Data</span></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>combinedData <span class="ot">&lt;-</span> <span class="fu">left_join</span>(combinedData, workerDF, <span class="at">by =</span> <span class="st">'date'</span>)</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(combinedData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  SPY.Open SPY.High SPY.Low SPY.Close SPY.Volume SPY.Adjusted    spyRange
+1   375.31   375.45  364.82    368.79  110210800     354.1974 0.028323266
+2   368.10   372.50  368.05    371.33   66426200     356.6369 0.012089139
+3   369.71   376.98  369.12    373.55  107997700     358.7691 0.021259950
+4   376.10   379.90  375.91    379.10   68766800     364.0995 0.010608854
+5   380.59   381.49  377.10    381.26   71677200     366.1740 0.011534681
+6   377.85   380.58  377.72    378.69   51034700     363.7057 0.007569102
+        date VIX.Open VIX.High VIX.Low VIX.Close VIX.Volume VIX.Adjusted
+1 2021-01-04    23.04    29.19   22.56     26.97          0        26.97
+2 2021-01-05    26.94    28.60   24.80     25.34          0        25.34
+3 2021-01-06    25.48    26.77   22.14     25.07          0        25.07
+4 2021-01-07    23.67    23.91   22.25     22.37          0        22.37
+5 2021-01-08    22.43    23.34   21.42     21.56          0        21.56
+6 2021-01-11    23.31    24.81   23.23     24.08          0        24.08
+  dailyChange QQQ.Open QQQ.High QQQ.Low QQQ.Close QQQ.Volume QQQ.Adjusted
+1          NA   315.11   315.29  305.18    309.31   45305900     304.2444
+2  -1.6299992   308.29   312.14  308.29    311.86   29323400     306.7526
+3  -0.2700005   307.00   311.88  305.98    307.54   52809600     302.5033
+4  -2.6999989   310.28   315.84  310.25    314.98   30394800     309.8215
+5  -0.8100014   317.34   319.39  315.08    319.03   33955800     313.8052
+6   2.5200005   315.98   317.19  313.75    314.42   32746400     309.2707
+    qqqRange IWM.Open IWM.High IWM.Low IWM.Close IWM.Volume IWM.Adjusted
+1 0.03208409   197.54   197.89  190.94    193.50   33664200     186.8583
+2 0.01248826   193.09   197.62  193.07    196.49   27442900     189.7456
+3 0.01921822   199.48   206.78  199.16    204.53   52952200     197.5097
+4 0.01801597   205.71   208.52  205.70    208.17   24031400     201.0247
+5 0.01358174   209.32   209.77  204.66    207.72   29017000     200.5902
+6 0.01088677   205.09   208.12  204.83    207.54   20945100     200.4164
+    iwmRange events pdam casualties hurricaneWarnings X1.Mo X2.Mo X3.Mo X4.Mo
+1 0.03518273     44   20          0                NA  0.09  0.09  0.09    NA
+2 0.02356408     18    0          2                NA  0.08  0.09  0.09    NA
+3 0.03819929     27  850          2                NA  0.09  0.09  0.09    NA
+4 0.01370865     74    0          0                NA  0.09  0.09  0.09    NA
+5 0.02441239     29   20          2                NA  0.08  0.08  0.08    NA
+6 0.01604171     68    0          0                NA  0.09  0.08  0.08    NA
+  X6.Mo X1.Yr X2.Yr X3.Yr X5.Yr X7.Yr X10.Yr X20.Yr X30.Yr mo3delta mo6delta
+1  0.09  0.10  0.11  0.16  0.36  0.64   0.93   1.46   1.66     0.00     0.00
+2  0.09  0.10  0.13  0.17  0.38  0.66   0.96   1.49   1.70     0.00     0.00
+3  0.09  0.11  0.14  0.20  0.43  0.74   1.04   1.60   1.81     0.00     0.00
+4  0.09  0.11  0.14  0.22  0.46  0.78   1.08   1.64   1.85     0.01     0.00
+5  0.09  0.10  0.14  0.24  0.49  0.81   1.13   1.67   1.87     0.00    -0.01
+6  0.10  0.10  0.14  0.22  0.50  0.84   1.15   1.68   1.88    -0.01     0.01
+  mo12delta workers
+1      0.00       0
+2     -0.01       0
+3      0.00       0
+4      0.01       0
+5      0.00       0
+6     -0.01       0</code></pre>
+</div>
+</div>
+<h3 class="anchored">
+Select Models Based on These Exogenous Variables
+</h3>
+<p>We will combine these 12 predictors into 5 models, for SPY, QQQ, and IWM intraday volatility:</p>
+<h4 class="anchored">
+Model 1: (ARIMAX) SPY ~ Interest Rate 1-Year + Daily Weather Property Damage + Daily VIX Change + Daily Striking Worker Total
+</h4>
+<p>This model is selected based on the literature review, which suggested that weather events and investor expecations could affect stock prices. This is the “kitchen sink” model, where I am throwing in variables from all data sources. However, looking at the variables individually, such as daily property damage vs.&nbsp;SPY daily price range, we don’t nessecarily see clear correlation (see plot below which resembles white noise). But I am interested to see how these variables are related when taking many different contextual factors into account in the same model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(combinedData, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(spyRange), <span class="at">y =</span> <span class="fu">log</span>(pdam)) ) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"3 Month Interest Rate Changes vs. VIX Change "</span>, <span class="at">x =</span> <span class="st">"Log SPY Daily Spread"</span>, <span class="at">y =</span> <span class="st">"Log Property Damage From Storms"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 63 rows containing missing values (geom_point).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<h4 class="anchored">
+Model 2: (VAR) SPY ~ Interest Rate 3-Months + Daily VIX Value
+</h4>
+<p>This model is based on a belief that there is an interrelationship between VIX prices and bond yields. This is because both would increase and decrease based on investor expectations for macroeconomic performance in upcoming months. If investors feel the economy will perform poorly, then this might predict bond yields lowering, as well as increased volatility which would be reflected by increases in the VIX. We also see a weak linear correlation in these daily values, as pictured in the plot below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(combinedData, <span class="fu">aes</span>(<span class="at">x =</span> mo3delta, <span class="at">y =</span> dailyChange ) ) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"3 Month Interest Rate Changes vs. VIX Change "</span>, <span class="at">x =</span> <span class="st">"Change in 3-Month Interest Rates"</span>, <span class="at">y =</span> <span class="st">"Change in VIX Price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 30 rows containing missing values (geom_point).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<h4 class="anchored">
+Model 3: (ARIMAX) IWM ~ Casualties + Hurricanes + Interest Rate 3-Months
+</h4>
+<p>This model is all about exogenous shocks. New strikes beggining and hurricane warnings are infrequent but extreme events, which have been grouped together with short-term interest rates (3 month window) to try and capture extreme-but-short-termm influences on volatility.</p>
+<h4 class="anchored">
+Model 4: (ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers
+</h4>
+<h4 class="anchored">
+Model 5: (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers
+</h4>
+<p>Models 4 and 5 follow the same logic as model 1, being selected based off of the literature review, but looking at QQQ as oppposed to SPY to see whether large-cap tech companies are more likely to be affected by this kind of volatility.</p>
+<h2 class="anchored">
+Model Selection
+</h2>
+<p>In this section, I will begin by identifying the candidate model structures for each of the 5 overarching models outlined above. I will identify candidate models through auto.arima for ARIMAX models, plus hand-selected values. For VAR models, I will identify 2 candidates for each overall model with the autoVAR function.</p>
+<h3 class="anchored">
+Model Selection for ARIMAX Models
+</h3>
+<h4 class="anchored">
+Model 1: SPY ~ Interest Rate 1-Year + Daily Weather Property Damage + Daily VIX Change + Daily Striking Worker Total
+</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>xMatrix <span class="ot">=</span> combinedData[,<span class="fu">c</span>(<span class="st">'mo12delta'</span>, <span class="st">'pdam'</span>, <span class="st">'dailyChange'</span>, <span class="st">'workers'</span>)]</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>xMatrix[<span class="fu">is.na</span>(xMatrix)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>xMatrix <span class="ot">=</span> <span class="fu">scale</span>(xMatrix)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>xMatrix <span class="ot">=</span> <span class="fu">as.matrix</span>(xMatrix)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="co">#xMatrix</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>mod1candidate1 <span class="ot">=</span> <span class="fu">auto.arima</span>(<span class="fu">scale</span>(combinedData<span class="sc">$</span>spyRange), <span class="at">xreg =</span> xMatrix, <span class="at">trace =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ Fitting models using approximations to speed things up...
+
+ Regression with ARIMA(2,1,2) errors : 1599.925
+ Regression with ARIMA(0,1,0) errors : 1880.267
+ Regression with ARIMA(1,1,0) errors : 1699.179
+ Regression with ARIMA(0,1,1) errors : 1616.148
+ Regression with ARIMA(0,1,0) errors : 1878.238
+ Regression with ARIMA(1,1,2) errors : 1604.247
+ Regression with ARIMA(2,1,1) errors : 1604.271
+ Regression with ARIMA(3,1,2) errors : 1599.17
+ Regression with ARIMA(3,1,1) errors : 1597.175
+ Regression with ARIMA(3,1,0) errors : 1626.681
+ Regression with ARIMA(4,1,1) errors : 1591.027
+ Regression with ARIMA(4,1,0) errors : 1623.139
+ Regression with ARIMA(5,1,1) errors : 1597.41
+ Regression with ARIMA(4,1,2) errors : 1593.09
+ Regression with ARIMA(5,1,0) errors : 1617.939
+ Regression with ARIMA(5,1,2) errors : Inf
+ Regression with ARIMA(4,1,1) errors : 1588.981
+ Regression with ARIMA(3,1,1) errors : 1595.121
+ Regression with ARIMA(4,1,0) errors : 1621.08
+ Regression with ARIMA(5,1,1) errors : 1595.37
+ Regression with ARIMA(4,1,2) errors : 1591.037
+ Regression with ARIMA(3,1,0) errors : 1624.63
+ Regression with ARIMA(3,1,2) errors : 1597.106
+ Regression with ARIMA(5,1,0) errors : 1615.874
+ Regression with ARIMA(5,1,2) errors : Inf
+
+ Now re-fitting the best model(s) without approximations...
+
+ Regression with ARIMA(4,1,1) errors : 1592.116
+
+ Best model: Regression with ARIMA(4,1,1) errors </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(mod1candidate1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from Regression with ARIMA(4,1,1) errors
+Q* = 3.619, df = 5, p-value = 0.6055
+
+Model df: 5.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>Auto ARIMA picks out the model (4,1,1) for the standardized data. The residual diagnostic plots look good, with the residuals normally distributed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>xMatrix <span class="ot">=</span> <span class="fu">as.data.frame</span>(xMatrix)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Lets examine the residuals directly to identify </span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>mod1candidate2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">scale</span>(combinedData<span class="sc">$</span>spyRange) <span class="sc">~</span> mo12delta <span class="sc">+</span> pdam <span class="sc">+</span> dailyChange <span class="sc">+</span> workers, <span class="at">data =</span> xMatrix )</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod1candidate2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = scale(combinedData$spyRange) ~ mo12delta + pdam + 
+    dailyChange + workers, data = xMatrix)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.5121 -0.7147 -0.2584  0.4739  5.6401 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  1.420e-16  3.766e-02   0.000 1.000000    
+mo12delta    1.479e-02  3.778e-02   0.392 0.695544    
+pdam        -2.214e-02  3.788e-02  -0.584 0.559186    
+dailyChange  1.046e-01  3.772e-02   2.772 0.005731 ** 
+workers     -1.272e-01  3.791e-02  -3.355 0.000838 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.9894 on 685 degrees of freedom
+Multiple R-squared:  0.02684,   Adjusted R-squared:  0.02116 
+F-statistic: 4.723 on 4 and 685 DF,  p-value: 0.0009156</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>resid1 <span class="ot">&lt;-</span> mod1candidate2<span class="sc">$</span>residuals</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(resid1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(resid1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Based on the PACF and ACF of the residuals from the regression, it seems we should definitely difference the series, as we have many significant lag terms in the ACF. On the PACF, we can see 4 terms clearly signfificant. Based on these charts, I might try the model (4,1,0). I will try up through (4,2,2) and look for the lowest aic.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>SARIMA.c<span class="ot">=</span><span class="cf">function</span>(p1,p2,q1,q2,P1,P2,Q1,Q2,d1,d2,data){</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>temp<span class="ot">=</span><span class="fu">c</span>()</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>d<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>D<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="dv">12</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>i<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>temp<span class="ot">=</span> <span class="fu">data.frame</span>()</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>ls<span class="ot">=</span><span class="fu">matrix</span>(<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="dv">9</span><span class="sc">*</span><span class="dv">378</span>),<span class="at">nrow=</span><span class="dv">378</span>)</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> p1<span class="sc">:</span>p2)</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(q <span class="cf">in</span> q1<span class="sc">:</span>q2)</span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span>(P <span class="cf">in</span> P1<span class="sc">:</span>P2)</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span>(Q <span class="cf">in</span> Q1<span class="sc">:</span>Q2)</span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span>(d <span class="cf">in</span> d1<span class="sc">:</span>d2)</span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>       </span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span>(p<span class="sc">+</span>d<span class="sc">+</span>q<span class="sc">+</span>P<span class="sc">+</span>D<span class="sc">+</span>Q<span class="sc">&lt;=</span><span class="dv">8</span>)</span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a>            model<span class="ot">&lt;-</span> <span class="fu">Arima</span>(data,<span class="at">order=</span><span class="fu">c</span>(p<span class="dv">-1</span>,d,q<span class="dv">-1</span>),<span class="at">seasonal=</span><span class="fu">c</span>(P<span class="dv">-1</span>,D,Q<span class="dv">-1</span>))</span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a>            ls[i,]<span class="ot">=</span> <span class="fu">c</span>(p<span class="dv">-1</span>,d,q<span class="dv">-1</span>,P<span class="dv">-1</span>,D,Q<span class="dv">-1</span>,model<span class="sc">$</span>aic,model<span class="sc">$</span>bic,model<span class="sc">$</span>aicc)</span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a>            i<span class="ot">=</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>            <span class="co">#print(i)</span></span>
+<span id="cb46-31"><a href="#cb46-31" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb46-32"><a href="#cb46-32" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb46-33"><a href="#cb46-33" aria-hidden="true" tabindex="-1"></a>          </span>
+<span id="cb46-34"><a href="#cb46-34" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb46-35"><a href="#cb46-35" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb46-36"><a href="#cb46-36" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb46-37"><a href="#cb46-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb46-38"><a href="#cb46-38" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb46-39"><a href="#cb46-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-40"><a href="#cb46-40" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb46-41"><a href="#cb46-41" aria-hidden="true" tabindex="-1"></a>  temp<span class="ot">=</span> <span class="fu">as.data.frame</span>(ls)</span>
+<span id="cb46-42"><a href="#cb46-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(temp)<span class="ot">=</span> <span class="fu">c</span>(<span class="st">"p"</span>,<span class="st">"d"</span>,<span class="st">"q"</span>,<span class="st">"P"</span>,<span class="st">"D"</span>,<span class="st">"Q"</span>,<span class="st">"AIC"</span>,<span class="st">"BIC"</span>,<span class="st">"AICc"</span>)</span>
+<span id="cb46-43"><a href="#cb46-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-44"><a href="#cb46-44" aria-hidden="true" tabindex="-1"></a>  temp</span>
+<span id="cb46-45"><a href="#cb46-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-46"><a href="#cb46-46" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-47"><a href="#cb46-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-48"><a href="#cb46-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-49"><a href="#cb46-49" aria-hidden="true" tabindex="-1"></a><span class="fu">SARIMA.c</span>(<span class="at">p1=</span><span class="dv">1</span>,<span class="at">p2=</span><span class="dv">5</span>,<span class="at">q1=</span><span class="dv">1</span>,<span class="at">q2=</span><span class="dv">4</span>,<span class="at">P1=</span><span class="dv">1</span>,<span class="at">P2=</span><span class="dv">3</span>,<span class="at">Q1=</span><span class="dv">1</span>,<span class="at">Q2=</span><span class="dv">2</span>,<span class="at">d1=</span><span class="dv">0</span>,<span class="at">d2=</span><span class="dv">1</span>,<span class="at">data=</span>resid1) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   p d q P D Q      AIC      BIC     AICc
+1  0 0 0 0 1 0 1942.363 1951.437 1942.381
+2  0 1 0 0 1 0 1881.332 1885.868 1881.338
+3  0 0 0 0 1 1 1942.363 1951.437 1942.381
+4  0 1 0 0 1 1 1881.332 1885.868 1881.338
+5  0 0 0 1 1 0 1942.363 1951.437 1942.381
+6  0 1 0 1 1 0 1881.332 1885.868 1881.338
+7  0 0 0 1 1 1 1942.363 1951.437 1942.381
+8  0 1 0 1 1 1 1881.332 1885.868 1881.338
+9  0 0 0 2 1 0 1942.363 1951.437 1942.381
+10 0 1 0 2 1 0 1881.332 1885.868 1881.338
+11 0 0 0 2 1 1 1942.363 1951.437 1942.381
+12 0 0 1 0 1 0 1809.358 1822.969 1809.393
+13 0 1 1 0 1 0 1611.588 1620.658 1611.605
+14 0 0 1 0 1 1 1809.358 1822.969 1809.393
+15 0 1 1 0 1 1 1611.588 1620.658 1611.605
+16 0 0 1 1 1 0 1809.358 1822.969 1809.393
+17 0 1 1 1 1 0 1611.588 1620.658 1611.605
+18 0 0 1 1 1 1 1809.358 1822.969 1809.393
+19 0 0 1 2 1 0 1809.358 1822.969 1809.393
+20 0 0 2 0 1 0 1728.571 1746.718 1728.629
+21 0 1 2 0 1 0 1611.137 1624.743 1611.172
+22 0 0 2 0 1 1 1728.571 1746.718 1728.629
+23 0 0 2 1 1 0 1728.571 1746.718 1728.629
+24 0 0 3 0 1 0 1713.789 1736.472 1713.877
+25 1 0 0 0 1 0 1708.277 1721.887 1708.312
+26 1 1 0 0 1 0 1713.364 1722.434 1713.381
+27 1 0 0 0 1 1 1708.277 1721.887 1708.312
+28 1 1 0 0 1 1 1713.364 1722.434 1713.381
+29 1 0 0 1 1 0 1708.277 1721.887 1708.312
+30 1 1 0 1 1 0 1713.364 1722.434 1713.381
+31 1 0 0 1 1 1 1708.277 1721.887 1708.312
+32 1 0 0 2 1 0 1708.277 1721.887 1708.312
+33 1 0 1 0 1 0 1601.649 1619.796 1601.707
+34 1 1 1 0 1 0 1610.324 1623.930 1610.359
+35 1 0 1 0 1 1 1601.649 1619.796 1601.707
+36 1 0 1 1 1 0 1601.649 1619.796 1601.707
+37 1 0 2 0 1 0 1603.227 1625.911 1603.315
+38 2 0 0 0 1 0 1640.939 1659.086 1640.997
+39 2 1 0 0 1 0 1680.368 1693.974 1680.403
+40 2 0 0 0 1 1 1640.939 1659.086 1640.997
+41 2 0 0 1 1 0 1640.939 1659.086 1640.997
+42 2 0 1 0 1 0 1603.142 1625.825 1603.229
+43 3 0 0 0 1 0 1631.451 1654.134 1631.539</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>mod1candidate2 <span class="ot">&lt;-</span> <span class="fu">arima</span>(resid1, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">seasonal =</span> <span class="fu">list</span>(<span class="at">order =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>)))</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(mod1candidate2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(1,0,1)
+Q* = 13.208, df = 8, p-value = 0.1049
+
+Model df: 2.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>The function to evaluate various p,d,q values returns SARIMA(1,0,1)(0,1,0)[12] with the lowest AIC and BIC. The residuals of this second model show clear correlation around lags 2 and 4, which was not present in the 4,1,0 model that auto arima suggested. So overall, I would say the diagnostics look worse for the second model than the first.</p>
+<h4 class="anchored">
+Model 3: (ARIMAX) IWM ~ Casualties + Hurricanes + Interest Rate 3-Months
+</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>xMatrix3 <span class="ot">=</span> combinedData[,<span class="fu">c</span>(<span class="st">'mo3delta'</span>, <span class="st">'casualties'</span>, <span class="st">'hurricaneWarnings'</span>)]</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>xMatrix3[<span class="fu">is.na</span>(xMatrix3)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>xMatrix3 <span class="ot">=</span> <span class="fu">scale</span>(xMatrix3)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>xMatrix3 <span class="ot">=</span> <span class="fu">as.matrix</span>(xMatrix3)</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="co">#xMatrix</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>mod3candidate1 <span class="ot">=</span> <span class="fu">auto.arima</span>(<span class="fu">scale</span>(combinedData<span class="sc">$</span>iwmRange), <span class="at">xreg =</span> xMatrix3, <span class="at">trace =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ Fitting models using approximations to speed things up...
+
+ Regression with ARIMA(2,1,2) errors : 1751.36
+ Regression with ARIMA(0,1,0) errors : 1999.57
+ Regression with ARIMA(1,1,0) errors : 1844.166
+ Regression with ARIMA(0,1,1) errors : 1765.158
+ Regression with ARIMA(0,1,0) errors : 1997.547
+ Regression with ARIMA(1,1,2) errors : 1744.072
+ Regression with ARIMA(0,1,2) errors : 1761.437
+ Regression with ARIMA(1,1,1) errors : 1749.049
+ Regression with ARIMA(1,1,3) errors : 1740.657
+ Regression with ARIMA(0,1,3) errors : 1751.237
+ Regression with ARIMA(2,1,3) errors : 1748.946
+ Regression with ARIMA(1,1,4) errors : 1742.521
+ Regression with ARIMA(0,1,4) errors : 1752.517
+ Regression with ARIMA(2,1,4) errors : 1749.048
+ Regression with ARIMA(1,1,3) errors : 1738.675
+ Regression with ARIMA(0,1,3) errors : 1749.422
+ Regression with ARIMA(1,1,2) errors : 1742.035
+ Regression with ARIMA(2,1,3) errors : 1747.358
+ Regression with ARIMA(1,1,4) errors : 1740.549
+ Regression with ARIMA(0,1,2) errors : 1759.509
+ Regression with ARIMA(0,1,4) errors : 1750.738
+ Regression with ARIMA(2,1,2) errors : 1749.538
+ Regression with ARIMA(2,1,4) errors : 1747.409
+
+ Now re-fitting the best model(s) without approximations...
+
+ Regression with ARIMA(1,1,3) errors : 1735.245
+
+ Best model: Regression with ARIMA(1,1,3) errors </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(mod3candidate1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from Regression with ARIMA(1,1,3) errors
+Q* = 5.873, df = 6, p-value = 0.4376
+
+Model df: 4.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>Auto.arima identifies (1,1,3) as the best model. The residuals show a low level of correlation in the lags, which is encouraging, and overall the residuals are mostly normally distributed although they are somewhat skewed to the right. Now, let’s see what we manually select, also considering a SARIMAX model.</p>
+<p>Prepare residuals:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>xMatrix3 <span class="ot">=</span> <span class="fu">as.data.frame</span>(xMatrix3)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Lets examine the residuals directly to identify </span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>mod3candidate2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">scale</span>(combinedData<span class="sc">$</span>iwmRange) <span class="sc">~</span> casualties <span class="sc">+</span> mo3delta <span class="sc">+</span> hurricaneWarnings, <span class="at">data =</span> xMatrix3 )</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod3candidate2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = scale(combinedData$iwmRange) ~ casualties + mo3delta + 
+    hurricaneWarnings, data = xMatrix3)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.5534 -0.7062 -0.2568  0.4825  4.7271 
+
+Coefficients:
+                    Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept)        2.694e-17  3.804e-02   0.000   1.0000  
+casualties         1.599e-02  3.830e-02   0.418   0.6764  
+mo3delta          -1.079e-02  3.811e-02  -0.283   0.7771  
+hurricaneWarnings  7.385e-02  3.833e-02   1.927   0.0545 .
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.9992 on 686 degrees of freedom
+Multiple R-squared:  0.006013,  Adjusted R-squared:  0.001666 
+F-statistic: 1.383 on 3 and 686 DF,  p-value: 0.2467</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>resid3 <span class="ot">&lt;-</span> mod3candidate2<span class="sc">$</span>residuals</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(resid3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(resid3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The ACF and PACF plots of the residuals from linear regression are mixed, but there is clear correlation through value 5 in the PACF plot. The ACF plot has many significant terms, suggesting the series should be differenced. Now, I’ll loop through all the options to see if there is a suitable SARIMA model for the residuals:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>output<span class="ot">=</span><span class="fu">SARIMA.c</span>(<span class="at">p1=</span><span class="dv">1</span>,<span class="at">p2=</span><span class="dv">3</span>,<span class="at">q1=</span><span class="dv">1</span>,<span class="at">q2=</span><span class="dv">4</span>,<span class="at">P1=</span><span class="dv">1</span>,<span class="at">P2=</span><span class="dv">3</span>,<span class="at">Q1=</span><span class="dv">1</span>,<span class="at">Q2=</span><span class="dv">2</span>,<span class="at">d1=</span><span class="dv">0</span>,<span class="at">d2=</span><span class="dv">1</span>,<span class="at">data=</span>resid3)</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>output <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   p d q P D Q      AIC      BIC     AICc
+1  0 0 0 0 1 0 1956.973 1966.046 1956.991
+2  0 1 0 0 1 0 1997.404 2001.939 1997.410
+3  0 0 0 0 1 1 1956.973 1966.046 1956.991
+4  0 1 0 0 1 1 1997.404 2001.939 1997.410
+5  0 0 0 1 1 0 1956.973 1966.046 1956.991
+6  0 1 0 1 1 0 1997.404 2001.939 1997.410
+7  0 0 0 1 1 1 1956.973 1966.046 1956.991
+8  0 1 0 1 1 1 1997.404 2001.939 1997.410
+9  0 0 0 2 1 0 1956.973 1966.046 1956.991
+10 0 1 0 2 1 0 1997.404 2001.939 1997.410
+11 0 0 0 2 1 1 1956.973 1966.046 1956.991
+12 0 0 1 0 1 0 1854.645 1868.255 1854.680
+13 0 1 1 0 1 0 1758.768 1767.838 1758.785
+14 0 0 1 0 1 1 1854.645 1868.255 1854.680
+15 0 1 1 0 1 1 1758.768 1767.838 1758.785
+16 0 0 1 1 1 0 1854.645 1868.255 1854.680
+17 0 1 1 1 1 0 1758.768 1767.838 1758.785
+18 0 0 1 1 1 1 1854.645 1868.255 1854.680
+19 0 0 1 2 1 0 1854.645 1868.255 1854.680
+20 0 0 2 0 1 0 1792.008 1810.155 1792.066
+21 0 1 2 0 1 0 1754.136 1767.742 1754.171
+22 0 0 2 0 1 1 1792.008 1810.155 1792.066
+23 0 0 2 1 1 0 1792.008 1810.155 1792.066
+24 0 0 3 0 1 0 1781.413 1804.096 1781.500
+25 1 0 0 0 1 0 1790.787 1804.397 1790.822
+26 1 1 0 0 1 0 1839.888 1848.958 1839.905
+27 1 0 0 0 1 1 1790.787 1804.397 1790.822
+28 1 1 0 0 1 1 1839.888 1848.958 1839.905
+29 1 0 0 1 1 0 1790.787 1804.397 1790.822
+30 1 1 0 1 1 0 1839.888 1848.958 1839.905
+31 1 0 0 1 1 1 1790.787 1804.397 1790.822
+32 1 0 0 2 1 0 1790.787 1804.397 1790.822
+33 1 0 1 0 1 0 1734.079 1752.226 1734.137
+34 1 1 1 0 1 0 1748.894 1762.499 1748.929
+35 1 0 1 0 1 1 1734.079 1752.226 1734.137
+36 1 0 1 1 1 0 1734.079 1752.226 1734.137
+37 1 0 2 0 1 0 1736.034 1758.717 1736.121
+38 2 0 0 0 1 0 1745.835 1763.981 1745.893
+39 2 1 0 0 1 0 1811.995 1825.600 1812.030
+40 2 0 0 0 1 1 1745.835 1763.981 1745.893
+41 2 0 0 1 1 0 1745.835 1763.981 1745.893
+42 2 0 1 0 1 0 1736.014 1758.697 1736.102</code></pre>
+</div>
+</div>
+<p>The best model identified by a small margin is SARIMA(1,0,1)(1,1,0). Let’s check the diagnostics</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>residualsMod3Can2 <span class="ot">&lt;-</span> <span class="fu">arima</span>(resid3, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">seasonal =</span> <span class="fu">list</span>(<span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>)))</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(residualsMod3Can2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(1,0,1)
+Q* = 17.291, df = 8, p-value = 0.02722
+
+Model df: 2.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>The residuals for this model arent encouraging, as the Ljung Box test returns a p value of 0.03. THe residuals also do not look perfectly normally distributed.</p>
+<h4 class="anchored">
+Model 4: (ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers
+</h4>
+<p>Running an auto arima:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>xMatrix4 <span class="ot">=</span> combinedData[,<span class="fu">c</span>(<span class="st">'mo3delta'</span>, <span class="st">'mo6delta'</span>, <span class="st">'mo12delta'</span>, <span class="st">'events'</span>, <span class="st">'dailyChange'</span>, <span class="st">'workers'</span>)]</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>xMatrix4[<span class="fu">is.na</span>(xMatrix4)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>xMatrix4 <span class="ot">=</span> <span class="fu">scale</span>(xMatrix4)</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>xMatrix4 <span class="ot">=</span> <span class="fu">as.matrix</span>(xMatrix4)</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="co">#xMatrix</span></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>mod4candidate1 <span class="ot">=</span> <span class="fu">auto.arima</span>(<span class="fu">scale</span>(combinedData<span class="sc">$</span>qqqRange), <span class="at">xreg =</span> xMatrix4, <span class="at">trace =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ Fitting models using approximations to speed things up...
+
+ Regression with ARIMA(2,1,2) errors : 1646.527
+ Regression with ARIMA(0,1,0) errors : 1985.591
+ Regression with ARIMA(1,1,0) errors : 1789.889
+ Regression with ARIMA(0,1,1) errors : 1653.554
+ Regression with ARIMA(0,1,0) errors : 1983.547
+ Regression with ARIMA(1,1,2) errors : 1643.615
+ Regression with ARIMA(0,1,2) errors : 1655.565
+ Regression with ARIMA(1,1,1) errors : 1641.759
+ Regression with ARIMA(2,1,1) errors : 1644.847
+ Regression with ARIMA(2,1,0) errors : 1723.561
+ Regression with ARIMA(1,1,1) errors : 1639.7
+ Regression with ARIMA(0,1,1) errors : 1651.558
+ Regression with ARIMA(1,1,0) errors : 1787.836
+ Regression with ARIMA(2,1,1) errors : 1642.787
+ Regression with ARIMA(1,1,2) errors : 1641.551
+ Regression with ARIMA(0,1,2) errors : 1653.561
+ Regression with ARIMA(2,1,0) errors : 1721.502
+ Regression with ARIMA(2,1,2) errors : 1644.457
+
+ Now re-fitting the best model(s) without approximations...
+
+ Regression with ARIMA(1,1,1) errors : 1645.163
+
+ Best model: Regression with ARIMA(1,1,1) errors </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(mod4candidate1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from Regression with ARIMA(1,1,1) errors
+Q* = 2.722, df = 8, p-value = 0.9506
+
+Model df: 2.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>Auto Arima returns (1,1,1). The diagnostics look acceptable, although there is clustered volatility in the residual plot. The Ljung-Box test returns p = 0.95, suggesting there is not autocorrelation in the residuals. However, the residual lag plot has high correlation around lag 20, and the correlation of the residuals slightly increases as the lags get greater.</p>
+<p>Now let’s select a candidate manually, including from SARIMA models. First we calculate and review the residuals from the linear regression:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>xMatrix4 <span class="ot">=</span> <span class="fu">as.data.frame</span>(xMatrix4)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Lets examine the residuals directly to identify </span></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>mod4candidate2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">scale</span>(combinedData<span class="sc">$</span>qqqRange) <span class="sc">~</span> mo3delta <span class="sc">+</span> mo6delta <span class="sc">+</span> mo12delta <span class="sc">+</span> events <span class="sc">+</span> dailyChange, <span class="at">data =</span> xMatrix4 )</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod1candidate2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+arima(x = resid1, order = c(1, 0, 1), seasonal = list(order = c(0, 1, 0)))
+
+Coefficients:
+         ar1      ma1
+      0.1099  -0.8103
+s.e.  0.0612   0.0446
+
+sigma^2 estimated as 0.6001:  log likelihood = -802.16,  aic = 1610.32
+
+Training set error measures:
+                       ME      RMSE       MAE       MPE     MAPE      MASE
+Training set -0.008908356 0.7740864 0.5740772 -314.3173 543.1463 0.8413363
+                     ACF1
+Training set -0.003214659</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>resid4 <span class="ot">&lt;-</span> mod4candidate2<span class="sc">$</span>residuals</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(resid4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(resid4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-18-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The ACF plot has many significant lags (&gt;10) which suggests we may need to difference the residuals. The PACF plot has high significance through lag 5. Let’s run a function to check all of the values up through p=2 and q=5.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>mod4candidate2fit <span class="ot">=</span><span class="fu">SARIMA.c</span>(<span class="at">p1=</span><span class="dv">1</span>,<span class="at">p2=</span><span class="dv">2</span>,<span class="at">q1=</span><span class="dv">1</span>,<span class="at">q2=</span><span class="dv">5</span>,<span class="at">P1=</span><span class="dv">1</span>,<span class="at">P2=</span><span class="dv">3</span>,<span class="at">Q1=</span><span class="dv">1</span>,<span class="at">Q2=</span><span class="dv">2</span>,<span class="at">d1=</span><span class="dv">0</span>,<span class="at">d2=</span><span class="dv">1</span>,<span class="at">data=</span>resid4)</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>mod4candidate2fit <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   p d q P D Q      AIC      BIC     AICc
+1  0 0 0 0 1 0 1942.736 1951.809 1942.753
+2  0 1 0 0 1 0 1984.792 1989.327 1984.798
+3  0 0 0 0 1 1 1942.736 1951.809 1942.753
+4  0 1 0 0 1 1 1984.792 1989.327 1984.798
+5  0 0 0 1 1 0 1942.736 1951.809 1942.753
+6  0 1 0 1 1 0 1984.792 1989.327 1984.798
+7  0 0 0 1 1 1 1942.736 1951.809 1942.753
+8  0 1 0 1 1 1 1984.792 1989.327 1984.798
+9  0 0 0 2 1 0 1942.736 1951.809 1942.753
+10 0 1 0 2 1 0 1984.792 1989.327 1984.798
+11 0 0 0 2 1 1 1942.736 1951.809 1942.753
+12 0 0 1 0 1 0 1844.520 1858.130 1844.555
+13 0 1 1 0 1 0 1642.996 1652.067 1643.014
+14 0 0 1 0 1 1 1844.520 1858.130 1844.555
+15 0 1 1 0 1 1 1642.996 1652.067 1643.014
+16 0 0 1 1 1 0 1844.520 1858.130 1844.555
+17 0 1 1 1 1 0 1642.996 1652.067 1643.014
+18 0 0 1 1 1 1 1844.520 1858.130 1844.555
+19 0 0 1 2 1 0 1844.520 1858.130 1844.555
+20 0 0 2 0 1 0 1788.823 1806.970 1788.881
+21 0 1 2 0 1 0 1644.979 1658.584 1645.014
+22 0 0 2 0 1 1 1788.823 1806.970 1788.881
+23 0 0 2 1 1 0 1788.823 1806.970 1788.881
+24 0 0 3 0 1 0 1761.530 1784.214 1761.618
+25 1 0 0 0 1 0 1777.225 1790.835 1777.260
+26 1 1 0 0 1 0 1788.204 1797.275 1788.222
+27 1 0 0 0 1 1 1777.225 1790.835 1777.260
+28 1 1 0 0 1 1 1788.204 1797.275 1788.222
+29 1 0 0 1 1 0 1777.225 1790.835 1777.260
+30 1 1 0 1 1 0 1788.204 1797.275 1788.222
+31 1 0 0 1 1 1 1777.225 1790.835 1777.260
+32 1 0 0 2 1 0 1777.225 1790.835 1777.260
+33 1 0 1 0 1 0 1638.017 1656.164 1638.075
+34 1 1 1 0 1 0 1644.977 1658.583 1645.012
+35 1 0 1 0 1 1 1638.017 1656.164 1638.075
+36 1 0 1 1 1 0 1638.017 1656.164 1638.075
+37 1 0 2 0 1 0 1639.444 1662.128 1639.532</code></pre>
+</div>
+</div>
+<p>The best AIC and BIC scores returned by the function are for the model SARIMA(1,0,1)(1,1,0). Let’s look at the diagnostic plots to see how well this model captures the data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>mod4candidate2fit <span class="ot">=</span> <span class="fu">arima</span>(resid4, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">seasonal =</span> <span class="fu">list</span>(<span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>)))</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(mod4candidate2fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(1,0,1)
+Q* = 4.6414, df = 8, p-value = 0.7951
+
+Model df: 2.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>The residuals for this model look similar to the auto.arima model, so it will be interesting to compare them with cross validation. Otherwise, it is notable that the residuals display clustered volatility, while the lag plot shows significant correlations at some values, although the Ljung-Box test returns 0.795 so we can conclude there is no autocorrelation in the residuals.</p>
+<h4 class="anchored">
+Model 5: (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers
+</h4>
+<p>I am leaving this model to fit after the homework.</p>
+<h3 class="anchored">
+Model Selection for VAR Models
+</h3>
+<h4 class="anchored">
+Model 2: (VAR) SPY ~ Interest Rate 3-Months + Daily VIX Value
+</h4><h4 class="anchored">
+<p>Step 1, let’s fit VAR with p=1 just to see the relationship between our 3 variables (SPY intraday range, 3-month interest rate changes, and the real daily VIX values).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>xMatrix2 <span class="ot">=</span> combinedData[,<span class="fu">c</span>(<span class="st">'VIX.Adjusted'</span>, <span class="st">'mo3delta'</span>, <span class="st">'spyRange'</span>) ]</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>xMatrix2[<span class="fu">is.na</span>(xMatrix2)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>xMatrix2 <span class="ot">=</span> <span class="fu">scale</span>(xMatrix2)</span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>xMatrix2 <span class="ot">=</span> <span class="fu">as.matrix</span>(xMatrix2)</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a><span class="co">#xMatrix</span></span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(vars<span class="sc">::</span><span class="fu">VAR</span>(xMatrix2, <span class="at">p =</span> <span class="dv">1</span>, <span class="at">type =</span> <span class="st">'both'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+VAR Estimation Results:
+========================= 
+Endogenous variables: VIX.Adjusted, mo3delta, spyRange 
+Deterministic variables: both 
+Sample size: 689 
+Log Likelihood: -1891.17 
+Roots of the characteristic polynomial:
+0.9396 0.05755 0.05755
+Call:
+vars::VAR(y = xMatrix2, p = 1, type = "both")
+
+
+Estimation results for equation VIX.Adjusted: 
+============================================= 
+VIX.Adjusted = VIX.Adjusted.l1 + mo3delta.l1 + spyRange.l1 + const + trend 
+
+                  Estimate Std. Error t value Pr(&gt;|t|)    
+VIX.Adjusted.l1  9.330e-01  1.915e-02  48.710   &lt;2e-16 ***
+mo3delta.l1     -2.685e-02  1.301e-02  -2.064   0.0394 *  
+spyRange.l1      4.189e-03  1.888e-02   0.222   0.8245    
+const            1.716e-02  2.680e-02   0.641   0.5221    
+trend           -5.707e-05  6.794e-05  -0.840   0.4013    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+Residual standard error: 0.3372 on 684 degrees of freedom
+Multiple R-Squared: 0.8869, Adjusted R-squared: 0.8862 
+F-statistic:  1341 on 4 and 684 DF,  p-value: &lt; 2.2e-16 
+
+
+Estimation results for equation mo3delta: 
+========================================= 
+mo3delta = VIX.Adjusted.l1 + mo3delta.l1 + spyRange.l1 + const + trend 
+
+                  Estimate Std. Error t value Pr(&gt;|t|)   
+VIX.Adjusted.l1 -0.0429432  0.0558806  -0.768  0.44247   
+mo3delta.l1     -0.1137505  0.0379419  -2.998  0.00282 **
+spyRange.l1     -0.1245585  0.0550961  -2.261  0.02409 * 
+const            0.1330199  0.0781812   1.701  0.08932 . 
+trend           -0.0003844  0.0001982  -1.939  0.05287 . 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+Residual standard error: 0.9838 on 684 degrees of freedom
+Multiple R-Squared: 0.03914,    Adjusted R-squared: 0.03352 
+F-statistic: 6.965 on 4 and 684 DF,  p-value: 1.69e-05 
+
+
+Estimation results for equation spyRange: 
+========================================= 
+spyRange = VIX.Adjusted.l1 + mo3delta.l1 + spyRange.l1 + const + trend 
+
+                  Estimate Std. Error t value Pr(&gt;|t|)    
+VIX.Adjusted.l1  0.6616598  0.0403536  16.397  &lt; 2e-16 ***
+mo3delta.l1      0.0662097  0.0273994   2.416   0.0159 *  
+spyRange.l1      0.0661674  0.0397871   1.663   0.0968 .  
+const           -0.3143373  0.0564577  -5.568 3.71e-08 ***
+trend            0.0008977  0.0001431   6.271 6.34e-10 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+Residual standard error: 0.7104 on 684 degrees of freedom
+Multiple R-Squared: 0.496,  Adjusted R-squared: 0.4931 
+F-statistic: 168.3 on 4 and 684 DF,  p-value: &lt; 2.2e-16 
+
+
+
+Covariance matrix of residuals:
+             VIX.Adjusted  mo3delta spyRange
+VIX.Adjusted      0.11371 -0.019172 0.076451
+mo3delta         -0.01917  0.967841 0.006324
+spyRange          0.07645  0.006324 0.504715
+
+Correlation matrix of residuals:
+             VIX.Adjusted  mo3delta spyRange
+VIX.Adjusted      1.00000 -0.057792 0.319129
+mo3delta         -0.05779  1.000000 0.009049
+spyRange          0.31913  0.009049 1.000000</code></pre>
+</div>
+</div>
+<p>The initial VAR fit is encouraging, as the 3 variables are all significant. SPY range has a p value of 0.09, which is slightly above the 0.05 threshold that would be ideal, but still suggests it helps explain the variance in the other variables in the model. The overall R squared and adjusted R squared are also encouraging, at 0.5, which is exceptionally high for a model concerning stock prices.</p>
+<p>Now lets use VAR select to identify some preferrable p values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>vars<span class="sc">::</span><span class="fu">VARselect</span>(xMatrix2, <span class="at">lag.max =</span> <span class="dv">10</span>, <span class="at">type =</span> <span class="st">'both'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$selection
+AIC(n)  HQ(n)  SC(n) FPE(n) 
+     5      1      1      5 
+
+$criteria
+                 1           2           3          4           5           6
+AIC(n) -2.95967636 -2.96412325 -2.96215454 -2.9562924 -3.00144103 -2.99099019
+HQ(n)  -2.92106481 -2.90234476 -2.87720911 -2.8481801 -2.87016173 -2.83654396
+SC(n)  -2.85992432 -2.80451997 -2.74270003 -2.6769867 -2.66228407 -2.59198201
+FPE(n)  0.05183573  0.05160586  0.05170783  0.0520123  0.04971693  0.05024022
+                 7           8           9          10
+AIC(n) -2.98502423 -2.96721214 -2.95685167 -2.95666268
+HQ(n)  -2.80741107 -2.76643204 -2.73290464 -2.70954871
+SC(n)  -2.52616482 -2.44850150 -2.37828980 -2.31824958
+FPE(n)  0.05054219  0.05145229  0.05199039  0.05200299</code></pre>
+</div>
+</div>
+<p>VAR select returns either p =5 or p = 1 as the best fits, with AIC and FPE selecting p=5, and HQ and SC selecting p =1. We will use cross validation to compare these options.</p>
+</h4><h2 class="anchored">
+Model Evaluation
+</h2>
+<p>In this section, I will use cross validation to select the best candidate model for each of the 5 overaching model designs. First, lets define a cross validation function</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="do">#######</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>crossVal <span class="ot">&lt;-</span> <span class="cf">function</span>(arima1order, arima2order, sarima2order, data) {</span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># window is always 1</span></span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>    test <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>    trainnum <span class="ot">&lt;-</span> <span class="fu">length</span>(data) <span class="sc">-</span> test</span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>    rmse1 <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">'numeric'</span>, <span class="at">length =</span> <span class="dv">30</span>)</span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>    rmse2 <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">'numeric'</span>, <span class="at">length =</span> <span class="dv">30</span>)</span>
+<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>) {</span>
+<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print(trainnum + ((i-1) * 4))</span></span>
+<span id="cb78-13"><a href="#cb78-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print(trainnum + (i*4))</span></span>
+<span id="cb78-14"><a href="#cb78-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print(trainnum + ((i-1) * 4) +1)</span></span>
+<span id="cb78-15"><a href="#cb78-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb78-16"><a href="#cb78-16" aria-hidden="true" tabindex="-1"></a>        xtrain <span class="ot">&lt;-</span> data[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span>(trainnum <span class="sc">+</span> i <span class="sc">-</span> <span class="dv">1</span>))]</span>
+<span id="cb78-17"><a href="#cb78-17" aria-hidden="true" tabindex="-1"></a>        xtest <span class="ot">&lt;-</span>  data[<span class="fu">c</span>((trainnum<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(trainnum<span class="sc">+</span>i<span class="sc">+</span><span class="dv">1</span>))]</span>
+<span id="cb78-18"><a href="#cb78-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb78-19"><a href="#cb78-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb78-20"><a href="#cb78-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb78-21"><a href="#cb78-21" aria-hidden="true" tabindex="-1"></a>        <span class="do">######## first Model ############</span></span>
+<span id="cb78-22"><a href="#cb78-22" aria-hidden="true" tabindex="-1"></a>        fit <span class="ot">&lt;-</span> <span class="fu">arima</span>(xtrain, <span class="at">order =</span> arima1order)</span>
+<span id="cb78-23"><a href="#cb78-23" aria-hidden="true" tabindex="-1"></a>        fcast <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">n.ahead =</span> <span class="dv">1</span>)<span class="sc">$</span>pred[<span class="dv">1</span>]</span>
+<span id="cb78-24"><a href="#cb78-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb78-25"><a href="#cb78-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb78-26"><a href="#cb78-26" aria-hidden="true" tabindex="-1"></a>        <span class="do">######## second model ###########</span></span>
+<span id="cb78-27"><a href="#cb78-27" aria-hidden="true" tabindex="-1"></a>        fit2 <span class="ot">&lt;-</span> <span class="fu">arima</span>(xtrain, <span class="at">order =</span> arima2order, <span class="at">seasonal =</span> sarima2order)</span>
+<span id="cb78-28"><a href="#cb78-28" aria-hidden="true" tabindex="-1"></a>        fcast2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit2, <span class="at">n.ahead =</span> <span class="dv">1</span>)<span class="sc">$</span>pred[<span class="dv">1</span>]</span>
+<span id="cb78-29"><a href="#cb78-29" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb78-30"><a href="#cb78-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Errors</span></span>
+<span id="cb78-31"><a href="#cb78-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-32"><a href="#cb78-32" aria-hidden="true" tabindex="-1"></a>        rmse1[i]  <span class="ot">&lt;-</span><span class="fu">sqrt</span>((fcast<span class="sc">-</span>xtest[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb78-33"><a href="#cb78-33" aria-hidden="true" tabindex="-1"></a>        rmse2[i]  <span class="ot">&lt;-</span><span class="fu">sqrt</span>((fcast2<span class="sc">-</span>xtest[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb78-34"><a href="#cb78-34" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb78-35"><a href="#cb78-35" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb78-36"><a href="#cb78-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb78-37"><a href="#cb78-37" aria-hidden="true" tabindex="-1"></a>    outputs <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="st">"rmse1"</span> <span class="ot">=</span> rmse1, <span class="st">'rmse2'</span> <span class="ot">=</span> rmse2)</span>
+<span id="cb78-38"><a href="#cb78-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(outputs)</span>
+<span id="cb78-39"><a href="#cb78-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-40"><a href="#cb78-40" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<h3 class="anchored">
+Model 1 (ARIMAX)
+</h3>
+<p>Lets test the function out on the first model, comparing ARIMA(4,1,1) vs.&nbsp;SARIMA(1,0,1)(0,1,0) on the residuals of the linear regression.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>model1comparison <span class="ot">=</span> <span class="fu">crossVal</span>(<span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>), <span class="fu">list</span>(<span class="at">order =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>)), resid1)</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(model1comparison<span class="sc">$</span>rmse1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2690243</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(model1comparison<span class="sc">$</span>rmse2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2696219</code></pre>
+</div>
+</div>
+<p>Between the two models, model 1, selected by auto.arima, beats out the sarima model with a mean RMSE of 0.2690 vs.&nbsp;0.2696. However, the models do perform similarly to eachother. Let’s look at a graph to make the difference more clear:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>index1 <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(model1comparison))</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> model1comparison, <span class="fu">aes</span>(<span class="at">x =</span> index1, <span class="at">y =</span> rmse1), <span class="at">color =</span> <span class="st">'blue'</span>) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> index1, <span class="at">y =</span> rmse2), <span class="at">color =</span> <span class="st">'red'</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'Comparing RMSE of ARIMAX(4,1,1) Black and SARIMAX(1,0,1)(0,1,0) Red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As we can see in the cross-validation chart, the two models perform similarly, and tend to have higher and lower errors at the same time, with both of the models performing poorly near the middle of the cross validation data sets. But overall, the ARIMA (ARIMAX) model performs the best at predicting the residuals. As such, my chosen model for Model 1 is ARIMAX(4,1,1).</p>
+<h4 class="anchored">
+Predictions
+</h4>
+<p>Now, let’s make predictions:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="co">#mod1candidate2 &lt;- lm(scale(combinedData$spyRange) ~ mo12delta + pdam + dailyChange + workers, data = xMatrix )</span></span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>mod1pdam <span class="ot">&lt;-</span> <span class="fu">forecast</span>(<span class="fu">auto.arima</span>(combinedData<span class="sc">$</span>pdam), <span class="dv">10</span>)</span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a>mod1delta12 <span class="ot">&lt;-</span> <span class="fu">forecast</span>(<span class="fu">auto.arima</span>(combinedData<span class="sc">$</span>mo12delta), <span class="dv">10</span>)</span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a>mod1dailyChange <span class="ot">&lt;-</span> <span class="fu">forecast</span>(<span class="fu">auto.arima</span>(combinedData<span class="sc">$</span>dailyChange), <span class="dv">10</span>)</span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a>mod1workers <span class="ot">&lt;-</span> <span class="fu">forecast</span>(<span class="fu">auto.arima</span>(combinedData<span class="sc">$</span>workers), <span class="dv">10</span>)</span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-9"><a href="#cb84-9" aria-hidden="true" tabindex="-1"></a>predictors1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">cbind</span>(<span class="at">pdam =</span> mod1pdam<span class="sc">$</span>mean, <span class="at">mo12delta =</span> mod1delta12<span class="sc">$</span>mean, <span class="at">dailyChange =</span> mod1dailyChange<span class="sc">$</span>mean, <span class="at">workers =</span> mod1workers<span class="sc">$</span>mean))</span>
+<span id="cb84-10"><a href="#cb84-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-11"><a href="#cb84-11" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">=</span> <span class="fu">arima</span>(combinedData<span class="sc">$</span>spyRange, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">1</span>), <span class="at">xreg =</span> xMatrix)</span>
+<span id="cb84-12"><a href="#cb84-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-13"><a href="#cb84-13" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(fit)</span></span>
+<span id="cb84-14"><a href="#cb84-14" aria-hidden="true" tabindex="-1"></a><span class="co">#forecast(fit)</span></span>
+<span id="cb84-15"><a href="#cb84-15" aria-hidden="true" tabindex="-1"></a>mod1 <span class="ot">=</span> <span class="fu">predict</span>(fit, <span class="at">newxreg =</span> predictors1)</span>
+<span id="cb84-16"><a href="#cb84-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-17"><a href="#cb84-17" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(mod1<span class="sc">$</span>pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Here we can see the models predictions for the SPY daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a precipitous drop in the daily range in SPY prices in the upcoming 10 days.</p>
+<h3 class="anchored">
+Model 3 (ARIMAX) IWM ~ Casualties + Hurricanes + Interest Rate 3-Months
+</h3>
+<p>Let’s compare the model returned by auto.arima, ARIMA(1,1,3), vs the model I found by hand, SARIMA(1,0,1)(1,1,0), on the residuals of the linear regression for model 3.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>model3comparison <span class="ot">=</span> <span class="fu">crossVal</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">3</span>), <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>), <span class="fu">list</span>(<span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>)), resid3)</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(model3comparison<span class="sc">$</span>rmse1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.5537179</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(model3comparison<span class="sc">$</span>rmse2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.6006214</code></pre>
+</div>
+</div>
+<p>Once again, the simple ARIMA model beats out the SARIMA architecture in terms of average RMSE. The average for ARIMA(1,1,3) was 0.554, while for SARIMA(1,0,1)(1,1,0) it was 0.601. Let’s look at a plot of the rmse values to see how the models fared:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>index3 <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(model3comparison))</span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> model3comparison, <span class="fu">aes</span>(<span class="at">x =</span> index3, <span class="at">y =</span> rmse1), <span class="at">color =</span> <span class="st">'blue'</span>) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> index3, <span class="at">y =</span> rmse2), <span class="at">color =</span> <span class="st">'red'</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">'Comparing RMSE of ARIMAX(1,1,3) Black and SARIMAX(1,0,1)(1,1,0) Red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Just like for model 1, the two approaches performed similarly. If one model had a high RMSE for a particular value, the other model was likely to perform poorly as well. Overall however, we can see that for a given value the black line (ARIMA) tended to perform better. In the end, the ARIMAX models seems to fit the data well. As such, my chosen model for Model 3 is: ARIMAX(1,1,3)/.</p>
+<h4 class="anchored">
+Predictions
+</h4>
+<p>Now, let’s make predictions:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co">#xMatrix3 = combinedData[,c('mo3delta', 'casualties', 'hurricaneWarnings')]</span></span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>mod3cas <span class="ot">&lt;-</span> <span class="fu">forecast</span>(<span class="fu">auto.arima</span>(combinedData<span class="sc">$</span>casualties), <span class="dv">10</span>)</span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a>mod3delta3 <span class="ot">&lt;-</span> <span class="fu">forecast</span>(<span class="fu">auto.arima</span>(combinedData<span class="sc">$</span>mo3delta), <span class="dv">10</span>)</span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a>mod3hurricane <span class="ot">&lt;-</span> <span class="fu">forecast</span>(<span class="fu">auto.arima</span>(combinedData<span class="sc">$</span>hurricaneWarnings), <span class="dv">10</span>)</span>
+<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a>predictors3 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">cbind</span>(<span class="at">casualties =</span> mod3cas<span class="sc">$</span>mean, <span class="at">mo3delta =</span> mod3delta3<span class="sc">$</span>mean, <span class="at">hurricaneWarnings =</span> mod3hurricane<span class="sc">$</span>mean))</span>
+<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a>fit3 <span class="ot">=</span> <span class="fu">arima</span>(combinedData<span class="sc">$</span>iwmRange, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">3</span>), <span class="at">xreg =</span> xMatrix3)</span>
+<span id="cb90-10"><a href="#cb90-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-11"><a href="#cb90-11" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(fit)</span></span>
+<span id="cb90-12"><a href="#cb90-12" aria-hidden="true" tabindex="-1"></a><span class="co">#forecast(fit)</span></span>
+<span id="cb90-13"><a href="#cb90-13" aria-hidden="true" tabindex="-1"></a>mod3 <span class="ot">=</span> <span class="fu">predict</span>(fit3, <span class="at">newxreg =</span> predictors3)</span>
+<span id="cb90-14"><a href="#cb90-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-15"><a href="#cb90-15" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(mod3<span class="sc">$</span>pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Here we can see the models predictions for the IWM daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a steep incline in IWM intraday ranges in the upcoming 10 days, especially in the first 5 before leveling off.</p>
+<h3 class="anchored">
+Model 4 ARIMAX
+</h3>
+Leaving for future work.
+<h3 class="anchored">
+Model 5 ARIMAX
+</h3>
+<p>Leaving for future work.</p>
+<h3 class="anchored">
+Model 2 VAR
+</h3>
+<p>Let’s forecast our VAR model, which used 3-month interest rate changes and daily VIX values to predict SPY’s intraday range. For this model we wanted to compare the p values of 1 and 5 to find the best model.</p>
+<p>Lets, run our CV function:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> xMatrix2</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># window is always 1</span></span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a>    test <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a>    trainnum <span class="ot">&lt;-</span> <span class="fu">nrow</span>(data) <span class="sc">-</span> test</span>
+<span id="cb91-6"><a href="#cb91-6" aria-hidden="true" tabindex="-1"></a>    rmse1 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="dv">30</span>,<span class="dv">3</span>)</span>
+<span id="cb91-7"><a href="#cb91-7" aria-hidden="true" tabindex="-1"></a>    rmse1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(rmse1)</span>
+<span id="cb91-8"><a href="#cb91-8" aria-hidden="true" tabindex="-1"></a>    rmse2 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="dv">30</span>,<span class="dv">3</span>)</span>
+<span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a>    rmse2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(rmse2)</span>
+<span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">29</span>) {</span>
+<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-13"><a href="#cb91-13" aria-hidden="true" tabindex="-1"></a>        xtrain <span class="ot">&lt;-</span> data[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span>(trainnum <span class="sc">+</span> i <span class="sc">-</span> <span class="dv">1</span>)),]</span>
+<span id="cb91-14"><a href="#cb91-14" aria-hidden="true" tabindex="-1"></a>        xtest <span class="ot">&lt;-</span>  data[<span class="fu">c</span>((trainnum<span class="sc">+</span>i)<span class="sc">:</span>(trainnum<span class="sc">+</span>i<span class="sc">+</span><span class="dv">1</span>)),]</span>
+<span id="cb91-15"><a href="#cb91-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb91-16"><a href="#cb91-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb91-17"><a href="#cb91-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb91-18"><a href="#cb91-18" aria-hidden="true" tabindex="-1"></a>        <span class="do">######## first Model ############</span></span>
+<span id="cb91-19"><a href="#cb91-19" aria-hidden="true" tabindex="-1"></a>        fit <span class="ot">&lt;-</span> vars<span class="sc">::</span><span class="fu">VAR</span>(xtrain, <span class="at">p =</span> <span class="dv">1</span>, <span class="at">type =</span> <span class="st">'both'</span>)</span>
+<span id="cb91-20"><a href="#cb91-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb91-21"><a href="#cb91-21" aria-hidden="true" tabindex="-1"></a>        fcast <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">n.ahead =</span> <span class="dv">1</span>)<span class="sc">$</span>fcst</span>
+<span id="cb91-22"><a href="#cb91-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb91-23"><a href="#cb91-23" aria-hidden="true" tabindex="-1"></a>        ff<span class="ot">&lt;-</span><span class="fu">data.frame</span>(fcast<span class="sc">$</span>VIX.Adjusted[,<span class="dv">1</span>],fcast<span class="sc">$</span>mo3delta[,<span class="dv">1</span>],fcast<span class="sc">$</span>spyRange[,<span class="dv">1</span>])</span>
+<span id="cb91-24"><a href="#cb91-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb91-25"><a href="#cb91-25" aria-hidden="true" tabindex="-1"></a>        <span class="do">######## second model ###########</span></span>
+<span id="cb91-26"><a href="#cb91-26" aria-hidden="true" tabindex="-1"></a>        fit2 <span class="ot">&lt;-</span> vars<span class="sc">::</span><span class="fu">VAR</span>(xtrain,<span class="at">p =</span><span class="dv">5</span>, <span class="at">type =</span> <span class="st">'both'</span>)</span>
+<span id="cb91-27"><a href="#cb91-27" aria-hidden="true" tabindex="-1"></a>        fcast2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit2, <span class="at">n.ahead =</span> <span class="dv">1</span>)<span class="sc">$</span>fcst</span>
+<span id="cb91-28"><a href="#cb91-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb91-29"><a href="#cb91-29" aria-hidden="true" tabindex="-1"></a>        ff2<span class="ot">&lt;-</span><span class="fu">data.frame</span>(fcast2<span class="sc">$</span>VIX.Adjusted[,<span class="dv">1</span>],fcast2<span class="sc">$</span>mo3delta[,<span class="dv">1</span>],fcast2<span class="sc">$</span>spyRange[,<span class="dv">1</span>])</span>
+<span id="cb91-30"><a href="#cb91-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-31"><a href="#cb91-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Errors</span></span>
+<span id="cb91-32"><a href="#cb91-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-33"><a href="#cb91-33" aria-hidden="true" tabindex="-1"></a>        rmse1[i,]  <span class="ot">=</span> <span class="fu">sqrt</span>((ff<span class="sc">-</span>xtest)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb91-34"><a href="#cb91-34" aria-hidden="true" tabindex="-1"></a>        rmse2[i,]  <span class="ot">=</span> <span class="fu">sqrt</span>((ff2<span class="sc">-</span>xtest)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb91-35"><a href="#cb91-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb91-36"><a href="#cb91-36" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb91-37"><a href="#cb91-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb91-38"><a href="#cb91-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb91-39"><a href="#cb91-39" aria-hidden="true" tabindex="-1"></a><span class="co">#print(rmse1)</span></span>
+<span id="cb91-40"><a href="#cb91-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-41"><a href="#cb91-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-42"><a href="#cb91-42" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(rmse1) <span class="ot">=</span><span class="fu">c</span>(<span class="st">"VIXPrice"</span>, <span class="st">"3mo"</span>,<span class="st">"SPYDailyRange"</span>)</span>
+<span id="cb91-43"><a href="#cb91-43" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(rmse2) <span class="ot">=</span><span class="fu">c</span>(<span class="st">"VIXPrice"</span>, <span class="st">"3mo"</span>,<span class="st">"SPYDailyRange"</span>)</span>
+<span id="cb91-44"><a href="#cb91-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-45"><a href="#cb91-45" aria-hidden="true" tabindex="-1"></a><span class="fu">colMeans</span>(rmse1, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     VIXPrice           3mo SPYDailyRange 
+    0.1477893     1.1090823     0.6958689 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colMeans</span>(rmse2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     VIXPrice           3mo SPYDailyRange 
+    0.1387773     1.1899464     0.6822915 </code></pre>
+</div>
+</div>
+<p>After cross validating the 2 VAR models across 30 1-day intervals, we obtain the following average RMSE for the different variables: VIX Price: p=1 -&gt; 0.148, p=5 -&gt; 0.139. 3 Month Interest Rate Changes: p=1 -&gt; 1.109, p=5 -&gt; 1.190. SPY Daily Range: p=1 -&gt; 0.696, p=5 -&gt; 0.682.</p>
+<p>Overall, the p=1 VAR model was better at predicting the interest rate changes variable, and the p=5 VAR model performed better on the VIX Price and SPY daily range variables.</p>
+<p>Let’s plot their performance:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>index2 <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(rmse1))</span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> rmse1, <span class="fu">aes</span>(<span class="at">x =</span> index2, <span class="at">y =</span> VIXPrice),<span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> rmse2, <span class="fu">aes</span>(<span class="at">x =</span> index2, <span class="at">y =</span> VIXPrice),<span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"CV RMSE for Vix Prices, Blue = (p=1), Red = (p=5)"</span>,</span>
+<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Date"</span>,</span>
+<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"RMSE"</span>,</span>
+<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour=</span><span class="fu">guide_legend</span>(<span class="at">title=</span><span class="st">"Fit"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 row(s) containing missing values (geom_path).
+Removed 1 row(s) containing missing values (geom_path).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> rmse1, <span class="fu">aes</span>(<span class="at">x =</span> index2, <span class="at">y =</span> SPYDailyRange),<span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> rmse2, <span class="fu">aes</span>(<span class="at">x =</span> index2, <span class="at">y =</span> SPYDailyRange),<span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"CV RMSE for SPY Daily Range, Blue = (p=1), Red = (p=5)"</span>,</span>
+<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Date"</span>,</span>
+<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"RMSE"</span>,</span>
+<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour=</span><span class="fu">guide_legend</span>(<span class="at">title=</span><span class="st">"Fit"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 row(s) containing missing values (geom_path).
+Removed 1 row(s) containing missing values (geom_path).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-31-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Overall, the charts show what we confirmed with the average values: That the mean performance of the p=5 model was better on average.</p>
+<p>Now let’s predict:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>finalmod2 <span class="ot">=</span> vars<span class="sc">::</span><span class="fu">VAR</span>(xMatrix2, <span class="at">p =</span> <span class="dv">5</span>, <span class="at">type =</span> <span class="st">'both'</span>)</span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>mod2forecast <span class="ot">&lt;-</span> <span class="fu">predict</span>(finalmod2, <span class="at">n.ahead =</span> <span class="dv">10</span>)<span class="sc">$</span>fcst</span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a>indexmod2 <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb99-7"><a href="#cb99-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> indexmod2, <span class="at">y =</span> mod2forecast<span class="sc">$</span>spyRange[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]),<span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb99-8"><a href="#cb99-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> indexmod2, <span class="at">y =</span> mod2forecast<span class="sc">$</span>mo3delta[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]),<span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb99-9"><a href="#cb99-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> indexmod2, <span class="at">y =</span> mod2forecast<span class="sc">$</span>VIX.Adjusted[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]),<span class="at">color =</span> <span class="st">"green"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ARIMAX-SARIMAX-VAR_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Here we can see the scale forecasts for the 3 key variables, which are created with the predict function for the VAR model with p=5. Overall, the model predicts the SPY range to raise slightly for the next 10 days, and the 3 month interest rates to change sharply.</p>
 
 
 
