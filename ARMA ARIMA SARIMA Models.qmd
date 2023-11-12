@@ -13,7 +13,7 @@ library(tidyverse)
 library(quantmod)
 library(forecast)
 library(tseries)
-
+library(fpp2)
 ```
 
 
@@ -130,3 +130,210 @@ plot(forecast(naiveModelQQQ, 10), xlim = c(650,750))
 
 
 Here, the naive method can only forecast 1 observation into the future, since the seasonal period is one. Which is an advantage to my model, but realistically means the naive model should be evaluated with cross validation.
+
+
+<h2> SARIMA </h2>
+
+Let's look for a seasonal affect in the ACF plots, using the weather events data. First we prepare the data:
+```{r}
+weather_data <- read.csv('data/storms_clean.csv')
+
+
+weather_data$month <- weather_data$BEGIN_YEARMONTH %% 100
+
+weather_data <- weather_data %>%
+    mutate(realdate = make_date(YEAR, month, BEGIN_DAY)) %>%
+    mutate(DAMAGE_PROPERTY =  str_replace(DAMAGE_PROPERTY, "K", "") )  %>%
+    mutate(DAMAGE_PROPERTY = as.numeric(DAMAGE_PROPERTY)) %>%
+    mutate(DAMAGE_PROPERTY = replace_na(DAMAGE_PROPERTY, 0))
+
+
+# Daily Event Number
+daily_events <- weather_data %>%
+    group_by(realdate) %>%
+    summarize(events = length(EPISODE_ID))
+
+# Daily Property Damage
+daily_property <-  weather_data %>%
+    group_by(realdate) %>%
+    summarize(pdam = sum(DAMAGE_PROPERTY))
+
+# Daily Daily Casualties
+daily_casualties <-  weather_data %>%
+    group_by(realdate) %>%
+    summarize(casualties = sum(INJURIES_DIRECT) + sum(INJURIES_INDIRECT) + sum(DEATHS_DIRECT) + sum(DEATHS_INDIRECT))
+
+# Daily Hurricanes
+daily_hurricanes <- weather_data %>%
+    filter(EVENT_TYPE == "Hurricane") %>%
+    group_by(realdate) %>%
+    summarize(hurricaneWarnings = length(EPISODE_ID))
+
+
+# Daily joined data
+
+weather_merged <- full_join(daily_events, daily_property, by = "realdate")
+weather_merged <- full_join(weather_merged, daily_casualties, by = 'realdate')
+weather_merged <- full_join(weather_merged, daily_hurricanes, by = 'realdate')
+
+head(weather_merged)
+
+```
+
+Now, lets look at the acf plot:
+```{r}
+acf(weather_merged$events, lag.max = 365)
+
+```
+
+With a 365 lag plot (as we are looking at weather data), we can see that for about 1/4 of the 365 lags, there is some positive correlation in the residuals (the same season), then for 1/2 the lags after that there is negative correlation (the opposite seasons), and then a return to significant positive correlation about 3/4 of the way through the data. This appears to show a clear seasonal effect of about 365. So let's seasonally difference the data.
+
+```{r}
+
+seasonDiff <- weather_merged$events %>% diff(lag = 365)
+acf(seasonDiff, lag.max = 365)
+pacf(seasonDiff)
+```
+
+After seasonal differencing, this plot looks much much better, without noticeable season-to-season correlations in the lags, although there is still some short-term correlation. And some repeating period which appears to be almost weekly in the residuals.
+
+
+Based on the ACF and PACF plots, I would consider p of 1, d of 0, and q of 3. Then for P and Q I might consider 0, D would be 1 since we seasonally differenced. But let's run some code to see the AIC of different values:
+
+```{r}
+SARIMA.c=function(p1,p2,q1,q2,P1,P2,Q1,Q2,d1,d2,data){
+  
+temp=c()
+d=1
+D=1
+s=12
+ 
+i=1
+temp= data.frame()
+ls=matrix(rep(NA,9*378),nrow=378)
+ 
+for (p in p1:p2)
+  {
+    for(q in q1:q2)
+    {
+      for(P in P1:P2)
+      {
+        for(Q in Q1:Q2)
+        {
+          for(d in d1:d2)
+       
+        {
+          if(p+d+q+P+D+Q<=8)
+          {
+            
+            model<- Arima(data,order=c(p-1,d,q-1),seasonal=c(P-1,D,Q-1))
+            ls[i,]= c(p-1,d,q-1,P-1,D,Q-1,model$aic,model$bic,model$aicc)
+            i=i+1
+            #print(i)
+            
+          }
+          
+        }
+      }
+    }
+    
+  }
+  
+  }
+  temp= as.data.frame(ls)
+  names(temp)= c("p","d","q","P","D","Q","AIC","BIC","AICc")
+  
+  temp
+  
+}
+
+SARIMA.c(p1=1,p2=5,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=weather_merged$events) %>% filter(!is.na(p))
+
+SARIMA.c(p1=1,p2=5,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=seasonDiff) %>% filter(!is.na(p))
+```
+
+Based on the results of the function, the minimum AIC and BIC are for the model: (0,1,2)(0,1,0). If I run the SARIMA function on the 365 differenced data, then it returns (1,1,1,)(0,1,0) as the model with the lowest AIC. So I will compare these two models for the series, using diagnostics.
+
+```{r}
+mod1 <- Arima(weather_merged$events,order=c(0,1,2),seasonal=c(0,1,0))
+mod2 <- Arima(weather_merged$events,order=c(1,1,1),seasonal=c(0,1,0))
+
+checkresiduals(mod1 )
+
+```
+
+The residuals for model 1 (0,1,2)(0,1,0) show some clustering of volatility. In addition, they appear to be skewed to the right, as the right tail of the residual distribution is fatter than the left tail and has more outlying values. Finally, the ACF plot of the residuals looks good, with little visible correlation and no values crossing the significance line. In addition, the Ljung-Box test returns p=0.43, suggesting we can reject the idea that there is autocorrelation in the residuals.
+
+
+```{r}
+checkresiduals(mod2 )
+```
+
+The residual diagnostics for model 2 (1,1,1)(0,1,0) are similar to model 1, except that they have even less correlatoin visible in the residual plots. The residual's distribution is still skewed to the right, with a fatter positive tail. The ACF plot, however, has even less correlation visible, with only two values even coming marginally close to the significance line. There is still some heteroskedacticity in the plot over time, however, suggesting clustering of volatility.
+
+
+Now, let's use an Auto.Arima function to determine the correct model:
+```{r}
+aaData <- ts(weather_merged$events)
+mod3 <- auto.arima(aaData, seasonal = TRUE, trace = TRUE)
+
+```
+
+Regardless of the frequency fed into the model, Auto.arima only wants to fit a (2,0,1) ARIMA model. I tried 365, 90, 60, 40, 14, and 7 day frequencies, and in each case the seasonal term was not chosen for the data. I think the reason that it doesn't recognize the seasonality is because it doesn't worok with 365, which should be the best frequency for the data. 
+
+
+Forecast with a confidence band: Model 1 (0,1,2)(0,1,0)
+```{r}
+
+plot(forecast(mod2), xlim = c(850,925))
+
+```
+
+Model 2: (1,1,1)(0,1,0)
+```{r}
+plot(forecast(mod1), xlim = c(850,925))
+```
+
+I think the forecasts are interesting, because model 2 has a more dynamic forecast, with a decrease over several days before leveling out its prediction. Model 1, meanwhile, predicts that the series will hardly change after its first prediction. While the series does not have a lot of trend going into the prediction interval, weather events are dynamic and I would tend to believe the model which includes more variation as opposed to constant numbers of events. Hence, I would select the (1,1,1)(0,1,0) SARIMA model.
+
+Benchmark Comparison
+
+We will use two benchmark methods: A seasonal naive forecast and a mean forecast.
+```{r}
+
+base1 <- snaive(aaData, 10)
+base2 <- meanf(aaData, 10)
+
+plot(base1, xlim = c(850,925))
+```
+
+Here we can see the plot for the seasonal naive model's forecasts (10 days out), which show a predicted value close to the last observed value in the series. It has a high degree of uncertainty as shown by the prediction interval, which is quite wide.
+
+
+```{r}
+plot(base2, xlim = c(850,925) ) 
+
+```
+
+The forecast for the meanf model (above) departs further from the previously observed values, as the mean of the series is substantially below recently observed values. However, the model has a smaller prediction interval than the seasonal naive forecast, which is a slight advantage.
+
+Now let's look at the accuracy of the three forcasts:
+```{r}
+
+
+accuracy(snaive(aaData))
+accuracy(meanf(aaData))
+accuracy(mod2)
+
+```
+
+The accuracy statistics were a mixed result between the seasonal naive forecast and the SARIMA(1,1,1)(0,1,0) model. The mean forecast did not perform better on any metric than the other two models, and could be discarded. On Root Mean Squared Error, the SARIMA model beat the Seasonal Naive model with a value of 182.4 vs. 222.3, respectively. On Mean Absolute Error, the SARIMA model also performed better, with 120.3 compared to the Seasonal Naive model's 134.7. On the Mean Absolute Percentage Error, however, the Seasonal Naive model performed better than the SARIMA model, achieving 141.1 vs. 179.3 for the SARIMA model. 
+
+Overall, it seems like the accuracy metrics might favor the seasonal naive model, while the prediction forecasts look more accurate for the SARIMA model.
+
+Cross Validation:
+Let's do a seasonal cross-validation with 1-step-ahead forecasts.
+```{r}
+
+
+```
