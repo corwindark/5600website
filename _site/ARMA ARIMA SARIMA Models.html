@@ -208,7 +208,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantmod)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fpp2)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Bringing the data into this tab as well:</p>
@@ -441,6 +443,453 @@ Training set -0.1944037</code></pre>
 </div>
 </div>
 <p>Here, the naive method can only forecast 1 observation into the future, since the seasonal period is one. Which is an advantage to my model, but realistically means the naive model should be evaluated with cross validation.</p>
+<h2 class="anchored">
+SARIMA
+</h2>
+<p>Let’s look for a seasonal affect in the ACF plots, using the weather events data. First we prepare the data:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>weather_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">'data/storms_clean.csv'</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>weather_data<span class="sc">$</span>month <span class="ot">&lt;-</span> weather_data<span class="sc">$</span>BEGIN_YEARMONTH <span class="sc">%%</span> <span class="dv">100</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>weather_data <span class="ot">&lt;-</span> weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">realdate =</span> <span class="fu">make_date</span>(YEAR, month, BEGIN_DAY)) <span class="sc">%&gt;%</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">DAMAGE_PROPERTY =</span>  <span class="fu">str_replace</span>(DAMAGE_PROPERTY, <span class="st">"K"</span>, <span class="st">""</span>) )  <span class="sc">%&gt;%</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">DAMAGE_PROPERTY =</span> <span class="fu">as.numeric</span>(DAMAGE_PROPERTY)) <span class="sc">%&gt;%</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">DAMAGE_PROPERTY =</span> <span class="fu">replace_na</span>(DAMAGE_PROPERTY, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There was 1 warning in `mutate()`.
+i In argument: `DAMAGE_PROPERTY = as.numeric(DAMAGE_PROPERTY)`.
+Caused by warning:
+! NAs introduced by coercion</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily Event Number</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>daily_events <span class="ot">&lt;-</span> weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(realdate) <span class="sc">%&gt;%</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">events =</span> <span class="fu">length</span>(EPISODE_ID))</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily Property Damage</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>daily_property <span class="ot">&lt;-</span>  weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(realdate) <span class="sc">%&gt;%</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">pdam =</span> <span class="fu">sum</span>(DAMAGE_PROPERTY))</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily Daily Casualties</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>daily_casualties <span class="ot">&lt;-</span>  weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(realdate) <span class="sc">%&gt;%</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">casualties =</span> <span class="fu">sum</span>(INJURIES_DIRECT) <span class="sc">+</span> <span class="fu">sum</span>(INJURIES_INDIRECT) <span class="sc">+</span> <span class="fu">sum</span>(DEATHS_DIRECT) <span class="sc">+</span> <span class="fu">sum</span>(DEATHS_INDIRECT))</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily Hurricanes</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>daily_hurricanes <span class="ot">&lt;-</span> weather_data <span class="sc">%&gt;%</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(EVENT_TYPE <span class="sc">==</span> <span class="st">"Hurricane"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(realdate) <span class="sc">%&gt;%</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">hurricaneWarnings =</span> <span class="fu">length</span>(EPISODE_ID))</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Daily joined data</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>weather_merged <span class="ot">&lt;-</span> <span class="fu">full_join</span>(daily_events, daily_property, <span class="at">by =</span> <span class="st">"realdate"</span>)</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>weather_merged <span class="ot">&lt;-</span> <span class="fu">full_join</span>(weather_merged, daily_casualties, <span class="at">by =</span> <span class="st">'realdate'</span>)</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>weather_merged <span class="ot">&lt;-</span> <span class="fu">full_join</span>(weather_merged, daily_hurricanes, <span class="at">by =</span> <span class="st">'realdate'</span>)</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(weather_merged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 x 5
+  realdate   events  pdam casualties hurricaneWarnings
+  &lt;date&gt;      &lt;int&gt; &lt;dbl&gt;      &lt;int&gt;             &lt;int&gt;
+1 2021-01-01    643  918           1                NA
+2 2021-01-02     75  189.          0                NA
+3 2021-01-03     80   63           3                NA
+4 2021-01-04     44   20           0                NA
+5 2021-01-05     18    0           2                NA
+6 2021-01-06     27  850           2                NA</code></pre>
+</div>
+</div>
+<p>Now, lets look at the acf plot:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(weather_merged<span class="sc">$</span>events, <span class="at">lag.max =</span> <span class="dv">365</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>With a 365 lag plot (as we are looking at weather data), we can see that for about 1/4 of the 365 lags, there is some positive correlation in the residuals (the same season), then for 1/2 the lags after that there is negative correlation (the opposite seasons), and then a return to significant positive correlation about 3/4 of the way through the data. This appears to show a clear seasonal effect of about 365. So let’s seasonally difference the data.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>seasonDiff <span class="ot">&lt;-</span> weather_merged<span class="sc">$</span>events <span class="sc">%&gt;%</span> <span class="fu">diff</span>(<span class="at">lag =</span> <span class="dv">365</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(seasonDiff, <span class="at">lag.max =</span> <span class="dv">365</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(seasonDiff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>After seasonal differencing, this plot looks much much better, without noticeable season-to-season correlations in the lags, although there is still some short-term correlation. And some repeating period which appears to be almost weekly in the residuals.</p>
+<p>Based on the ACF and PACF plots, I would consider p of 1, d of 0, and q of 3. Then for P and Q I might consider 0, D would be 1 since we seasonally differenced. But let’s run some code to see the AIC of different values:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>SARIMA.c<span class="ot">=</span><span class="cf">function</span>(p1,p2,q1,q2,P1,P2,Q1,Q2,d1,d2,data){</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>temp<span class="ot">=</span><span class="fu">c</span>()</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>d<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>D<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="dv">12</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>i<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>temp<span class="ot">=</span> <span class="fu">data.frame</span>()</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>ls<span class="ot">=</span><span class="fu">matrix</span>(<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="dv">9</span><span class="sc">*</span><span class="dv">378</span>),<span class="at">nrow=</span><span class="dv">378</span>)</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> p1<span class="sc">:</span>p2)</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(q <span class="cf">in</span> q1<span class="sc">:</span>q2)</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span>(P <span class="cf">in</span> P1<span class="sc">:</span>P2)</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span>(Q <span class="cf">in</span> Q1<span class="sc">:</span>Q2)</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span>(d <span class="cf">in</span> d1<span class="sc">:</span>d2)</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>       </span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span>(p<span class="sc">+</span>d<span class="sc">+</span>q<span class="sc">+</span>P<span class="sc">+</span>D<span class="sc">+</span>Q<span class="sc">&lt;=</span><span class="dv">8</span>)</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>            model<span class="ot">&lt;-</span> <span class="fu">Arima</span>(data,<span class="at">order=</span><span class="fu">c</span>(p<span class="dv">-1</span>,d,q<span class="dv">-1</span>),<span class="at">seasonal=</span><span class="fu">c</span>(P<span class="dv">-1</span>,D,Q<span class="dv">-1</span>))</span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>            ls[i,]<span class="ot">=</span> <span class="fu">c</span>(p<span class="dv">-1</span>,d,q<span class="dv">-1</span>,P<span class="dv">-1</span>,D,Q<span class="dv">-1</span>,model<span class="sc">$</span>aic,model<span class="sc">$</span>bic,model<span class="sc">$</span>aicc)</span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>            i<span class="ot">=</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>            <span class="co">#print(i)</span></span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>          </span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a>  temp<span class="ot">=</span> <span class="fu">as.data.frame</span>(ls)</span>
+<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(temp)<span class="ot">=</span> <span class="fu">c</span>(<span class="st">"p"</span>,<span class="st">"d"</span>,<span class="st">"q"</span>,<span class="st">"P"</span>,<span class="st">"D"</span>,<span class="st">"Q"</span>,<span class="st">"AIC"</span>,<span class="st">"BIC"</span>,<span class="st">"AICc"</span>)</span>
+<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a>  temp</span>
+<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a><span class="fu">SARIMA.c</span>(<span class="at">p1=</span><span class="dv">1</span>,<span class="at">p2=</span><span class="dv">5</span>,<span class="at">q1=</span><span class="dv">1</span>,<span class="at">q2=</span><span class="dv">4</span>,<span class="at">P1=</span><span class="dv">1</span>,<span class="at">P2=</span><span class="dv">3</span>,<span class="at">Q1=</span><span class="dv">1</span>,<span class="at">Q2=</span><span class="dv">2</span>,<span class="at">d1=</span><span class="dv">0</span>,<span class="at">d2=</span><span class="dv">1</span>,<span class="at">data=</span>weather_merged<span class="sc">$</span>events) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   p d q P D Q      AIC      BIC     AICc
+1  0 0 0 0 1 0 12204.30 12213.93 12204.32
+2  0 1 0 0 1 0 12419.43 12424.24 12419.43
+3  0 0 0 0 1 1 12204.30 12213.93 12204.32
+4  0 1 0 0 1 1 12419.43 12424.24 12419.43
+5  0 0 0 1 1 0 12204.30 12213.93 12204.32
+6  0 1 0 1 1 0 12419.43 12424.24 12419.43
+7  0 0 0 1 1 1 12204.30 12213.93 12204.32
+8  0 1 0 1 1 1 12419.43 12424.24 12419.43
+9  0 0 0 2 1 0 12204.30 12213.93 12204.32
+10 0 1 0 2 1 0 12419.43 12424.24 12419.43
+11 0 0 0 2 1 1 12204.30 12213.93 12204.32
+12 0 0 1 0 1 0 12102.10 12116.55 12102.13
+13 0 1 1 0 1 0 12130.44 12140.07 12130.46
+14 0 0 1 0 1 1 12102.10 12116.55 12102.13
+15 0 1 1 0 1 1 12130.44 12140.07 12130.46
+16 0 0 1 1 1 0 12102.10 12116.55 12102.13
+17 0 1 1 1 1 0 12130.44 12140.07 12130.46
+18 0 0 1 1 1 1 12102.10 12116.55 12102.13
+19 0 0 1 2 1 0 12102.10 12116.55 12102.13
+20 0 0 2 0 1 0 12090.24 12109.50 12090.28
+21 0 1 2 0 1 0 12071.61 12086.05 12071.64
+22 0 0 2 0 1 1 12090.24 12109.50 12090.28
+23 0 0 2 1 1 0 12090.24 12109.50 12090.28
+24 0 0 3 0 1 0 12090.34 12114.42 12090.41
+25 1 0 0 0 1 0 12084.41 12098.85 12084.43
+26 1 1 0 0 1 0 12303.82 12313.44 12303.83
+27 1 0 0 0 1 1 12084.41 12098.85 12084.43
+28 1 1 0 0 1 1 12303.82 12313.44 12303.83
+29 1 0 0 1 1 0 12084.41 12098.85 12084.43
+30 1 1 0 1 1 0 12303.82 12313.44 12303.83
+31 1 0 0 1 1 1 12084.41 12098.85 12084.43
+32 1 0 0 2 1 0 12084.41 12098.85 12084.43
+33 1 0 1 0 1 0 12084.67 12103.93 12084.72
+34 1 1 1 0 1 0 12067.11 12081.55 12067.14
+35 1 0 1 0 1 1 12084.67 12103.93 12084.72
+36 1 0 1 1 1 0 12084.67 12103.93 12084.72
+37 1 0 2 0 1 0 12077.36 12101.43 12077.43
+38 2 0 0 0 1 0 12085.17 12104.42 12085.21
+39 2 1 0 0 1 0 12240.65 12255.09 12240.67
+40 2 0 0 0 1 1 12085.17 12104.42 12085.21
+41 2 0 0 1 1 0 12085.17 12104.42 12085.21
+42 2 0 1 0 1 0 12074.21 12098.29 12074.28
+43 3 0 0 0 1 0 12085.39 12109.46 12085.45</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">SARIMA.c</span>(<span class="at">p1=</span><span class="dv">1</span>,<span class="at">p2=</span><span class="dv">5</span>,<span class="at">q1=</span><span class="dv">1</span>,<span class="at">q2=</span><span class="dv">4</span>,<span class="at">P1=</span><span class="dv">1</span>,<span class="at">P2=</span><span class="dv">3</span>,<span class="at">Q1=</span><span class="dv">1</span>,<span class="at">Q2=</span><span class="dv">2</span>,<span class="at">d1=</span><span class="dv">0</span>,<span class="at">d2=</span><span class="dv">1</span>,<span class="at">data=</span>seasonDiff) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   p d q P D Q      AIC      BIC     AICc
+1  0 0 0 0 1 0 7590.941 7599.546 7590.963
+2  0 1 0 0 1 0 7681.255 7685.556 7681.263
+3  0 0 0 0 1 1 7590.941 7599.546 7590.963
+4  0 1 0 0 1 1 7681.255 7685.556 7681.263
+5  0 0 0 1 1 0 7590.941 7599.546 7590.963
+6  0 1 0 1 1 0 7681.255 7685.556 7681.263
+7  0 0 0 1 1 1 7590.941 7599.546 7590.963
+8  0 1 0 1 1 1 7681.255 7685.556 7681.263
+9  0 0 0 2 1 0 7590.941 7599.546 7590.963
+10 0 1 0 2 1 0 7681.255 7685.556 7681.263
+11 0 0 0 2 1 1 7590.941 7599.546 7590.963
+12 0 0 1 0 1 0 7508.844 7521.752 7508.888
+13 0 1 1 0 1 0 7574.405 7583.007 7574.427
+14 0 0 1 0 1 1 7508.844 7521.752 7508.888
+15 0 1 1 0 1 1 7574.405 7583.007 7574.427
+16 0 0 1 1 1 0 7508.844 7521.752 7508.888
+17 0 1 1 1 1 0 7574.405 7583.007 7574.427
+18 0 0 1 1 1 1 7508.844 7521.752 7508.888
+19 0 0 1 2 1 0 7508.844 7521.752 7508.888
+20 0 0 2 0 1 0 7502.242 7519.453 7502.316
+21 0 1 2 0 1 0 7501.777 7514.680 7501.822
+22 0 0 2 0 1 1 7502.242 7519.453 7502.316
+23 0 0 2 1 1 0 7502.242 7519.453 7502.316
+24 0 0 3 0 1 0 7504.242 7525.755 7504.353
+25 1 0 0 0 1 0 7502.164 7515.072 7502.208
+26 1 1 0 0 1 0 7641.447 7650.048 7641.469
+27 1 0 0 0 1 1 7502.164 7515.072 7502.208
+28 1 1 0 0 1 1 7641.447 7650.048 7641.469
+29 1 0 0 1 1 0 7502.164 7515.072 7502.208
+30 1 1 0 1 1 0 7641.447 7650.048 7641.469
+31 1 0 0 1 1 1 7502.164 7515.072 7502.208
+32 1 0 0 2 1 0 7502.164 7515.072 7502.208
+33 1 0 1 0 1 0 7502.957 7520.168 7503.031
+34 1 1 1 0 1 0 7494.739 7507.642 7494.784
+35 1 0 1 0 1 1 7502.957 7520.168 7503.031
+36 1 0 1 1 1 0 7502.957 7520.168 7503.031
+37 1 0 2 0 1 0 7504.242 7525.755 7504.353
+38 2 0 0 0 1 0 7502.828 7520.038 7502.902
+39 2 1 0 0 1 0 7610.893 7623.795 7610.937
+40 2 0 0 0 1 1 7502.828 7520.038 7502.902
+41 2 0 0 1 1 0 7502.828 7520.038 7502.902
+42 2 0 1 0 1 0 7504.793 7526.306 7504.904
+43 3 0 0 0 1 0 7504.726 7526.239 7504.838</code></pre>
+</div>
+</div>
+<p>Based on the results of the function, the minimum AIC and BIC are for the model: (0,1,2)(0,1,0). If I run the SARIMA function on the 365 differenced data, then it returns (1,1,1,)(0,1,0) as the model with the lowest AIC. So I will compare these two models for the series, using diagnostics.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">Arima</span>(weather_merged<span class="sc">$</span>events,<span class="at">order=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>),<span class="at">seasonal=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">Arima</span>(weather_merged<span class="sc">$</span>events,<span class="at">order=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>),<span class="at">seasonal=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(mod1 )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(0,1,2)
+Q* = 8.0235, df = 8, p-value = 0.4312
+
+Model df: 2.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>The residuals for model 1 (0,1,2)(0,1,0) show some clustering of volatility. In addition, they appear to be skewed to the right, as the right tail of the residual distribution is fatter than the left tail and has more outlying values. Finally, the ACF plot of the residuals looks good, with little visible correlation and no values crossing the significance line. In addition, the Ljung-Box test returns p=0.43, suggesting we can reject the idea that there is autocorrelation in the residuals.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(mod2 )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(1,1,1)
+Q* = 2.7198, df = 8, p-value = 0.9507
+
+Model df: 2.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>The residual diagnostics for model 2 (1,1,1)(0,1,0) are similar to model 1, except that they have even less correlatoin visible in the residual plots. The residual’s distribution is still skewed to the right, with a fatter positive tail. The ACF plot, however, has even less correlation visible, with only two values even coming marginally close to the significance line. There is still some heteroskedacticity in the plot over time, however, suggesting clustering of volatility.</p>
+<p>Now, let’s use an Auto.Arima function to determine the correct model:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>aaData <span class="ot">&lt;-</span> <span class="fu">ts</span>(weather_merged<span class="sc">$</span>events)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">auto.arima</span>(aaData, <span class="at">seasonal =</span> <span class="cn">TRUE</span>, <span class="at">trace =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ Fitting models using approximations to speed things up...
+
+ ARIMA(2,0,2) with non-zero mean : 12069.53
+ ARIMA(0,0,0) with non-zero mean : 12204.32
+ ARIMA(1,0,0) with non-zero mean : 12079.82
+ ARIMA(0,0,1) with non-zero mean : 12102.76
+ ARIMA(0,0,0) with zero mean     : 12785.96
+ ARIMA(1,0,2) with non-zero mean : 12082.52
+ ARIMA(2,0,1) with non-zero mean : 12069.52
+ ARIMA(1,0,1) with non-zero mean : 12081.01
+ ARIMA(2,0,0) with non-zero mean : 12079.36
+ ARIMA(3,0,1) with non-zero mean : 12069.61
+ ARIMA(3,0,0) with non-zero mean : 12080.39
+ ARIMA(3,0,2) with non-zero mean : 12072.31
+ ARIMA(2,0,1) with zero mean     : Inf
+
+ Now re-fitting the best model(s) without approximations...
+
+ ARIMA(2,0,1) with non-zero mean : 12074.28
+
+ Best model: ARIMA(2,0,1) with non-zero mean </code></pre>
+</div>
+</div>
+<p>Regardless of the frequency fed into the model, Auto.arima only wants to fit a (2,0,1) ARIMA model. I tried 365, 90, 60, 40, 14, and 7 day frequencies, and in each case the seasonal term was not chosen for the data. I think the reason that it doesn’t recognize the seasonality is because it doesn’t worok with 365, which should be the best frequency for the data.</p>
+<p>Forecast with a confidence band: Model 1 (0,1,2)(0,1,0)</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(mod2), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">850</span>,<span class="dv">925</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Model 2: (1,1,1)(0,1,0)</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">forecast</span>(mod1), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">850</span>,<span class="dv">925</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>I think the forecasts are interesting, because model 2 has a more dynamic forecast, with a decrease over several days before leveling out its prediction. Model 1, meanwhile, predicts that the series will hardly change after its first prediction. While the series does not have a lot of trend going into the prediction interval, weather events are dynamic and I would tend to believe the model which includes more variation as opposed to constant numbers of events. Hence, I would select the (1,1,1)(0,1,0) SARIMA model.</p>
+<p>Benchmark Comparison</p>
+<p>We will use two benchmark methods: A seasonal naive forecast and a mean forecast.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>base1 <span class="ot">&lt;-</span> <span class="fu">snaive</span>(aaData, <span class="dv">10</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>base2 <span class="ot">&lt;-</span> <span class="fu">meanf</span>(aaData, <span class="dv">10</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(base1, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">850</span>,<span class="dv">925</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Here we can see the plot for the seasonal naive model’s forecasts (10 days out), which show a predicted value close to the last observed value in the series. It has a high degree of uncertainty as shown by the prediction interval, which is quite wide.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(base2, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">850</span>,<span class="dv">925</span>) ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The forecast for the meanf model (above) departs further from the previously observed values, as the mean of the series is substantially below recently observed values. However, the model has a smaller prediction interval than the seasonal naive forecast, which is a slight advantage.</p>
+<p>Now let’s look at the accuracy of the three forcasts:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy</span>(<span class="fu">snaive</span>(aaData))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    ME     RMSE      MAE       MPE    MAPE MASE       ACF1
+Training set -0.232967 222.2549 134.6615 -92.97186 141.104    1 -0.3466138</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy</span>(<span class="fu">meanf</span>(aaData))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                       ME     RMSE      MAE       MPE     MAPE     MASE
+Training set 4.269057e-15 195.8141 137.4244 -231.3227 259.5254 1.020517
+                  ACF1
+Training set 0.3527022</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy</span>(mod2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   ME     RMSE      MAE       MPE     MAPE      MASE
+Training set 1.865123 182.4393 120.2761 -152.6725 179.3078 0.8931731
+                    ACF1
+Training set 0.006055532</code></pre>
+</div>
+</div>
+<p>The accuracy statistics were a mixed result between the seasonal naive forecast and the SARIMA(1,1,1)(0,1,0) model. The mean forecast did not perform better on any metric than the other two models, and could be discarded. On Root Mean Squared Error, the SARIMA model beat the Seasonal Naive model with a value of 182.4 vs.&nbsp;222.3, respectively. On Mean Absolute Error, the SARIMA model also performed better, with 120.3 compared to the Seasonal Naive model’s 134.7. On the Mean Absolute Percentage Error, however, the Seasonal Naive model performed better than the SARIMA model, achieving 141.1 vs.&nbsp;179.3 for the SARIMA model.</p>
+<p>Overall, it seems like the accuracy metrics might favor the seasonal naive model, while the prediction forecasts look more accurate for the SARIMA model.</p>
+<p>Cross Validation: Let’s do a seasonal cross-validation with 1 and 10-step-ahead forecasts.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># I add a 100 day buffer to my period of 365 days to have enough data</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    test <span class="ot">&lt;-</span> <span class="dv">100</span> </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    trainnum <span class="ot">&lt;-</span> <span class="fu">length</span>(aaData) <span class="sc">-</span> test</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    rmse1 <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">'numeric'</span>, <span class="at">length =</span> <span class="dv">100</span>)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    rmse2 <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">'numeric'</span>, <span class="at">length =</span> <span class="dv">100</span>)</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    rmse361 <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">'numeric'</span>, <span class="at">length =</span> <span class="dv">100</span>)</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    rmse362 <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">'numeric'</span>, <span class="at">length =</span> <span class="dv">100</span>)</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>) {</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>        xtrain <span class="ot">&lt;-</span> aaData[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span>(trainnum <span class="sc">+</span> i <span class="sc">-</span> <span class="dv">1</span>))]</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>        xtest <span class="ot">&lt;-</span>  aaData[<span class="fu">c</span>((trainnum <span class="sc">+</span> i <span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(trainnum<span class="sc">+</span>i<span class="sc">+</span><span class="dv">10</span>))]</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>        <span class="do">######## model ###########</span></span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>        fit2 <span class="ot">&lt;-</span> <span class="fu">arima</span>(xtrain, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>), <span class="at">seasonal =</span> <span class="fu">list</span>(<span class="at">order =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>)))</span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>        fcast2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit2, <span class="at">n.ahead =</span> <span class="dv">10</span>)<span class="sc">$</span>pred</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Errors</span></span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a>        rmse2[i]  <span class="ot">&lt;-</span><span class="fu">sqrt</span>((fcast2[<span class="dv">1</span>]<span class="sc">-</span>xtest[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a>        rmse362[i]  <span class="ot">&lt;-</span> <span class="fu">mean</span>( <span class="fu">sqrt</span>((fcast2 <span class="sc">-</span>xtest)<span class="sc">^</span><span class="dv">2</span>) )</span>
+<span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-28"><a href="#cb47-28" aria-hidden="true" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>)</span>
+<span id="cb47-29"><a href="#cb47-29" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb47-30"><a href="#cb47-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> index, <span class="at">y =</span> rmse2), <span class="at">color =</span> <span class="st">'blue'</span> ) <span class="sc">+</span> </span>
+<span id="cb47-31"><a href="#cb47-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> index, <span class="at">y =</span> rmse362), <span class="at">color =</span> <span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 row(s) containing missing values (geom_path).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 10 row(s) containing missing values (geom_path).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The chart above shows the RMSE for the cross validated forecasts with windows 1 and 10. I had to use 10 for my seasonal window as my computer was unable to handle the 365 window, and could not produce results. But my data also had short-term seasonality so I relied upon that here. The red line represents the 10-step ahead forecast average RMSE and the blue line represents the 1-step ahead forecast RMSE. Overall you can see that both forecasts perform better and worse around the same time, except that the short-term forecast has a lagged reaction to the same periods where the long-term forecast performed poorly. In some cases, however, the 1-step RMSE does exceed the 10-step RMSE, suggesting poor short term performance.</p>
 
 
 

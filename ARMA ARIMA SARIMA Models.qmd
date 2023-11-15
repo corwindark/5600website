@@ -14,6 +14,7 @@ library(quantmod)
 library(forecast)
 library(tseries)
 library(fpp2)
+library(lubridate)
 ```
 
 
@@ -332,8 +333,44 @@ The accuracy statistics were a mixed result between the seasonal naive forecast 
 Overall, it seems like the accuracy metrics might favor the seasonal naive model, while the prediction forecasts look more accurate for the SARIMA model.
 
 Cross Validation:
-Let's do a seasonal cross-validation with 1-step-ahead forecasts.
+Let's do a seasonal cross-validation with 1 and 10-step-ahead forecasts. 
 ```{r}
 
+    # I add a 100 day buffer to my period of 365 days to have enough data
+    test <- 100 
+    trainnum <- length(aaData) - test
+    rmse1 <- vector(mode = 'numeric', length = 100)
+    rmse2 <- vector(mode = 'numeric', length = 100)
+    rmse361 <- vector(mode = 'numeric', length = 100)
+    rmse362 <- vector(mode = 'numeric', length = 100)
 
+    for(i in 1:100) {
+
+        
+        xtrain <- aaData[c(1:(trainnum + i - 1))]
+        xtest <-  aaData[c((trainnum + i +1):(trainnum+i+10))]
+        
+    
+        ######## model ###########
+        fit2 <- arima(xtrain, order = c(1,1,1), seasonal = list(order = c(0,1,0)))
+        fcast2 <- predict(fit2, n.ahead = 10)$pred
+        
+        # Errors
+
+        rmse2[i]  <-sqrt((fcast2[1]-xtest[1])^2)
+        rmse362[i]  <- mean( sqrt((fcast2 -xtest)^2) )
+        
+    }
+    
+
+index <- c(1:100)
+ggplot() +
+    geom_line(aes(x = index, y = rmse2), color = 'blue' ) + 
+    geom_line(aes(x = index, y = rmse362), color = 'red')
 ```
+
+The chart above shows the RMSE for the cross validated forecasts with windows 1 and 10. I had to use 10 for my seasonal window as my computer was unable to handle the 365 window, and could not produce results. But my data also had short-term seasonality so I relied upon that here. The red line represents the 10-step ahead forecast average RMSE and the blue line represents the 1-step ahead forecast RMSE. Overall you can see that both forecasts perform better and worse around the same time, except that the short-term forecast has a lagged reaction to the same periods where the long-term forecast performed poorly. In some cases, however, the 1-step RMSE does exceed the 10-step RMSE, suggesting poor short term performance.
+
+
+
+
