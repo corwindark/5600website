@@ -362,7 +362,7 @@ Let's do a seasonal cross-validation with 1 and 10-step-ahead forecasts.
         
     }
     
-
+# create index
 index <- c(1:100)
 ggplot() +
     geom_line(aes(x = index, y = rmse2), color = 'blue' ) + 
