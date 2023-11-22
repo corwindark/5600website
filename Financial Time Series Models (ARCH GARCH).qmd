@@ -88,16 +88,184 @@ While the variance looked elevated in the non-differenced plot, it is actually l
 
 <h2>  Look at past arima model for the data (fit here and copy to that tab later) </h2>
 
-Now, let's gather ARIMA models for the intraday range. Starting with SPY:
+Now, let's gather ARIMA models for the intraday range. First we declare the helper function
 ```{r}
+arimaResults <- function(data) {
+    
+    i=1
+    temp= data.frame()
+    ls=matrix(rep(NA,6*100),nrow=100) # roughly nrow = 3x4x2
 
+
+    for (p in 1:6)# p=1,2,3 : 3
+    {
+        for(q in 1:6)# q=1,2,3,4 :4
+        {
+            for(d in 1:2) {
+                
+                if(p-1+d - 1+q-1<=8) #usual threshold
+                {
+                    
+                    model<- Arima(data,order=c(p-1,d-1,q-1),include.drift=FALSE) 
+                    ls[i,]= c(p-1,d-1,q-1,model$aic,model$bic,model$aicc)
+                    i=i+1
+                    #print(i)
+                    
+                }
+
+            }
+                
+        }
+    }
+
+
+    temp= as.data.frame(ls)
+    names(temp)= c("p","d","q","AIC","BIC","AICc")
+    return(temp[which.min(temp$AIC),])
+    #return(temp)
+}
 
 ```
 
 
 
+Now, let's find good-fitting models starting with SPY:
+```{r}
+arimaResults(spyIn$spyRange)
+```
 
-<h2> Look at residuals, they will be clustered, decide to fit further </h2>
+The best model returned by the function is ARMA(3,0,3). It is surprising that the models which differenced the data didn't perform better, but I manually reviewed those options and they all had worse AIC and BIC scores.
+
+For QQQ:
+```{r}
+arimaResults(qqqIn$qqqRange)
+```
+
+For QQQ, the model with the lowest AIC score was ARMA(1,0,1). Once again I expected a differenced model to perform better, but I will continue with the residuals from this model.
+
+For IWM:
+```{r}
+arimaResults(iwmIn$iwmRange)
+```
+
+Fitting the pattern of the best models for the financial instruments being of the form ARMA(N, 0, N), the model with the lowest AIC for IWM was ARMA(4,0,4).
+
+
+
+<h2> Reviewing Residuals to Identify ARCH/GARCH Models </h2>
+
+Now, lets look at the residuals of all of these models, to identify clustering and see if we need to fit ARCH/GARCH models on the residuals.
+
+Declaring the models
+```{r}
+spyARMA <- arima(spyIn$spyRange, order = c(3,0,3))
+qqqARMA <- arima(spyIn$spyRange, order = c(1,0,1))
+iwmARMA <- arima(spyIn$spyRange, order = c(4,0,4))
+```
+
+
+SPY range residuals:
+```{r}
+checkresiduals(spyARMA)
+```
+
+The residuals show definite clustering around timestamps 260 and 450, which suggests a ARCH/GARCH model will be a good fit. Now lets look at ACF and PACF plots of the residuals and squared residuals:
+
+```{r}
+acf(spyARMA$residuals)
+pacf(spyARMA$residuals)
+acf(spyARMA$residuals^2)
+pacf(spyARMA$residuals^2)
+
+#install.packages('FinTS')
+library(FinTS)
+ArchTest(spyIn$spyRange)
+#ArchTest(spyARMA$residuals)
+```
+
+Based on the ACF and PACF plots, it seems like an ARCH model of (1) might be the best fit for SPY residual data. An ARCH test of the original range data confirms that there is an ARCH effect in the dataset.
+
+
+QQQ Residuals:
+```{r}
+acf(qqqARMA$residuals)
+pacf(qqqARMA$residuals)
+acf(qqqARMA$residuals^2)
+pacf(qqqARMA$residuals^2)
+
+#install.packages('FinTS')
+library(FinTS)
+ArchTest(qqqIn$qqqRange)
+ArchTest(qqqARMA$residuals)
+```
+
+The QQQ residuals suggest GARCH values up to (1,3). The squared residuals suggest more similar to a ARCH(1) model. ARCH tests of the original range data confirm an ARCH effect.
+
+
+
+IWM Residuals:
+```{r}
+acf(iwmARMA$residuals)
+pacf(iwmARMA$residuals)
+acf(iwmARMA$residuals^2)
+pacf(iwmARMA$residuals^2)
+
+#install.packages('FinTS')
+library(FinTS)
+ArchTest(iwmIn$iwmRange)
+ArchTest(iwmARMA$residuals)
+```
+
+The IWM residuals look similar to the spy residuals, but suggest an ARCH (1) model. The squared residuals suggest GARCH(1,1).
+
+<h2> Finding and evaluating ARCH and GARCH Fits </h2>
+
+Let's start by declaring a GARCH helper function that checks possible values:
+```{r}
+library(tseries)
+garchResults <- function(data) {
+    model <- list() ## set counter
+    cc <- 1
+    for (p in 1:7) {
+        for (q in 1:7) {
+            model[[cc]] <- garch(data,order=c(q-1,p),trace=F)
+            cc <- cc + 1
+        }
+    } 
+
+    ## get AIC values for model evaluation
+    GARCH_AIC <- sapply(model, AIC) ## model with lowest AIC is the best
+    which(GARCH_AIC == min(GARCH_AIC))
+    ## [1] 24
+    model[[which(GARCH_AIC == min(GARCH_AIC))]]
+}
+
+
+```
+
+Let's check our ARCH(1) model hypothesis for SPY:
+```{r}
+library(vars)
+
+spyMod <- garchResults(spyARMA$residuals)
+summary(spyMod)
+```
+
+The automatic function returns a surprise: The GARCH model with the lowest AIC is acutally GARCH(4,1)
+
+
+```{r}
+qqqMod <- garchResults(qqqARMA$residuals)
+summary(qqqMod)
+```
+
+
+
+```{r}
+iwmMod <- garchResults(iwmARMA$residuals)
+summary(iwmMod)
+```
+
 
 
 <h2> Find ARCH or GARCH Model by looking at squared residuals and returns of each model. </h2>
