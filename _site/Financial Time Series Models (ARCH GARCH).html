@@ -212,92 +212,23 @@ Stationarity and Volatility
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantmod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>-- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>v ggplot2 3.4.4     v purrr   1.0.1
-v tibble  3.2.1     v dplyr   1.1.2
-v tidyr   1.2.0     v stringr 1.4.0
-v readr   2.1.2     v forcats 0.5.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>-- Conflicts ------------------------------------------ tidyverse_conflicts() --
-x dplyr::filter() masks stats::filter()
-x dplyr::lag()    masks stats::lag()</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Registered S3 method overwritten by 'quantmod':
-  method            from
-  as.zoo.data.frame zoo </code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantmod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: xts</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: zoo</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'zoo'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    as.Date, as.Date.numeric</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-######################### Warning from 'xts' package ##########################
-#                                                                             #
-# The dplyr lag() function breaks how base R's lag() function is supposed to  #
-# work, which breaks lag(my_xts). Calls to lag(my_xts) that you type or       #
-# source() into this session won't work correctly.                            #
-#                                                                             #
-# Use stats::lag() to make sure you're not using dplyr::lag(), or you can add #
-# conflictRules('dplyr', exclude = 'lag') to your .Rprofile to stop           #
-# dplyr from breaking base R's lag() function.                                #
-#                                                                             #
-# Code in packages is not affected. It's protected by R's namespace mechanism #
-# Set `options(xts.warn_dplyr_breaks_lag = FALSE)` to suppress this warning.  #
-#                                                                             #
-###############################################################################</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'xts'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:dplyr':
-
-    first, last</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: TTR</code></pre>
-</div>
 </div>
 <p>Read in data</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>spyIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"SPY"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>qqqIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"QQQ"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>iwmIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"IWM"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>spyIn<span class="sc">$</span>spyRange <span class="ot">&lt;-</span> (spyIn<span class="sc">$</span>SPY.High <span class="sc">-</span> spyIn<span class="sc">$</span>SPY.Low)<span class="sc">/</span> spyIn<span class="sc">$</span>SPY.Open</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>qqqIn<span class="sc">$</span>qqqRange <span class="ot">&lt;-</span> (qqqIn<span class="sc">$</span>QQQ.High <span class="sc">-</span> qqqIn<span class="sc">$</span>QQQ.Low)<span class="sc">/</span> qqqIn<span class="sc">$</span>QQQ.Open</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>iwmIn<span class="sc">$</span>iwmRange <span class="ot">&lt;-</span> (iwmIn<span class="sc">$</span>IWM.High <span class="sc">-</span> iwmIn<span class="sc">$</span>IWM.Low)<span class="sc">/</span> iwmIn<span class="sc">$</span>IWM.Open</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>spyIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"SPY"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>qqqIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"QQQ"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>iwmIn <span class="ot">&lt;-</span> quantmod<span class="sc">::</span><span class="fu">getSymbols</span>(<span class="st">"IWM"</span>, <span class="at">from =</span> <span class="fu">as.Date</span>(<span class="st">"2021/01/01"</span>), <span class="at">to =</span> <span class="fu">as.Date</span>(<span class="st">"2023/09/30"</span>), <span class="at">periodicity =</span> <span class="st">"daily"</span>, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">auto.assign =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>spyIn<span class="sc">$</span>spyRange <span class="ot">&lt;-</span> (spyIn<span class="sc">$</span>SPY.High <span class="sc">-</span> spyIn<span class="sc">$</span>SPY.Low)<span class="sc">/</span> spyIn<span class="sc">$</span>SPY.Open</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>qqqIn<span class="sc">$</span>qqqRange <span class="ot">&lt;-</span> (qqqIn<span class="sc">$</span>QQQ.High <span class="sc">-</span> qqqIn<span class="sc">$</span>QQQ.Low)<span class="sc">/</span> qqqIn<span class="sc">$</span>QQQ.Open</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>iwmIn<span class="sc">$</span>iwmRange <span class="ot">&lt;-</span> (iwmIn<span class="sc">$</span>IWM.High <span class="sc">-</span> iwmIn<span class="sc">$</span>IWM.Low)<span class="sc">/</span> iwmIn<span class="sc">$</span>IWM.Open</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Plotting the daily ranges:</p>
@@ -305,7 +236,7 @@ Attaching package: 'xts'</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(spyIn<span class="sc">$</span>spyRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(spyIn<span class="sc">$</span>spyRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
@@ -315,7 +246,7 @@ Attaching package: 'xts'</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(spyIn<span class="sc">$</span>spyRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(spyIn<span class="sc">$</span>spyRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
@@ -326,7 +257,7 @@ Attaching package: 'xts'</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qqqIn<span class="sc">$</span>qqqRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qqqIn<span class="sc">$</span>qqqRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
@@ -336,7 +267,7 @@ Attaching package: 'xts'</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qqqIn<span class="sc">$</span>qqqRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qqqIn<span class="sc">$</span>qqqRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
@@ -347,7 +278,7 @@ Attaching package: 'xts'</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
@@ -357,7 +288,7 @@ Attaching package: 'xts'</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(iwmIn<span class="sc">$</span>iwmRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(iwmIn<span class="sc">$</span>iwmRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
@@ -371,45 +302,45 @@ Look at past arima model for the data (fit here and copy to that tab later)
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>arimaResults <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    i<span class="ot">=</span><span class="dv">1</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    temp<span class="ot">=</span> <span class="fu">data.frame</span>()</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    ls<span class="ot">=</span><span class="fu">matrix</span>(<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="dv">6</span><span class="sc">*</span><span class="dv">100</span>),<span class="at">nrow=</span><span class="dv">100</span>) <span class="co"># roughly nrow = 3x4x2</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (p <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)<span class="co"># p=1,2,3 : 3</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span>(q <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)<span class="co"># q=1,2,3,4 :4</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>        {</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span>(d <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) {</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>                </span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span>(p<span class="dv">-1</span><span class="sc">+</span>d <span class="sc">-</span> <span class="dv">1</span><span class="sc">+</span>q<span class="dv">-1</span><span class="sc">&lt;=</span><span class="dv">8</span>) <span class="co">#usual threshold</span></span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                {</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>                    </span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>                    model<span class="ot">&lt;-</span> <span class="fu">Arima</span>(data,<span class="at">order=</span><span class="fu">c</span>(p<span class="dv">-1</span>,d<span class="dv">-1</span>,q<span class="dv">-1</span>),<span class="at">include.drift=</span><span class="cn">FALSE</span>) </span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>                    ls[i,]<span class="ot">=</span> <span class="fu">c</span>(p<span class="dv">-1</span>,d<span class="dv">-1</span>,q<span class="dv">-1</span>,model<span class="sc">$</span>aic,model<span class="sc">$</span>bic,model<span class="sc">$</span>aicc)</span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>                    i<span class="ot">=</span>i<span class="sc">+</span><span class="dv">1</span></span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>                    <span class="co">#print(i)</span></span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>                    </span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>                }</span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>            }</span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>                </span>
-<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    temp<span class="ot">=</span> <span class="fu">as.data.frame</span>(ls)</span>
-<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(temp)<span class="ot">=</span> <span class="fu">c</span>(<span class="st">"p"</span>,<span class="st">"d"</span>,<span class="st">"q"</span>,<span class="st">"AIC"</span>,<span class="st">"BIC"</span>,<span class="st">"AICc"</span>)</span>
-<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(temp[<span class="fu">which.min</span>(temp<span class="sc">$</span>AIC),])</span>
-<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">#return(temp)</span></span>
-<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>arimaResults <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    i<span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    temp<span class="ot">=</span> <span class="fu">data.frame</span>()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    ls<span class="ot">=</span><span class="fu">matrix</span>(<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="dv">6</span><span class="sc">*</span><span class="dv">100</span>),<span class="at">nrow=</span><span class="dv">100</span>) <span class="co"># roughly nrow = 3x4x2</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (p <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)<span class="co"># p=1,2,3 : 3</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span>(q <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)<span class="co"># q=1,2,3,4 :4</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span>(d <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>) {</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span>(p<span class="dv">-1</span><span class="sc">+</span>d <span class="sc">-</span> <span class="dv">1</span><span class="sc">+</span>q<span class="dv">-1</span><span class="sc">&lt;=</span><span class="dv">8</span>) <span class="co">#usual threshold</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                {</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>                    model<span class="ot">&lt;-</span> <span class="fu">Arima</span>(data,<span class="at">order=</span><span class="fu">c</span>(p<span class="dv">-1</span>,d<span class="dv">-1</span>,q<span class="dv">-1</span>),<span class="at">include.drift=</span><span class="cn">FALSE</span>) </span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>                    ls[i,]<span class="ot">=</span> <span class="fu">c</span>(p<span class="dv">-1</span>,d<span class="dv">-1</span>,q<span class="dv">-1</span>,model<span class="sc">$</span>aic,model<span class="sc">$</span>bic,model<span class="sc">$</span>aicc)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>                    i<span class="ot">=</span>i<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>                    <span class="co">#print(i)</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>                }</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    temp<span class="ot">=</span> <span class="fu">as.data.frame</span>(ls)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(temp)<span class="ot">=</span> <span class="fu">c</span>(<span class="st">"p"</span>,<span class="st">"d"</span>,<span class="st">"q"</span>,<span class="st">"AIC"</span>,<span class="st">"BIC"</span>,<span class="st">"AICc"</span>)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(temp[<span class="fu">which.min</span>(temp<span class="sc">$</span>AIC),])</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">#return(temp)</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now, let’s find good-fitting models starting with SPY:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">arimaResults</span>(spyIn<span class="sc">$</span>spyRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">arimaResults</span>(spyIn<span class="sc">$</span>spyRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   p d q       AIC       BIC      AICc
@@ -421,7 +352,7 @@ Look at past arima model for the data (fit here and copy to that tab later)
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">arimaResults</span>(qqqIn<span class="sc">$</span>qqqRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">arimaResults</span>(qqqIn<span class="sc">$</span>qqqRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   p d q      AIC       BIC      AICc
@@ -433,7 +364,7 @@ Look at past arima model for the data (fit here and copy to that tab later)
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">arimaResults</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">arimaResults</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   p d q       AIC       BIC      AICc
@@ -449,16 +380,16 @@ Reviewing Residuals to Identify ARCH/GARCH Models
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>spyARMA <span class="ot">&lt;-</span> <span class="fu">arima</span>(spyIn<span class="sc">$</span>spyRange, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">3</span>))</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>qqqARMA <span class="ot">&lt;-</span> <span class="fu">arima</span>(spyIn<span class="sc">$</span>spyRange, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>))</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>iwmARMA <span class="ot">&lt;-</span> <span class="fu">arima</span>(spyIn<span class="sc">$</span>spyRange, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">0</span>,<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>spyARMA <span class="ot">&lt;-</span> <span class="fu">arima</span>(spyIn<span class="sc">$</span>spyRange, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">3</span>))</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>qqqARMA <span class="ot">&lt;-</span> <span class="fu">arima</span>(qqqIn<span class="sc">$</span>qqqRange, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>iwmARMA <span class="ot">&lt;-</span> <span class="fu">arima</span>(iwmIn<span class="sc">$</span>iwmRange, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">0</span>,<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>SPY range residuals:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(spyARMA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(spyARMA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
@@ -477,49 +408,37 @@ Model df: 6.   Total lags used: 10</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(spyARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(spyARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(spyARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(spyARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(spyARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(spyARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-15-3.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(spyARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(spyARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-15-4.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages('FinTS')</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FinTS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'FinTS'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:forecast':
-
-    Acf</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(spyIn<span class="sc">$</span>spyRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages('FinTS')</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FinTS)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(spyIn<span class="sc">$</span>spyRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -530,7 +449,7 @@ Chi-squared = 204.01, df = 12, p-value &lt; 2.2e-16</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co">#ArchTest(spyARMA$residuals)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#ArchTest(spyARMA$residuals)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Based on the ACF and PACF plots, it seems like an ARCH model of (1) might be the best fit for SPY residual data. An ARCH test of the original range data confirms that there is an ARCH effect in the dataset.</p>
@@ -538,37 +457,37 @@ Chi-squared = 204.01, df = 12, p-value &lt; 2.2e-16</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(qqqARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(qqqARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(qqqARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(qqqARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-16-2.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(qqqARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(qqqARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-16-3.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(qqqARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(qqqARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-16-4.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages('FinTS')</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FinTS)</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(qqqIn<span class="sc">$</span>qqqRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages('FinTS')</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FinTS)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(qqqIn<span class="sc">$</span>qqqRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -579,51 +498,52 @@ Chi-squared = 173.7, df = 12, p-value &lt; 2.2e-16</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(qqqARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(qqqARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     ARCH LM-test; Null hypothesis: no ARCH effects
 
 data:  qqqARMA$residuals
-Chi-squared = 14.504, df = 12, p-value = 0.2697</code></pre>
+Chi-squared = 17.618, df = 12, p-value = 0.1278</code></pre>
 </div>
 </div>
+<p>The QQQ residuals suggest GARCH values up to (1,3). The squared residuals suggest more similar to a ARCH(1) model. ARCH tests of the original range data confirm an ARCH effect.</p>
 <p>IWM Residuals:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(iwmARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(iwmARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(iwmARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(iwmARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(iwmARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(iwmARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-17-3.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(iwmARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(iwmARMA<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-17-4.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages('FinTS')</span></span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FinTS)</span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages('FinTS')</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FinTS)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -634,25 +554,392 @@ Chi-squared = 174.39, df = 12, p-value &lt; 2.2e-16</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(iwmARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ArchTest</span>(iwmARMA<span class="sc">$</span>residuals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
     ARCH LM-test; Null hypothesis: no ARCH effects
 
 data:  iwmARMA$residuals
-Chi-squared = 17.151, df = 12, p-value = 0.144</code></pre>
+Chi-squared = 28.872, df = 12, p-value = 0.004116</code></pre>
 </div>
 </div>
+<p>The IWM residuals look similar to the spy residuals, but suggest an ARCH (1) model. The squared residuals suggest GARCH(1,1).</p>
 <h2 class="anchored">
-Find ARCH or GARCH Model by looking at squared residuals and returns of each model.
+Finding and evaluating ARCH and GARCH Fits
 </h2>
-<h2 class="anchored">
-Ljung box tests and model diagnostics for each model
-</h2>
-<h2 class="anchored">
-Writing out the final equations of the model
-</h2>
+<p>Let’s start by declaring a GARCH helper function that checks possible values:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>garchResults <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    model <span class="ot">&lt;-</span> <span class="fu">list</span>() <span class="do">## set counter</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    cc <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (p <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>) {</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (q <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>) {</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span>(p <span class="sc">+</span> q <span class="sc">&lt;</span> <span class="dv">8</span>) {</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>                model[[cc]] <span class="ot">&lt;-</span> <span class="fu">garch</span>(data,<span class="at">order=</span><span class="fu">c</span>(q<span class="dv">-1</span>,p),<span class="at">trace=</span>F)</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>                cc <span class="ot">&lt;-</span> cc <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>    } </span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>    <span class="do">## get AIC values for model evaluation</span></span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>    GARCH_AIC <span class="ot">&lt;-</span> <span class="fu">sapply</span>(model, AIC) <span class="do">## model with lowest AIC is the best</span></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">#which(GARCH_AIC == min(GARCH_AIC))</span></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>    <span class="do">## [1] 24</span></span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>    model[[<span class="fu">which</span>(GARCH_AIC <span class="sc">==</span> <span class="fu">min</span>(GARCH_AIC))]]</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<h3 class="anchored">
+SPY GARCH Model Fitting, Diagnostics, and Equation
+</h3>
+<p>Let’s check our ARCH(1) model hypothesis for SPY:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vars)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fGarch)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>spyMod <span class="ot">&lt;-</span> <span class="fu">garchResults</span>(spyARMA<span class="sc">$</span>residuals)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(spyMod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+garch(x = data, order = c(q - 1, p), trace = F)
+
+Model:
+GARCH(4,1)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.9251 -0.6944 -0.1773  0.4743  5.7716 
+
+Coefficient(s):
+    Estimate  Std. Error  t value Pr(&gt;|t|)    
+a0 1.295e-06   5.529e-07    2.342   0.0192 *  
+a1 2.677e-01   4.417e-02    6.060 1.36e-09 ***
+b1 2.309e-01   9.399e-02    2.457   0.0140 *  
+b2 3.670e-09   1.336e-01    0.000   1.0000    
+b3 8.880e-02   1.380e-01    0.643   0.5199    
+b4 4.160e-01   9.804e-02    4.244 2.20e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Diagnostic Tests:
+    Jarque Bera Test
+
+data:  Residuals
+X-squared = 692.91, df = 2, p-value &lt; 2.2e-16
+
+
+    Box-Ljung test
+
+data:  Squared.Residuals
+X-squared = 0.46517, df = 1, p-value = 0.4952</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co">#checkresiduals(spyARMA)</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(spyMod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals
+Q* = 2.669, df = 10, p-value = 0.9882
+
+Model df: 0.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>The automatic function returns a surprise: The GARCH model with the lowest AIC is acutally GARCH(4,1). The diagnostics for this model are also promising, the 4th and 1st lag variance are highly significant (p &lt; 0.05), as is the 1st residual error. The Box-Ljung test is decidedly above the threshold at which we can reject the idea that there is no autocorrelation in the residuals (p = 0.495) which is another encouraging sign for the model fit. This suggests that the model has explained most of the signal in the data, with little correlation left in the residuals. It also shows that the results have improved from the ARMA(3,0,3) model alone, which had a Ljung-Box test result of 0.26, which suggests less correlation is left in the residuals after fitting a GARCH(4,1) model.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">garchFit</span>(<span class="at">formula =</span> <span class="sc">~</span><span class="fu">arma</span>(<span class="dv">3</span>,<span class="dv">3</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">4</span>,<span class="dv">1</span>), <span class="at">data =</span> spyIn<span class="sc">$</span>spyRange, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Title:
+ GARCH Modelling 
+
+Call:
+ garchFit(formula = ~arma(3, 3) + garch(4, 1), data = spyIn$spyRange, 
+    trace = FALSE) 
+
+Mean and Variance Equation:
+ data ~ arma(3, 3) + garch(4, 1)
+&lt;environment: 0x0000000038798ad8&gt;
+ [data = spyIn$spyRange]
+
+Conditional Distribution:
+ norm 
+
+Coefficient(s):
+         mu          ar1          ar2          ar3          ma1          ma2  
+ 2.4917e-05   9.7804e-01   5.9471e-01  -5.7502e-01  -6.6483e-01  -5.8857e-01  
+        ma3        omega       alpha1       alpha2       alpha3       alpha4  
+ 2.9376e-01   3.2859e-07   5.3270e-02   1.0000e-08   1.0000e-08   1.0000e-08  
+      beta1  
+ 9.3784e-01  
+
+Std. Errors:
+ based on Hessian 
+
+Error Analysis:
+         Estimate  Std. Error  t value Pr(&gt;|t|)    
+mu      2.492e-05   3.759e-05    0.663 0.507405    
+ar1     9.780e-01   1.474e-01    6.634 3.28e-11 ***
+ar2     5.947e-01   1.858e-01    3.200 0.001374 ** 
+ar3    -5.750e-01   8.150e-02   -7.055 1.73e-12 ***
+ma1    -6.648e-01   1.629e-01   -4.082 4.46e-05 ***
+ma2    -5.886e-01   1.573e-01   -3.742 0.000182 ***
+ma3     2.938e-01   8.403e-02    3.496 0.000473 ***
+omega   3.286e-07   2.829e-07    1.161 0.245454    
+alpha1  5.327e-02   4.160e-02    1.281 0.200369    
+alpha2  1.000e-08   4.400e-02    0.000 1.000000    
+alpha3  1.000e-08   1.060e-01    0.000 1.000000    
+alpha4  1.000e-08   8.994e-02    0.000 1.000000    
+beta1   9.378e-01   2.959e-02   31.699  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Log Likelihood:
+ 2619.748    normalized:  3.796736 
+
+Description:
+ Wed Nov 22 17:54:55 2023 by user: corwi </code></pre>
+</div>
+</div>
+<p>The final evaluation of all the parameters together, however, suggests that the GARCH model should be (0,1). SO I will write the final correct formula as:</p>
+<p>Final formula is: Rt = 0.000025 + 0.978 * R(t-1) + 0.595 * R(t-2) - 0.575 * R(t-3) - 0.665 * W(t-1) - 0.589 * W(t-2) + 0.294 * W(t-3) + At</p>
+<p>At = Sigma(t) * Epsilon(t)</p>
+<p>Sigma(t) ^ 2 = 0.00000033 + 0.94 * Sigma(t-1)^2</p>
+<h3 class="anchored">
+QQQ GARCH Model Fitting, Diagnostics, and Equation
+</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>qqqMod <span class="ot">&lt;-</span> <span class="fu">garchResults</span>(qqqARMA<span class="sc">$</span>residuals)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(qqqMod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+garch(x = data, order = c(q - 1, p), trace = F)
+
+Model:
+GARCH(1,1)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.9569 -0.6967 -0.1981  0.4453  5.4864 
+
+Coefficient(s):
+    Estimate  Std. Error  t value Pr(&gt;|t|)    
+a0 3.515e-07   1.633e-07    2.152   0.0314 *  
+a1 3.527e-02   5.331e-03    6.615 3.72e-11 ***
+b1 9.582e-01   6.218e-03  154.113  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Diagnostic Tests:
+    Jarque Bera Test
+
+data:  Residuals
+X-squared = 591.42, df = 2, p-value &lt; 2.2e-16
+
+
+    Box-Ljung test
+
+data:  Squared.Residuals
+X-squared = 0.070318, df = 1, p-value = 0.7909</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">#qqqMod</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="co">#checkresiduals(qqqARMA)</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="co">#checkresiduals(qqqMod)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The GARCH model with the lowest AIC for the QQQ residuals is GARCH(1,1), which is within the range of the (1,3) we suspected, but still a different value than we anticipated. All of the terms in this model a significant at the p&lt;0.05 level, both the residual error lag term and the lag variance term. In addition, the Ljung-Box test score improves from 0.1825 in the ARMA(1,0,1) model alone, to 0.51 in the GARCH model. This suggests the model has lowered the autocorrelation in the residuals.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">garchFit</span>(<span class="at">formula =</span> <span class="sc">~</span><span class="fu">arma</span>(<span class="dv">1</span>,<span class="dv">1</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>,<span class="dv">1</span>), <span class="at">data =</span> qqqIn<span class="sc">$</span>qqqRange, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Title:
+ GARCH Modelling 
+
+Call:
+ garchFit(formula = ~arma(1, 1) + garch(1, 1), data = qqqIn$qqqRange, 
+    trace = FALSE) 
+
+Mean and Variance Equation:
+ data ~ arma(1, 1) + garch(1, 1)
+&lt;environment: 0x000000003ade9550&gt;
+ [data = qqqIn$qqqRange]
+
+Conditional Distribution:
+ norm 
+
+Coefficient(s):
+         mu          ar1          ma1        omega       alpha1        beta1  
+ 6.1100e-04   9.6203e-01  -7.4073e-01   3.5130e-07   3.5178e-02   9.5819e-01  
+
+Std. Errors:
+ based on Hessian 
+
+Error Analysis:
+         Estimate  Std. Error  t value Pr(&gt;|t|)    
+mu      6.110e-04   2.413e-04    2.532   0.0113 *  
+ar1     9.620e-01   1.488e-02   64.636  &lt; 2e-16 ***
+ma1    -7.407e-01   3.685e-02  -20.099  &lt; 2e-16 ***
+omega   3.513e-07   2.017e-07    1.741   0.0816 .  
+alpha1  3.518e-02   7.556e-03    4.656 3.23e-06 ***
+beta1   9.582e-01   7.993e-03  119.873  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Log Likelihood:
+ 2441.621    normalized:  3.538581 
+
+Description:
+ Wed Nov 22 17:54:56 2023 by user: corwi </code></pre>
+</div>
+</div>
+<p>Final formula is: Rt = 0.00061 + 0.962 * R(t-1) - 0.741 * W(t-1) + At</p>
+<p>At = Sigma(t) * Epsilon(t)</p>
+<p>Sigma(t) ^ 2 = 0.00000035 + .034 * a(t-1)^2 + 0.96 * Sigma(t-1)^2</p>
+<h3 class="anchored">
+IWM GARCH Model Fitting, Diagnostics, and Equation
+</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>iwmMod <span class="ot">&lt;-</span> <span class="fu">garchResults</span>(iwmARMA<span class="sc">$</span>residuals)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(iwmMod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+garch(x = data, order = c(q - 1, p), trace = F)
+
+Model:
+GARCH(1,1)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.7824 -0.7249 -0.1962  0.4915  5.1795 
+
+Coefficient(s):
+    Estimate  Std. Error  t value Pr(&gt;|t|)    
+a0 2.153e-06   8.987e-07    2.395 0.016602 *  
+a1 6.089e-02   1.693e-02    3.597 0.000322 ***
+b1 8.969e-01   2.903e-02   30.900  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Diagnostic Tests:
+    Jarque Bera Test
+
+data:  Residuals
+X-squared = 338.27, df = 2, p-value &lt; 2.2e-16
+
+
+    Box-Ljung test
+
+data:  Squared.Residuals
+X-squared = 8.6335e-05, df = 1, p-value = 0.9926</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># checkresiduals(iwmARMA)</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="fu">checkresiduals</span>(iwmMod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals
+Q* = 4.2445, df = 10, p-value = 0.9356
+
+Model df: 0.   Total lags used: 10</code></pre>
+</div>
+</div>
+<p>For IWM, the squared residuals showed a GARCH(1,1) fit, and this is also what the function returned as the model with the lowest AIC value. All of the terms were significant at the p &lt; 0.01 threshold, and the Ljung-Box test returns 0.498, improving from 0.088 in the ARMA(4,0,4) model alone. This suggests the GARCH fit has done a very good job at removing autocorrelation from the resdiuals.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">garchFit</span>(<span class="at">formula =</span> <span class="sc">~</span><span class="fu">arma</span>(<span class="dv">4</span>,<span class="dv">2</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>,<span class="dv">1</span>), <span class="at">data =</span> iwmIn<span class="sc">$</span>iwmRange, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Title:
+ GARCH Modelling 
+
+Call:
+ garchFit(formula = ~arma(4, 2) + garch(1, 1), data = iwmIn$iwmRange, 
+    trace = FALSE) 
+
+Mean and Variance Equation:
+ data ~ arma(4, 2) + garch(1, 1)
+&lt;environment: 0x000000002cd6b940&gt;
+ [data = iwmIn$iwmRange]
+
+Conditional Distribution:
+ norm 
+
+Coefficient(s):
+         mu          ar1          ar2          ar3          ar4          ma1  
+ 3.4855e-04   6.6410e-01   5.6820e-01  -1.7672e-01  -7.5180e-02  -3.9551e-01  
+        ma2        omega       alpha1        beta1  
+-4.7133e-01   1.7350e-06   5.8615e-02   9.0767e-01  
+
+Std. Errors:
+ based on Hessian 
+
+Error Analysis:
+         Estimate  Std. Error  t value Pr(&gt;|t|)    
+mu      3.485e-04   3.509e-04    0.993  0.32058    
+ar1     6.641e-01   1.613e-01    4.118 3.83e-05 ***
+ar2     5.682e-01   2.229e-01    2.549  0.01080 *  
+ar3    -1.767e-01   5.433e-02   -3.253  0.00114 ** 
+ar4    -7.518e-02   6.747e-02   -1.114  0.26516    
+ma1    -3.955e-01   1.592e-01   -2.484  0.01299 *  
+ma2    -4.713e-01   1.791e-01   -2.631  0.00851 ** 
+omega   1.735e-06   1.000e-06    1.734  0.08287 .  
+alpha1  5.861e-02   1.936e-02    3.027  0.00247 ** 
+beta1   9.077e-01   3.244e-02   27.979  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Log Likelihood:
+ 2457.18    normalized:  3.56113 
+
+Description:
+ Wed Nov 22 17:54:57 2023 by user: corwi </code></pre>
+</div>
+</div>
+<p>When pulling all of the variables together, the final model diagnostic suggests that the moving average terms 3 and 4 are not significant. As such, I will write the equation for the final selected model of ARMA(4,2) + GARCH(1,1):</p>
+<p>Final formula is: Rt = 0.00035 + 0.664 * R(t-1) + 0.568 * R(t-2) - 0.177 * R(t-3) - 0.075 * R(t-4) - 0.396 * W(t-1) - 0.471 * W(t-2) + At</p>
+<p>At = Sigma(t) * Epsilon(t)</p>
+<p>Sigma(t) ^ 2 = 0.00000017 + .0586 * a(t-1)^2 + 0.908 * Sigma(t-1)^2</p>
 
 
 

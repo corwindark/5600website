@@ -6,6 +6,10 @@ format:
         code-summary: "Show Code"
 ---
 
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
 <h2> Introduction </h2>
 
 On this page, I will look to see whether ARCH and GARCH models may be a good fit for the change in intraday range of popular stock market indices. While these models would usually be fitted on the returns of financial intstruments, the day over day change in intraday percent range also exhibits volatility clustering, and intraday range is the exact subject of my project. This means that modelling these time series successfully would be complementary with the other models I have tried to fit, and I am eager to investigate whether these methods will work well at answering my research questions. I will look to fit 3 models: 1 each for the daily range of SPY, QQQ, and IWM.
@@ -159,8 +163,8 @@ Now, lets look at the residuals of all of these models, to identify clustering a
 Declaring the models
 ```{r}
 spyARMA <- arima(spyIn$spyRange, order = c(3,0,3))
-qqqARMA <- arima(spyIn$spyRange, order = c(1,0,1))
-iwmARMA <- arima(spyIn$spyRange, order = c(4,0,4))
+qqqARMA <- arima(qqqIn$qqqRange, order = c(1,0,1))
+iwmARMA <- arima(iwmIn$iwmRange, order = c(4,0,4))
 ```
 
 
@@ -228,14 +232,16 @@ garchResults <- function(data) {
     cc <- 1
     for (p in 1:7) {
         for (q in 1:7) {
-            model[[cc]] <- garch(data,order=c(q-1,p),trace=F)
-            cc <- cc + 1
+            if(p + q < 8) {
+                model[[cc]] <- garch(data,order=c(q-1,p),trace=F)
+                cc <- cc + 1
+            }
         }
     } 
 
     ## get AIC values for model evaluation
     GARCH_AIC <- sapply(model, AIC) ## model with lowest AIC is the best
-    which(GARCH_AIC == min(GARCH_AIC))
+    #which(GARCH_AIC == min(GARCH_AIC))
     ## [1] 24
     model[[which(GARCH_AIC == min(GARCH_AIC))]]
 }
@@ -243,35 +249,83 @@ garchResults <- function(data) {
 
 ```
 
+
+<h3> SPY GARCH Model Fitting, Diagnostics, and Equation </h3>
 Let's check our ARCH(1) model hypothesis for SPY:
 ```{r}
 library(vars)
+library(fGarch)
 
 spyMod <- garchResults(spyARMA$residuals)
 summary(spyMod)
+
+#checkresiduals(spyARMA)
+checkresiduals(spyMod)
+
 ```
 
-The automatic function returns a surprise: The GARCH model with the lowest AIC is acutally GARCH(4,1)
+The automatic function returns a surprise: The GARCH model with the lowest AIC is acutally GARCH(4,1). The diagnostics for this model are also promising, the 4th and 1st lag variance are highly significant (p < 0.05), as is the 1st residual error. The Box-Ljung test is decidedly above the threshold at which we can reject the idea that there is no autocorrelation in the residuals (p = 0.495) which is another encouraging sign for the model fit. This suggests that the model has explained most of the signal in the data, with little correlation left in the residuals. It also shows that the results have improved from the ARMA(3,0,3) model alone, which had a Ljung-Box test result of 0.26, which suggests less correlation is left in the residuals after fitting a GARCH(4,1) model.
+
+```{r}
+garchFit(formula = ~arma(3,3) + garch(4,1), data = spyIn$spyRange, trace = FALSE)
+```
+
+The final evaluation of all the parameters together, however, suggests that the GARCH model should be (0,1). SO I will write the final correct formula as:
+
+Final formula is:
+Rt = 0.000025 + 0.978 * R(t-1) + 0.595 * R(t-2) - 0.575 * R(t-3) - 0.665 * W(t-1) - 0.589 * W(t-2) + 0.294 * W(t-3) +  At
+
+At = Sigma(t) * Epsilon(t)
+
+Sigma(t) ^ 2 =   0.00000033 +  0.94 * Sigma(t-1)^2
 
 
+<h3> QQQ GARCH Model Fitting, Diagnostics, and Equation </h3>
 ```{r}
 qqqMod <- garchResults(qqqARMA$residuals)
 summary(qqqMod)
+#qqqMod
+
+#checkresiduals(qqqARMA)
+#checkresiduals(qqqMod)
 ```
 
+The GARCH model with the lowest AIC for the QQQ residuals is GARCH(1,1), which is within the range of the (1,3) we suspected, but still a different value than we anticipated. All of the terms in this model a significant at the p<0.05 level, both the residual error lag term and the lag variance term. In addition, the Ljung-Box test score improves from 0.1825 in the ARMA(1,0,1) model alone, to 0.51 in the GARCH model. This suggests the model has lowered the autocorrelation in the residuals.
 
+```{r}
+garchFit(formula = ~arma(1,1) + garch(1,1), data = qqqIn$qqqRange, trace = FALSE)
+```
 
+Final formula is:
+Rt = 0.00061 + 0.962 * R(t-1) - 0.741 * W(t-1) +  At 
+
+At = Sigma(t) * Epsilon(t)
+
+Sigma(t) ^ 2 =   0.00000035 +  .034 * a(t-1)^2  +  0.96 * Sigma(t-1)^2
+
+<h3> IWM GARCH Model Fitting, Diagnostics, and Equation </h3>
 ```{r}
 iwmMod <- garchResults(iwmARMA$residuals)
 summary(iwmMod)
+
+# checkresiduals(iwmARMA)
+
+checkresiduals(iwmMod)
 ```
 
+For IWM, the squared residuals showed a GARCH(1,1) fit, and this is also what the function returned as the model with the lowest AIC value. All of the terms were significant at the p < 0.01 threshold, and the Ljung-Box test returns 0.498, improving from 0.088 in the ARMA(4,0,4) model alone. This suggests the GARCH fit has done a very good job at removing autocorrelation from the resdiuals.
 
 
-<h2> Find ARCH or GARCH Model by looking at squared residuals and returns of each model. </h2>
+```{r}
+garchFit(formula = ~arma(4,2) + garch(1,1), data = iwmIn$iwmRange, trace = FALSE)
+```
+
+When pulling all of the variables together, the final model diagnostic suggests that the moving average terms 3 and 4 are not significant. As such, I will write the equation for the final selected model of ARMA(4,2) + GARCH(1,1):
 
 
-<h2> Ljung box tests and model diagnostics for each model </h2>
+Final formula is:
+Rt = 0.00035 + 0.664 * R(t-1) + 0.568 * R(t-2) - 0.177 * R(t-3) - 0.075 * R(t-4) - 0.396 * W(t-1) - 0.471 * W(t-2) +  At
 
+At = Sigma(t) * Epsilon(t)
 
-<h2>  Writing out the final equations of the model </h2>
+Sigma(t) ^ 2 =   0.00000017 + .0586 * a(t-1)^2  +  0.908 * Sigma(t-1)^2
