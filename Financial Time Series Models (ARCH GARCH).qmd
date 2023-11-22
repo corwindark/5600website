@@ -6,6 +6,26 @@ format:
         code-summary: "Show Code"
 ---
 
+
+Read in data
 ```{r}
 
 ```
+
+
+Look at stationarity and volatility
+
+
+Look at past arima model for the data (fit here and copy to that tab later)
+
+
+Look at residuals, they will be clustered, decide to fit further
+
+
+Find ARCH or GARCH Model by looking at squared residuals and returns of each model.
+
+
+Ljung box tests and model diagnostics for each model
+
+
+Write out the final equation of the model
