@@ -1,3 +1,8 @@
 ---
 title: "Financial Time Series Models (ARCH GARCH)"
+format:
+    html:
+        code-fold: true
+        code-summary: "Show Code"
 ---
+
