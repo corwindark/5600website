@@ -204,7 +204,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored">
 Introduction
 </h2>
-<p>On this page, I will look to see whether ARCH and GARCH models may be a good fit for the intraday range of popular stock market indices. While these models would usually be fitted on the returns of financial intstruments, intraday percent range also exhibits volatility clustering, and intraday range is the exact subject of my project. This means that modelling these time series successfully would be complementary with the other models I have tried to fit, and I am eager to investigate whether these methods will work well at answering my research questions. I will look to fit 3 models: 1 each for the daily range of SPY, QQQ, and IWM.</p>
+<p>On this page, I will look to see whether ARCH and GARCH models may be a good fit for the change in intraday range of popular stock market indices. While these models would usually be fitted on the returns of financial intstruments, the day over day change in intraday percent range also exhibits volatility clustering, and intraday range is the exact subject of my project. This means that modelling these time series successfully would be complementary with the other models I have tried to fit, and I am eager to investigate whether these methods will work well at answering my research questions. I will look to fit 3 models: 1 each for the daily range of SPY, QQQ, and IWM.</p>
 <h2 class="anchored">
 Stationarity and Volatility
 </h2>
@@ -305,33 +305,53 @@ Attaching package: 'xts'</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(spyIn<span class="sc">$</span>spyRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(spyIn<span class="sc">$</span>spyRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>The SPY data certainly appears to have clustered volatility, as there are large swings in close proximity to eachother.</p>
-<p>QQQ</p>
+<p>The SPY data certainly appears to have clustered volatility, as there are large swings in close proximity to eachother. But it also has noticeable trend, with the intraday ranges being higher during the middle of the time series before dropping down again towards the end. To combat this, let’s look at the differenced series:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qqqIn<span class="sc">$</span>qqqRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(spyIn<span class="sc">$</span>spyRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>IWM</p>
+<p>Now, we see a plot that looks very similar to the daily returns of a stock and promising for ARCH/GARCH modeling, which means it is stationary but has clustered volatility. To adjust for this, we can fit an ARIMA model on the SPY ranges, and then fit a GARCH model on the residuals, which will come from differenced data that is now stationary.</p>
+<p>Repeating the process for QQQ:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qqqIn<span class="sc">$</span>qqqRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Once again we see clear non-stationarity in the data, so let’s look at the differenced values:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qqqIn<span class="sc">$</span>qqqRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<pre><code>
+IWM
+::: {.cell}
+
+```{.r .cell-code}
+plot(iwmIn$iwmRange)</code></pre>
+<div class="cell-output-display">
+<p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+<p>:::</p>
 <h2 class="anchored">
 Look at past arima model for the data (fit here and copy to that tab later)
 </h2>
