@@ -873,17 +873,17 @@ Training set 0.006055532</code></pre>
 <span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>        </span>
 <span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a>    }</span>
 <span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a><span class="co"># create index</span></span>
 <span id="cb47-28"><a href="#cb47-28" aria-hidden="true" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>)</span>
 <span id="cb47-29"><a href="#cb47-29" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
 <span id="cb47-30"><a href="#cb47-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> index, <span class="at">y =</span> rmse2), <span class="at">color =</span> <span class="st">'blue'</span> ) <span class="sc">+</span> </span>
 <span id="cb47-31"><a href="#cb47-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> index, <span class="at">y =</span> rmse362), <span class="at">color =</span> <span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 1 row(s) containing missing values (geom_path).</code></pre>
+<pre><code>Warning: Removed 1 row containing missing values (`geom_line()`).</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 10 row(s) containing missing values (geom_path).</code></pre>
+<pre><code>Warning: Removed 10 rows containing missing values (`geom_line()`).</code></pre>
 </div>
 <div class="cell-output-display">
 <p><img src="ARMA-ARIMA-SARIMA-Models_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>

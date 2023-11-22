@@ -6,26 +6,90 @@ format:
         code-summary: "Show Code"
 ---
 
+<h2> Introduction </h2>
 
-Read in data
+On this page, I will look to see whether ARCH and GARCH models may be a good fit for the change in intraday range of popular stock market indices. While these models would usually be fitted on the returns of financial intstruments, the day over day change in intraday percent range also exhibits volatility clustering, and intraday range is the exact subject of my project. This means that modelling these time series successfully would be complementary with the other models I have tried to fit, and I am eager to investigate whether these methods will work well at answering my research questions. I will look to fit 3 models: 1 each for the daily range of SPY, QQQ, and IWM.
+
+
+
+
+<h2> Stationarity and Volatility </h2>
+
+Load packages
 ```{r}
+
+library(tidyverse)
+library(forecast)
+library(quantmod)
 
 ```
 
 
-Look at stationarity and volatility
+
+Read in data
+```{r}
+spyIn <- quantmod::getSymbols("SPY", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+qqqIn <- quantmod::getSymbols("QQQ", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
+iwmIn <- quantmod::getSymbols("IWM", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
 
 
-Look at past arima model for the data (fit here and copy to that tab later)
+spyIn$spyRange <- (spyIn$SPY.High - spyIn$SPY.Low)/ spyIn$SPY.Open
+qqqIn$qqqRange <- (qqqIn$QQQ.High - qqqIn$QQQ.Low)/ qqqIn$QQQ.Open
+iwmIn$iwmRange <- (iwmIn$IWM.High - iwmIn$IWM.Low)/ iwmIn$IWM.Open
 
 
-Look at residuals, they will be clustered, decide to fit further
+```
 
 
-Find ARCH or GARCH Model by looking at squared residuals and returns of each model.
+Plotting the daily ranges:
+
+SPY
+```{r}
+
+plot(spyIn$spyRange)
+
+```
+
+The SPY data certainly appears to have clustered volatility, as there are large swings in close proximity to eachother. But it also has noticeable trend, with the intraday ranges being higher during the middle of the time series before dropping down again towards the end. To combat this, let's look at the differenced series:
+
+```{r}
+plot(spyIn$spyRange %>% diff())
+```
+
+Now, we see a plot that looks very similar to the daily returns of a stock and promising for ARCH/GARCH modeling, which means it is stationary but has clustered volatility. To adjust for this, we can fit an ARIMA model on the SPY ranges, and then fit a GARCH model on the residuals, which will come from differenced data that is now stationary.
+
+Repeating the process for QQQ:
+```{r}
+plot(qqqIn$qqqRange)
+
+```
+
+Once again we see clear non-stationarity in the data, so let's look at the differenced values:
+```{r}
+
+plot(qqqIn$qqqRange %>% diff())
+
+```
+
+```
+
+IWM
+```{r}
+plot(iwmIn$iwmRange)
+
+```
 
 
-Ljung box tests and model diagnostics for each model
+<h2>  Look at past arima model for the data (fit here and copy to that tab later) </h2>
 
 
-Write out the final equation of the model
+<h2> Look at residuals, they will be clustered, decide to fit further </h2>
+
+
+<h2> Find ARCH or GARCH Model by looking at squared residuals and returns of each model. </h2>
+
+
+<h2> Ljung box tests and model diagnostics for each model </h2>
+
+
+<h2>  Writing out the final equations of the model </h2>
