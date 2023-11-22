@@ -66,21 +66,35 @@ plot(qqqIn$qqqRange)
 
 Once again we see clear non-stationarity in the data, so let's look at the differenced values:
 ```{r}
-
 plot(qqqIn$qqqRange %>% diff())
-
 ```
 
-```
+Similar to the SPY data, the time series is now stationary, although there is heteroskedasticity. So we might expect to model QQQ and SPY similarly, with an ARIMA + ARCH/GARCH model.
 
-IWM
+
+Let's check IWM:
 ```{r}
 plot(iwmIn$iwmRange)
-
 ```
+
+IWM's intraday range looks slightly more stationary than the other 2 time series, and also has more extreme changes in volatility over time. However, we can still see somewhat of a trend, such that a moving average would be obviously nonstationary, so once again we difference the series.
+
+```{r}
+plot(iwmIn$iwmRange %>% diff())
+```
+
+While the variance looked elevated in the non-differenced plot, it is actually less hesteroskedastic in the differenced plot. This suggests IWM may not have as much autocorrelation in the variance as the other two indices. An ARIMA model alone might suffice here.
 
 
 <h2>  Look at past arima model for the data (fit here and copy to that tab later) </h2>
+
+Now, let's gather ARIMA models for the intraday range. Starting with SPY:
+```{r}
+
+
+```
+
+
 
 
 <h2> Look at residuals, they will be clustered, decide to fit further </h2>

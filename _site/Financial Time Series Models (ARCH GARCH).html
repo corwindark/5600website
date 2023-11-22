@@ -342,16 +342,26 @@ Attaching package: 'xts'</code></pre>
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<pre><code>
-IWM
-::: {.cell}
-
-```{.r .cell-code}
-plot(iwmIn$iwmRange)</code></pre>
+<p>Similar to the SPY data, the time series is now stationary, although there is heteroskedasticity. So we might expect to model QQQ and SPY similarly, with an ARIMA + ARCH/GARCH model.</p>
+<p>Let’s check IWM:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(iwmIn<span class="sc">$</span>iwmRange)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
-<p>:::</p>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(iwmIn<span class="sc">$</span>iwmRange <span class="sc">%&gt;%</span> <span class="fu">diff</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Financial-Time-Series-Models--ARCH-GARCH-_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 <h2 class="anchored">
 Look at past arima model for the data (fit here and copy to that tab later)
 </h2>
