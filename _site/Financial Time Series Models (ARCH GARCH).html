@@ -676,7 +676,7 @@ Call:
 
 Mean and Variance Equation:
  data ~ arma(3, 3) + garch(4, 1)
-&lt;environment: 0x0000000038798ad8&gt;
+&lt;environment: 0x000000003e8a0fb0&gt;
  [data = spyIn$spyRange]
 
 Conditional Distribution:
@@ -715,7 +715,7 @@ Log Likelihood:
  2619.748    normalized:  3.796736 
 
 Description:
- Wed Nov 22 17:54:55 2023 by user: corwi </code></pre>
+ Thu Nov 30 17:07:03 2023 by user: corwi </code></pre>
 </div>
 </div>
 <p>The final evaluation of all the parameters together, however, suggests that the GARCH model should be (0,1). SO I will write the final correct formula as:</p>
@@ -788,7 +788,7 @@ Call:
 
 Mean and Variance Equation:
  data ~ arma(1, 1) + garch(1, 1)
-&lt;environment: 0x000000003ade9550&gt;
+&lt;environment: 0x0000000038071ad8&gt;
  [data = qqqIn$qqqRange]
 
 Conditional Distribution:
@@ -816,7 +816,7 @@ Log Likelihood:
  2441.621    normalized:  3.538581 
 
 Description:
- Wed Nov 22 17:54:56 2023 by user: corwi </code></pre>
+ Thu Nov 30 17:07:03 2023 by user: corwi </code></pre>
 </div>
 </div>
 <p>Final formula is: Rt = 0.00061 + 0.962 * R(t-1) - 0.741 * W(t-1) + At</p>
@@ -899,7 +899,7 @@ Call:
 
 Mean and Variance Equation:
  data ~ arma(4, 2) + garch(1, 1)
-&lt;environment: 0x000000002cd6b940&gt;
+&lt;environment: 0x000000003ce613f0&gt;
  [data = iwmIn$iwmRange]
 
 Conditional Distribution:
@@ -933,7 +933,7 @@ Log Likelihood:
  2457.18    normalized:  3.56113 
 
 Description:
- Wed Nov 22 17:54:57 2023 by user: corwi </code></pre>
+ Thu Nov 30 17:07:04 2023 by user: corwi </code></pre>
 </div>
 </div>
 <p>When pulling all of the variables together, the final model diagnostic suggests that the moving average terms 3 and 4 are not significant. As such, I will write the equation for the final selected model of ARMA(4,2) + GARCH(1,1):</p>

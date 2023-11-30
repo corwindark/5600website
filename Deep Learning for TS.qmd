@@ -11,30 +11,493 @@ from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras import layers
 from keras.optimizers import RMSprop
+import subprocess
+
+import sys
+import os 
+
+def install(name):
+    subprocess.call([sys.executable, '-m', 'pip', 'install', name])
+
+#install('yfinance')
+```
+
+
+<h2> Declare Useful Functions </h2>
+
+```{python}
+
+def history_plot(history):
+    FS=18   #FONT SIZE
+    # PLOTTING THE TRAINING AND VALIDATION LOSS 
+    history_dict = history.history
+    loss_values = history_dict["loss"]
+    val_loss_values = history_dict["val_loss"]
+    epochs = range(1, len(loss_values) + 1)
+    plt.plot(epochs, loss_values, "bo", label="Training loss")
+    plt.plot(epochs, val_loss_values, "b", label="Validation loss")
+    plt.title("Training and validation loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.show()
 
 
 ```
+
 
 
 <h2> Read in Data </h2>
 
 ```{python}
 
+import yfinance as yf
+
+spy = yf.download('SPY',start = "2021-01-01", end = "2023-09-30")
+iwm = yf.download('QQQ',start = "2021-01-01", end = "2023-09-30")
+qqq = yf.download('IWM',start = "2021-01-01", end = "2023-09-30")
+
+spyRange = (spy['High'] - spy['Low']) / spy['Close']
+iwmRange = (iwm['High'] - iwm['Low']) / iwm['Close']
+qqqRange = (qqq['High'] - qqq['Low']) / qqq['Close']
+
+```
+
+<h2> Normalize </h2>
+
+```{python}
+
+
+
+# Slice training set
+spy_train = pd.DataFrame( spyRange[range(0,490)] )
+spy_train = spy_train.reset_index(drop = True)
+
+# Slice validation set
+spy_val =  pd.DataFrame( spyRange[range(490,590)] )
+spy_val = spy_val.reset_index(drop = True)
+
+# Slice test set
+spy_test =  pd.DataFrame( spyRange[range(590,690)] )
+spy_test = spy_test.reset_index(drop = True)
+
+# Save training normalization to use on test and validation sets
+spy_train_mean = spy_train.mean()
+spy_train_std = spy_train.std()
+
+# Normalize
+spy_train=(spy_train-spy_train_mean)/spy_train_std
+spy_val=(spy_val-spy_train_mean)/spy_train_std
+spy_test=(spy_test-spy_train_mean)/spy_train_std
+
+
 
 ```
 
 
-<h2> Fit RNN </h2>
+<h2> Fit Helper Function to Create Data in Desired Format </h2>
+
+```{python}
+# code from lab
+def form_arrays(x,lookback=3,delay=1,step=1,feature_columns=[0],target_columns=[0],unique=False,verbose=False):
+
+    # verbose=True --> report and plot for debugging
+    # unique=True --> don't re-sample:
+    # x1,x2,x3 --> x4 then x4,x5,x6 --> x7 instead of x2,x3,x4 --> x5
+    # initialize
+    i_start=0; count=0;
+
+    # initialize output arrays with samples
+    x_out=[]
+    y_out=[]
+
+    # sequentially build mini-batch samples
+    while i_start+lookback+delay< x.shape[0]:
+        
+        # define index bounds
+        i_stop=i_start+lookback
+        i_pred=i_stop+delay
+    
+        # report if desired
+        if verbose and count<2: print("indice range:",i_start,i_stop,"-->", i_pred)
+
+        # define arrays:
+        # method-1: buggy due to indexing from left
+        # numpy's slicing --> start:stop:step
+        # xtmp=x[i_start:i_stop+1:steps]
+        
+        # method-2: non-vectorized but cleaner
+        indices_to_keep=[]; j=i_stop
+        while j>=i_start:
+            indices_to_keep.append(j)
+            j=j-step
+        
+        # create mini-batch sample
+        xtmp=x.iloc[indices_to_keep,:] # isolate relevant indices
+        
+        xtmp=xtmp.iloc[:,feature_columns] # isolate desire features
+        ytmp=x.iloc[i_pred,target_columns]
+        x_out.append(xtmp); y_out.append(ytmp);
+        
+        # report if desired
+        if verbose and count<2: print(xtmp, "-->",ytmp)
+        if verbose and count<2: print("shape:",xtmp.shape, "-->",ytmp.shape)
+        
+        if verbose and count<2:
+            fig, ax = plt.subplots()
+            ax.plot(x,'b-')
+            ax.plot(x,'bx')
+            ax.plot(indices_to_keep,xtmp,'go')
+            ax.plot(i_pred*np.ones(len(target_columns)),ytmp,'ro')
+            plt.show()
+        
+        # UPDATE START POINT
+        if unique: i_start+=lookback
+        i_start+=1; count+=1
+
+    return np.array(x_out),np.array(y_out)
+
+```
+
+
+Diagnostic plotting functions from the lab
+```{python}
+
+from sklearn.metrics import mean_squared_error,mean_absolute_percentage_error,mean_absolute_error
+
+# UTILITY FUNCTION
+def regression_report(yt,ytp,yv,yvp):
+
+    print("---------- Regression report ----------")
+
+    print("TRAINING:")
+    print(" MSE:",mean_squared_error(yt,ytp))
+    print(" MAE:",mean_absolute_error(yt,ytp))
+    # print(" MAPE:",mean_absolute_percentage_error(Yt,Ytp))
+
+    # PARITY PLOT
+    fig, ax = plt.subplots()
+    ax.plot(yt,ytp,'ro')
+    ax.plot(yt,yt,'b-')
+    ax.set(xlabel='y_data', ylabel='y_predicted',
+    title='Training data parity plot (line y=x represents a perfect fit)')
+    plt.show()
+
+    # PLOT PART OF THE PREDICTED TIME-SERIES
+    frac_plot=1.0
+    upper=int(frac_plot*yt.shape[0]);
+    # print(int(0.5*yt.shape[0]))
+    fig, ax = plt.subplots()
+    ax.plot(yt[0:upper],'b-')
+    ax.plot(ytp[0:upper],'r-',alpha=0.5)
+    ax.plot(ytp[0:upper],'ro',alpha=0.25)
+    ax.set(xlabel='index', ylabel='y(t (blue=actual & red=prediction)', title='Training: Time-series prediction')
+    plt.show()
+    print("VALIDATION:")
+    print(" MSE:",mean_squared_error(yv,yvp))
+    print(" MAE:",mean_absolute_error(yv,yvp))
+    # print(" MAPE:",mean_absolute_percentage_error(Yt,Ytp))
+
+    # PARITY PLOT
+    fig, ax = plt.subplots()
+    ax.plot(yv,yvp,'ro')
+    ax.plot(yv,yv,'b-')
+    ax.set(xlabel='y_data', ylabel='y_predicted',
+    title='Validation data parity plot (line y=x represents a perfect fit)')
+    plt.show()
+
+    # PLOT PART OF THE PREDICTED TIME-SERIES
+    upper=int(frac_plot*yv.shape[0])
+    fig, ax = plt.subplots()
+    ax.plot(yv[0:upper],'b-')
+    ax.plot(yvp[0:upper],'r-',alpha=0.5)
+    ax.plot(yvp[0:upper],'ro',alpha=0.25)
+    ax.set(xlabel='index', ylabel='y(t) (blue=actual & red=prediction)', title='Validation: Time-series prediction')
+    plt.show()
+
+
+
+```
+
+
+Use function to reformat data. Train will be 1-490, Validation 491-590, and Test 591-690
+
+```{python}
+
+
+
+#spy_train = generator(spyRange, lookback=lookback, delay=delay, min_index=0, max_index=489, shuffle=True, step=step, batch_size=batch_size)
+#spy_val = generator(spyRange, lookback=lookback, delay=delay, min_index=490, max_index=589, step=step, batch_size=batch_size)
+#spy_test = generator(spyRange, lookback=lookback, delay=delay, min_index=590, max_index=690, step=step, batch_size=batch_size)
+
+
+
+L = 30
+S = 1
+D = 1
+batch_size = 10 
+
+
+spy_x,spy_y=form_arrays(spy_train,lookback=L,delay=D,step=S,unique=False,verbose=True)
+
+spy_val_x, spy_val_y = form_arrays(spy_val,lookback=L,delay=D,step=S,unique=False,verbose=True)
+
+
+```
+
+Reshape data
+```{python}
+
+# RESHAPE INTO A DATA FRAME
+spy_t_1 = spy_x.reshape(spy_x.shape[0],spy_x.shape[1]*spy_x.shape[2])
+spy_v_1 = spy_val_x.reshape(spy_val_x.shape[0],spy_val_x.shape[1]*spy_val_x.shape[2])
+
+
+input_shape = (spy_t_1.shape[1],)
+rnn_input_shape = (spy_x.shape[1], spy_x.shape[2])
+
+# NEW SIZES
+print("train: ", spy_x.shape,"-->",spy_t_1.shape)
+print("validation: ", spy_val_x.shape,"-->",spy_v_1.shape)
+
+```
+
 
 
 
 
 <h2> Fit GRU </h2>
 
+No regularlization
+
+```{python}
+
+from keras.models import Sequential
+from keras import layers
+from keras.optimizers import RMSprop
+
+
+# create a sequential model once again
+model = Sequential()
+model.add(layers.Dense(32, activation='relu',input_shape=rnn_input_shape))
+# This layer is the recurent layer, which returns all previous data
+model.add(layers.GRU(32, dropout=0.1, recurrent_dropout=0.5, return_sequences=True))
+# layer that reads the recurent layer
+model.add(layers.GRU(64, activation='relu', dropout=0.1, recurrent_dropout=0.5))
+model.add(layers.Dense(1))
+model.compile(optimizer=RMSprop(), loss='mae')
+
+
+history_spy_1_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=30, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+
+
+```
+
+Let's plot results
+
+```{python}
+history_plot(history_spy_1_noreg)
+
+```
+
+Regularlization
+
+```{python}
+
+from tensorflow.keras import regularizers
+L1=0
+L2=1e-3
+
+# create a sequential model once again
+model = Sequential()
+model.add(layers.Dense(32, activation='relu',input_shape=rnn_input_shape,kernel_regularizer=regularizers.L1L2(l1=L1, l2=L2)))
+# This layer is the recurent layer, which returns all previous data
+model.add(layers.GRU(32, dropout=0.1, recurrent_dropout=0.5, return_sequences=True, recurrent_regularizer=regularizers.L1L2(l1=L1, l2=L2)))
+# layer that reads the recurent layer
+model.add(layers.GRU(64, activation='relu', dropout=0.1, recurrent_dropout=0.5,kernel_regularizer=regularizers.L1L2(l1=L1, l2=L2)))
+model.add(layers.Dense(1))
+model.compile(optimizer=RMSprop(), loss='mae')
+
+
+history_spy_1_reg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=30, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+
+
+```
+
+Let's look at the diagnostic plot
+```{python}
+
+history_plot(history_spy_1_reg)
+```
+
+
+Compared to the model without regularization, we can see that the training set error decreases more steadily, without regressing higher very often. The consequence of this is that the raining error goes lower than the validation error faster than without regularization, suggesting regularization is helping the model to learn more purposefully and successfully.
+
+
+<h2> Fit RNN </h2>
+
+```{python}
+
+# create a sequential model once again
+model = Sequential()
+model.add(layers.Dense(32, activation='relu',input_shape=rnn_input_shape))
+# This layer is the recurent layer, which returns all previous data
+model.add(layers.SimpleRNN(32, dropout=0.1, recurrent_dropout=0.5, return_sequences=True))
+# layer that reads the recurent layer
+model.add(layers.Dense(1))
+model.compile(optimizer=RMSprop(), loss='mae')
+
+
+history_spy_2_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+
+```
+
+
+```{python}
+
+history_plot(history_spy_2_noreg)
+```
+
+We can see the validation loss of the simple RNN model is actually almost equivalent to both the regularized and non-regularized GRU models above. Specifically, all 3 models tended to initialize around 0.6 loss for the validation set, and then slowly work down to about 0.55. If anything, the RNN model might perform slightly better, with validation loss decreasing below 0.55 at the later-stage epochs.
 
 
 
 <h2> Fit LSTM </h2>
+
+```{python}
+
+
+# create a sequential model once again
+model = Sequential()
+model.add(layers.Dense(32, activation='relu',input_shape=rnn_input_shape))
+# This layer is the recurent layer, which returns all previous data
+model.add(layers.LSTM(32, dropout=0.1, recurrent_dropout=0.5, return_sequences=True))
+# layer that reads the recurent layer
+model.add(layers.Dense(1))
+model.compile(optimizer=RMSprop(), loss='mae')
+
+
+history_spy_3_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+
+
+```
+
+```{python}
+
+history_plot(history_spy_3_noreg)
+
+```
+
+With one LSTM layer, the model already seems better than the RNN and GRU competitiors. The validation loss starts out around 0.56 and stays in the lower end of the 0.55-0.6 range. Let's try adding another layer:
+
+```{python}
+#from sklearn.neural_network import MLPRegressor
+
+
+# create a sequential model once again
+model = Sequential()
+model.add(layers.Dense(32, activation='relu',input_shape=rnn_input_shape))
+# This layer is the recurent layer, which returns all previous data
+model.add(layers.LSTM(64, dropout=0.1, recurrent_dropout=0.5, return_sequences=True, recurrent_regularizer= regularizers.L1L2(l1=L1, l2=L2)))
+model.add(layers.LSTM(64, dropout=0.1, recurrent_dropout=0.5, return_sequences=True, recurrent_regularizer = regularizers.L1L2(l1=L1, l2=L2)))
+model.add(layers.LSTM(64, dropout=0.1, recurrent_dropout=0.5, return_sequences=True, recurrent_regularizer = regularizers.L1L2(l1=L1, l2=L2)))
+# layer that reads the recurent layer
+model.add(layers.Dense(32, activation='relu',kernel_regularizer=regularizers.L1L2(l1=L1, l2=L2)))
+model.add(layers.Dense(1))
+#model.add(MLPRegressor())
+
+model.compile(optimizer=RMSprop(), loss='mae')
+
+
+#  trying diff shape
+
+history_spy_4_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+
+
+```
+
+```{python}
+
+spy_4_t_pred = model.predict(spy_x)
+spy_4_t_pred = spy_4_t_pred
+
+spy_4_v_pred = model.predict(spy_val_x)
+spy_4_v_pred.shape
+
+
+```
+
+```{python}
+history_plot(history_spy_4_noreg)
+```
+
+
+With a much larger model of 3x64 neuron LSTM layers, we can see that the validation loss is still around 55. However, the training loss has a consistent curve down to the validation loss. It is interesting that even in the later epochs, the validation loss remains lower than the training.
+
+
+
+<h2> Comparing Results of Deep Learning Models </h2>
+
+Of the three neural network models, the LSTM provided the most consistent performance, while the RNN provided the best performance. The GRU model performed slightly worse than the other two, as measured by its validation set performance. Interestingly, the complexity required for the model to avoid underfitting was much higher with the LSTM model, where 3 hidden layers of 64 neurons each were needed before I felt the training plot showed excess training performance over validation performance. With smaller models, the LSTM performed somewhat poorly on the training set in comparison to the validation set. In terms of accuracy, the RNN model was notable for sometimes reaching below 0.55 loss in performance on the validation set, while the LSTM model usually reached around 0.56 and the GRU model between 0.56 and 0.6. In terms of predictive power (extrapolating outside the validation set) I would tend to trust the LSTM model, because it had the most consistent performance once it was trained over a number of epochs, and even boasted the lowest loss on a particular epoch, sometimes reaching as low as 0.51 in the validation set, although these results were not the norm.
+
+Regularization was an important element across the models. It had two main benefits: First, the models achieved better performance faster because they had more consistent improvement and less variation in performance between epochs. Models which included regularization (both L1L2 and dropout regularization) had almost monotonically decreasing loss in the training set, and clear trends toward improvement in the validation set.
+
+The deep learning models will only have the performance described above when they predict 1 observation into the future. This is because they take in the past 30 observations and return 1 prediction. All of the loss estimates are for this 1-step ahead prediction. If we were to predict further into the future with the models, there would be drift or compound error, where the models loss from a previous prediction would be inherited in future predictions that relied upon that past prediction as an input into the model.
+
+The deep learning modelling is more complicated than the univariate modeling from  HW3, because there are a range of hyperparameters introduced that make the process of selecting the best model more complicated. Unlike a simple ARIMA model, it is not possible to iterate through all combinations of hidden layer sizes and complexities. As such, I think there is more subjective elements introduced to neural network modeling.
+
+
+
+<h2> Comparing Deep Learning and Traditional TS Models </h2>
+
+
+
+We identified ARIMA(3,0,3) as a good model for the SPY data. Lets look at the one step ahead precition of the ARIMA and best-performing (LSTM) neural network model in the validation data:
+
+```{python}
+
+from statsmodels.tsa.arima.model import ARIMA
+
+modelA = ARIMA(spy_train, order = (3,0,3))
+modelA = modelA.fit()
+
+forecasts_arima = modelA.forecast(100)
+
+predict_arima = ARIMA(spy_val, order = (3,0,3))
+predict_arima = predict_arima.fit()
+
+arimapreds = list()
+
+
+
+indexvals = pd.array(range(0,69))
+arimavals = pd.array(predict_arima.get_prediction().predicted_mean)
+arimavals = arimavals[0:69]
+nnvals = spy_4_v_pred[:,0,0]
+
+
+plt.plot(indexvals, arimavals, label='ARIMA Prediction')
+plt.plot(indexvals, nnvals, label='NN Prediction')
+plt.plot(indexvals, spy_val_y, label='Real Values')
+plt.legend()
+plt.title("One Step Ahead Forecasts in Validation (NN vs. ARIMA)")
+plt.show()
+
+realVals = spy_val_y
+
+def rmse(pred, tar):
+    return np.sqrt(((pred - tar) ** 2).mean())
+
+
+print("arima: ", rmse(arimavals, spy_val_y))
+print("Neural Net: ", rmse(nnvals, spy_val_y))
+```
+
+
+Looking at a chart of our best-performing Neural Network Model (LSTM) vs. my best performing ARIMA model (3,0,3) from earlier work, vs. the real observed values, a few things become clear. One, neither model type does a perfect job, especially of capturing extremely high or low values. Two, the ARIMA predictions increase and decrease more (have a higher range) thant he NN predictions. However, the ARIMA predictions tend to vary further from 0, while the NN predictions stay close to zero and only alter slightly. Because of this, the RSME of the neural network is actually lower than the ARIMA model, with the neural network having 0.71 RMSE and the ARIMA model having 0.78 RMSE.
+
+However, the neural network is still not the best model I have tested in this project, because the VAR model achieved an RMSE of 0.68 on the same dataset. This suggests that while Neural networks are powerful tools for univariate prediction, the most accurate model predictions may still be those that include exogenous variables.
+
 
 
 
