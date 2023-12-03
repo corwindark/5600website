@@ -51,12 +51,12 @@ Based on previous results, and the fact that I am using "pseudo-differenced data
 ## Building ARIMA Model
 
 ### QQQ
-Since I did some of this work with SPY data on the EDA tab, I will focus on QQQ range data here.
+Since I did some of this work with SPY data on the EDA tab, I will focus on QQQ range data here, after it has been differenced.
 
 ``` {r}
 #print(diff1QQQ)
-acf(diff1QQQ, na.action = na.exclude)
-pacf(diff1QQQ, na.action = na.exclude)
+acf(diff1QQQ, na.action = na.exclude, main = "Differenced QQQ Daily Range ACF Plot")
+pacf(diff1QQQ, na.action = na.exclude, main = "Differenced QQQ Daily Range PACF Plot")
 
 ```
 
@@ -65,10 +65,10 @@ Based on these charts the order I would pick for QQQ is: ARIMA(2,1,0)
 ``` {r}
 
 modelQQQ1 <- arima(diff1QQQ, order = c(2,1,0))
-summary(modelQQQ1)
+#summary(modelQQQ1)
 ```
 
-5. Equation is x = -1.0034x(t-1) - 0.4832x(t-2) + error
+5. The equation for an ARIMA model with the above formula is x = -1.0034x(t-1) - 0.4832x(t-2) + error.
 
 6. Model Diagnostic:
 ``` {r}
@@ -77,15 +77,12 @@ stats::tsdiag(modelQQQ1)
 
 ```
 
-The Ljung Box statistics look cood, although the ACF of the residuals does have 1 significant term.
+The Ljung Box statistics look good, although the ACF of the residuals does have 1 significant term.I originally tried a (4,1,2) model, however the ljung box statistics were highly correlated, and I suspected overfitting. After reducing the parametrization greatly, the new model performed mnuch better.
 
-I originally tried a (4,1,2) model, however the ljung box statistics were highly correlated, and I suspected overfitting. After reducing the parametrization greatly, the new model performed mnuch better.
-
-7.
+7. Comparing the Auto ARIMA method:
 ``` {r}
-
 autoQQQ <- auto.arima(diff1QQQ)
-summary(autoQQQ)
+#summary(autoQQQ)
 ```
 
 The auto.arima method chose an ARIMA(1,0,1) model. However, this model did not perform as well in terms of AIC, with the Auto arima model having a score of -4799 while my model had a score of -4292.
@@ -102,7 +99,6 @@ plot(forecast(modelQQQ1, 10), xlim = c(650,750))
 Forecasting with auto arima model
 ``` {r}
 plot(forecast(autoQQQ, 10), xlim = c(650,750))
-
 ```
 
 Overall, my model has a slightly more dynamic prediction than the auto arima function, which quicly levels out to 0. However, my model also has a much wider uncertainty band.
@@ -114,9 +110,9 @@ Overall, my model has a slightly more dynamic prediction than the auto arima fun
 naiveModelQQQ <- naive(diff1QQQ, h=1)
 snaiveModelQQQ <- snaive(diff1QQQ, h=1)
 
-summary(naiveModelQQQ)
-summary(snaiveModelQQQ)
-summary(modelQQQ1)
+#summary(naiveModelQQQ)
+#summary(snaiveModelQQQ)
+#summary(modelQQQ1)
 
 ```
 
@@ -275,7 +271,7 @@ head(weather_merged)
 
 Now, lets look at the acf plot:
 ```{r}
-acf(weather_merged$events, lag.max = 365)
+acf(weather_merged$events, lag.max = 365, main = "ACF, Daily Weather Events")
 
 ```
 
@@ -284,8 +280,8 @@ With a 365 lag plot (as we are looking at weather data), we can see that for abo
 ```{r}
 
 seasonDiff <- weather_merged$events %>% diff(lag = 365)
-acf(seasonDiff, lag.max = 365)
-pacf(seasonDiff)
+acf(seasonDiff, lag.max = 365, main = "ACF, 365 Day Differenced Weather Events")
+pacf(seasonDiff, main = "PACF, 365 Differenced Weather Events")
 ```
 
 After seasonal differencing, this plot looks much much better, without noticeable season-to-season correlations in the lags, although there is still some short-term correlation. And some repeating period which appears to be almost weekly in the residuals.
@@ -340,9 +336,9 @@ for (p in p1:p2)
   
 }
 
-SARIMA.c(p1=1,p2=5,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=weather_merged$events) %>% filter(!is.na(p))
+#SARIMA.c(p1=1,p2=5,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=weather_merged$events) %>% filter(!is.na(p))
 
-SARIMA.c(p1=1,p2=5,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=seasonDiff) %>% filter(!is.na(p))
+#SARIMA.c(p1=1,p2=5,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=seasonDiff) %>% filter(!is.na(p))
 ```
 
 Based on the results of the function, the minimum AIC and BIC are for the model: (0,1,2)(0,1,0). If I run the SARIMA function on the 365 differenced data, then it returns (1,1,1,)(0,1,0) as the model with the lowest AIC. So I will compare these two models for the series, using diagnostics.
@@ -368,7 +364,7 @@ The residual diagnostics for model 2 (1,1,1)(0,1,0) are similar to model 1, exce
 Now, let's use an Auto.Arima function to determine the correct model:
 ```{r}
 aaData <- ts(weather_merged$events)
-mod3 <- auto.arima(aaData, seasonal = TRUE, trace = TRUE)
+mod3 <- auto.arima(aaData, seasonal = TRUE, trace = FALSE)
 
 ```
 
@@ -457,8 +453,10 @@ Let's do a seasonal cross-validation with 1 and 10-step-ahead forecasts.
 # create index
 index <- c(1:100)
 ggplot() +
-    geom_line(aes(x = index, y = rmse2), color = 'blue' ) + 
-    geom_line(aes(x = index, y = rmse362), color = 'red')
+    geom_line(aes(x = index, y = rmse2, color = '1 Step Ahead') ) + 
+    geom_line(aes(x = index, y = rmse362, color = '10 Steps Ahead')) + 
+    labs(title = "1 vs. 10 Steps Ahead Forecasts", color = "Forecast", 
+    x = "Days", y = "Predicted Number of Weather Events" ) +  theme(text = element_text(size=14))
 ```
 
 The chart above shows the RMSE for the cross validated forecasts with windows 1 and 10. I had to use 10 for my seasonal window as my computer was unable to handle the 365 window, and could not produce results. But my data also had short-term seasonality so I relied upon that here. The red line represents the 10-step ahead forecast average RMSE and the blue line represents the 1-step ahead forecast RMSE. Overall you can see that both forecasts perform better and worse around the same time, except that the short-term forecast has a lagged reaction to the same periods where the long-term forecast performed poorly. In some cases, however, the 1-step RMSE does exceed the 10-step RMSE, suggesting poor short term performance.

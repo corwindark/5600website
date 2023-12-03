@@ -12,17 +12,29 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ## Planning Models 
 
 We have the following independent variables:
+
 1. Interest Rate Expectation Changes - 3 Months 
+
 2. Interest Rate Expectation Changes - 6 Months 
+
 3. Interest Rate Expectation Changes - 1 Year
+
 4. Extreme Weather Events - Daily Event Number
+
 5. Extreme Weather Events - Daily Property Damage
+
 6. Extreme Weather Events - Daily Casualties
+
 7. Extreme Weather Events - Hurricanes
+
 8. Expected Volatility (VIX) - Value
+
 9. Expected Volatility (VIX) - Daily Change
+
 10. Work Stoppages - Daily Striking Worker Total
+
 11. Work Stoppages - Daily New Strike Beggining
+
 12. Work Stoppages - Daily New Workers Striking
 
 
@@ -63,7 +75,7 @@ vixIn$dailyChange <- vixIn$VIX.Close - lag(vixIn$VIX.Close)
 
 #vixIn <- vixIn %>% 
 #    mutate(date = ymd(index(vixIn)))
-head(vixIn)
+#head(vixIn)
 ```
 
 We have bond yields stored in a CSV, but let's calculate daily changes:
@@ -122,7 +134,7 @@ weather_merged <- full_join(daily_events, daily_property, by = "realdate")
 weather_merged <- full_join(weather_merged, daily_casualties, by = 'realdate')
 weather_merged <- full_join(weather_merged, daily_hurricanes, by = 'realdate')
 
-head(weather_merged)
+#head(weather_merged)
 ```
 
 Finally, lets get the striking worker data ready:
@@ -135,7 +147,7 @@ strike_data$end = mdy(strike_data$Work.stoppage.ending.date)
 strike_data$workers = as.numeric(str_replace(strike_data$Number.of.workers.2., ",", "" ))
 
 
-head(strike_data)
+#head(strike_data)
 
 target_dates <- ymd(index(spyIn))
 
@@ -180,7 +192,7 @@ combinedData <- left_join(combinedData, yieldCurve, by = c("date" = "Date"))
 # Join Labor Data
 combinedData <- left_join(combinedData, workerDF, by = 'date')
 
-head(combinedData)
+#head(combinedData)
 
 
 ```
@@ -211,10 +223,10 @@ ggplot(combinedData, aes(x = mo3delta, y = dailyChange ) ) + geom_point() + labs
 
 This model is all about exogenous shocks. New strikes beggining and hurricane warnings are infrequent but extreme events, which have been grouped together with short-term interest rates (3 month window) to try and capture extreme-but-short-termm influences on volatility.
 
-#### Model 4: (ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers 
-#### Model 5: (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers
+#### Models 4 & 5: (ARIMAX) QQQ/IWM ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers 
 
-Models 4 and 5 follow the same logic as model 1, being selected based off of the literature review, but looking at QQQ as oppposed to SPY to see whether large-cap tech companies are more likely to be affected by this kind of volatility.
+The intent in models 4 and 5 is to follow the same logic as model 1, but to test each of the other two central indices in question. Model 4 will have QQ as the target and model 5 will have IWM as the target.This will allow us to determine if the effects of these exogenous varibables differ based on the model in question. These exogenous variables were selected based off of the literature review, but now we will look at whether large-cap tech companies (QQQ) or small enterprises (IWM) are more likely to be affected by this kind of volatility.
+
 
 ## Model Selection 
 
@@ -232,7 +244,7 @@ xMatrix = as.matrix(xMatrix)
 
 #xMatrix
 
-mod1candidate1 = auto.arima(scale(combinedData$spyRange), xreg = xMatrix, trace = TRUE)
+mod1candidate1 = auto.arima(scale(combinedData$spyRange), xreg = xMatrix, trace = FALSE)
 checkresiduals(mod1candidate1)
 ```
 
@@ -243,11 +255,11 @@ xMatrix = as.data.frame(xMatrix)
 
 # Lets examine the residuals directly to identify 
 mod1candidate2 <- lm(scale(combinedData$spyRange) ~ mo12delta + pdam + dailyChange + workers, data = xMatrix )
-summary(mod1candidate2)
+#summary(mod1candidate2)
 
 resid1 <- mod1candidate2$residuals
-pacf(resid1)
-acf(resid1)
+pacf(resid1,main = "PACF of Model Residuals")
+acf(resid1,main = "ACF of Model Residuals")
 
 ```
 
@@ -302,7 +314,7 @@ for (p in p1:p2)
 }
 
 
-SARIMA.c(p1=1,p2=5,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=resid1) %>% filter(!is.na(p))
+#SARIMA.c(p1=1,p2=5,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=resid1) %>% filter(!is.na(p))
 
 mod1candidate2 <- arima(resid1, order = c(1,0,1), seasonal = list(order = c(0,1,0)))
 checkresiduals(mod1candidate2)
@@ -323,7 +335,7 @@ xMatrix3 = as.matrix(xMatrix3)
 
 #xMatrix
 
-mod3candidate1 = auto.arima(scale(combinedData$iwmRange), xreg = xMatrix3, trace = TRUE)
+mod3candidate1 = auto.arima(scale(combinedData$iwmRange), xreg = xMatrix3, trace = FALSE)
 checkresiduals(mod3candidate1)
 ```
 
@@ -336,11 +348,11 @@ xMatrix3 = as.data.frame(xMatrix3)
 
 # Lets examine the residuals directly to identify 
 mod3candidate2 <- lm(scale(combinedData$iwmRange) ~ casualties + mo3delta + hurricaneWarnings, data = xMatrix3 )
-summary(mod3candidate2)
+#summary(mod3candidate2)
 
 resid3 <- mod3candidate2$residuals
-pacf(resid3)
-acf(resid3)
+pacf(resid3, main = "PACF of Model Residuals")
+acf(resid3, main = "ACF of Model Residuals")
 
 ```
 
@@ -349,8 +361,8 @@ The ACF and PACF plots of the residuals from linear regression are mixed, but th
 
 ```{r}
 
-output=SARIMA.c(p1=1,p2=3,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=resid3)
-output %>% filter(!is.na(p))
+#output=SARIMA.c(p1=1,p2=3,q1=1,q2=4,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=resid3)
+#output %>% filter(!is.na(p))
 
 ```
 
@@ -376,7 +388,7 @@ xMatrix4 = as.matrix(xMatrix4)
 
 #xMatrix
 
-mod4candidate1 = auto.arima(scale(combinedData$qqqRange), xreg = xMatrix4, trace = TRUE)
+mod4candidate1 = auto.arima(scale(combinedData$qqqRange), xreg = xMatrix4, trace = FALSE)
 checkresiduals(mod4candidate1)
 
 ```
@@ -391,11 +403,11 @@ xMatrix4 = as.data.frame(xMatrix4)
 
 # Lets examine the residuals directly to identify 
 mod4candidate2 <- lm(scale(combinedData$qqqRange) ~ mo3delta + mo6delta + mo12delta + events + dailyChange, data = xMatrix4 )
-summary(mod1candidate2)
+#summary(mod1candidate2)
 
 resid4 <- mod4candidate2$residuals
-pacf(resid4)
-acf(resid4)
+pacf(resid4, main = "PACF of Model Residuals")
+acf(resid4, main = "ACF of Model Residuals")
 ```
 
 The ACF plot has many significant lags (>10) which suggests we may need to difference the residuals. The PACF plot has high significance through lag 5. Let's run a function to check all of the values up through p=2 and q=5.
@@ -403,8 +415,8 @@ The ACF plot has many significant lags (>10) which suggests we may need to diffe
 
 ```{r}
 
-mod4candidate2fit =SARIMA.c(p1=1,p2=2,q1=1,q2=5,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=resid4)
-mod4candidate2fit %>% filter(!is.na(p))
+#mod4candidate2fit =SARIMA.c(p1=1,p2=2,q1=1,q2=5,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=resid4)
+#mod4candidate2fit %>% filter(!is.na(p))
 
 
 ```
@@ -421,9 +433,67 @@ checkresiduals(mod4candidate2fit)
 
 The residuals for this model look similar to the auto.arima model, so it will be interesting to compare them with cross validation. Otherwise, it is notable that the residuals display clustered volatility, while the lag plot shows significant correlations at some values, although the Ljung-Box test returns 0.795 so we can conclude there is no autocorrelation in the residuals.
 
-#### Model 5: (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers 
+#### Model 5: (ARIMAX) IWM ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers 
 
-I am leaving this model to fit after the homework.
+
+Running an auto arima:
+```{r}
+
+xMatrix5 = combinedData[,c('mo3delta', 'mo6delta', 'mo12delta', 'events', 'dailyChange', 'workers')]
+xMatrix5[is.na(xMatrix4)] <- 0
+xMatrix5 = scale(xMatrix4)
+xMatrix5 = as.matrix(xMatrix4)
+
+#xMatrix
+
+mod5candidate1 = auto.arima(scale(combinedData$iwmRange), xreg = xMatrix5, trace = FALSE)
+checkresiduals(mod5candidate1)
+
+```
+
+
+Auto Arima returns (1,1,3). The diagnostics look acceptable, although there is clustered volatility in the residual plot. The Ljung-Box test returns p = 0.499, suggesting there is not autocorrelation in the residuals. However, the residual lag plot has high correlation around lag 14 and 26.
+
+Now let's select a candidate manually, including from SARIMA models. First we calculate and review the residuals from the linear regression:
+```{r}
+
+xMatrix5 = as.data.frame(xMatrix5)
+
+# Lets examine the residuals directly to identify 
+mod5candidate2 <- lm(scale(combinedData$iwmRange) ~ mo3delta + mo6delta + mo12delta + events + dailyChange, data = xMatrix5 )
+#summary(mod5candidate2)
+
+resid5 <- mod5candidate2$residuals
+pacf(resid5,main = "PACF of Model Residuals")
+acf(resid5,main = "ACF of Model Residuals")
+```
+
+The ACF plot has many significant lags (>10) which suggests we may need to difference the residuals. The PACF plot has high significance through lag 5. Let's run a function to check all of the values up through p=2 and q=5.
+
+
+```{r}
+
+#mod5candidate2fit =SARIMA.c(p1=1,p2=2,q1=1,q2=5,P1=1,P2=3,Q1=1,Q2=2,d1=0,d2=1,data=resid5)
+#mod5candidate2fit %>% filter(!is.na(p))
+
+
+```
+
+
+The best AIC and BIC scores returned by the function are for the model SARIMA(1,0,1)(1,1,0). The same as for QQQ with the same exogenous predictors. Let's look at the diagnostic plots to see how well this model captures the data:
+
+```{r}
+mod5candidate2fit = arima(resid5, order = c(1,0,1), seasonal = list(order = c(1,1,0)))
+checkresiduals(mod5candidate2fit)
+
+
+```
+
+The residuals for this model look somewhat unideal, with significant lags at 2, 6, 12, 14, and 26. Otherwise, it is notable that the residuals display clustered volatility, while the lag plot shows significant correlations at some values. The Ljung Box test returns 0.015 suggesting the residuals are autocorrelated, which is an issue.
+
+
+
+
 
 ### Model Selection for VAR Models 
 
@@ -550,60 +620,10 @@ fit = arima(combinedData$spyRange, order = c(4,1,1), xreg = xMatrix)
 #forecast(fit)
 mod1 = predict(fit, newxreg = predictors1)
 
-autoplot(mod1$pred)
+autoplot(mod1$pred, main = "ARIMA(4,1,1) Predictions, SPY Daily Range")
 ```
 
 Here we can see the models predictions for the SPY daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a precipitous drop in the daily range in SPY prices in the upcoming 10 days.
-
-
-### Model 3 (ARIMAX)  IWM ~ Casualties + Hurricanes + Interest Rate 3-Months
-
-Let's compare the model returned by auto.arima, ARIMA(1,1,3), vs the model I found by hand, SARIMA(1,0,1)(1,1,0), on the residuals of the linear regression for model 3.
-
-```{r}
-model3comparison = crossVal(c(1,1,3), c(1,0,1), list(order = c(1,1,0)), resid3)
-
-mean(model3comparison$rmse1)
-mean(model3comparison$rmse2)
-```
-
-Once again, the simple ARIMA model beats out the SARIMA architecture in terms of average RMSE. The average for ARIMA(1,1,3) was 0.554, while for SARIMA(1,0,1)(1,1,0) it was 0.601. Let's look at a plot of the rmse values to see how the models fared:
-
-```{r}
-index3 = c(1:nrow(model3comparison))
-ggplot(data = model3comparison, aes(x = index3, y = rmse1), color = 'blue') + geom_line() + geom_line(aes(x = index3, y = rmse2), color = 'red') + labs(title = 'Comparing RMSE of ARIMAX(1,1,3) Black and SARIMAX(1,0,1)(1,1,0) Red')
-
-```
-
-Just like for model 1, the two approaches performed similarly. If one model had a high RMSE for a particular value, the other model was likely to perform poorly as well. Overall however, we can see that for a given value the black line (ARIMA) tended to perform better. In the end, the ARIMAX models seems to fit the data well. As such, my chosen model for Model 3 is: ARIMAX(1,1,3)/.
-
-#### Predictions 
-
-Now, let's make predictions:
-```{r}
-#xMatrix3 = combinedData[,c('mo3delta', 'casualties', 'hurricaneWarnings')]
-
-mod3cas <- forecast(auto.arima(combinedData$casualties), 10)
-mod3delta3 <- forecast(auto.arima(combinedData$mo3delta), 10)
-mod3hurricane <- forecast(auto.arima(combinedData$hurricaneWarnings), 10)
-
-predictors3 <- data.frame(cbind(casualties = mod3cas$mean, mo3delta = mod3delta3$mean, hurricaneWarnings = mod3hurricane$mean))
-
-fit3 = arima(combinedData$iwmRange, order = c(1,1,3), xreg = xMatrix3)
-
-#summary(fit)
-#forecast(fit)
-mod3 = predict(fit3, newxreg = predictors3)
-
-autoplot(mod3$pred)
-```
-
-Here we can see the models predictions for the IWM daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a steep incline in IWM intraday ranges in the upcoming 10 days, especially in the first 5 before leveling off.
-
-### Model 4 ARIMAX 
-Leaving for future work.
-### Model 5 ARIMAX 
-Leaving for future work.
 
 ### Model 2 VAR 
 
@@ -679,7 +699,7 @@ ggplot() +
     title = "CV RMSE for Vix Prices, Blue = (p=1), Red = (p=5)",
     x = "Date",
     y = "RMSE",
-    guides(colour=guide_legend(title="Fit")))
+    guides(colour=guide_legend(title="Fit"))) +  theme(text = element_text(size=14))
 
 
 ggplot() + 
@@ -689,7 +709,7 @@ ggplot() +
     title = "CV RMSE for SPY Daily Range, Blue = (p=1), Red = (p=5)",
     x = "Date",
     y = "RMSE",
-    guides(colour=guide_legend(title="Fit")))
+    guides(colour=guide_legend(title="Fit"))) +  theme(text = element_text(size=14))
 
 
 ```
@@ -705,10 +725,160 @@ mod2forecast <- predict(finalmod2, n.ahead = 10)$fcst
 
 indexmod2 = c(1:10)
 ggplot() +
-    geom_line(aes(x = indexmod2, y = mod2forecast$spyRange[1:10]),color = "blue") +
-    geom_line(aes(x = indexmod2, y = mod2forecast$mo3delta[1:10]),color = "red") +
-    geom_line(aes(x = indexmod2, y = mod2forecast$VIX.Adjusted[1:10]),color = "green")
+    geom_line(aes(x = indexmod2, y = mod2forecast$spyRange[1:10],color = "SPY Daily Range")) +
+    geom_line(aes(x = indexmod2, y = mod2forecast$mo3delta[1:10],color = "3 Month Change in Interest Rates")) +
+    geom_line(aes(x = indexmod2, y = mod2forecast$VIX.Adjusted[1:10],color = "VIX Price")) + labs(y = "Scaled Value", x = "Days Predicted into the Future", color = "Series Predicted", title = "VAR Forecast of VIX, SPY Range, and 3mo Interest Rates") +  theme(text = element_text(size=14))
 
 ```
 
 Here we can see the scale forecasts for the 3 key variables, which are created with the predict function for the VAR model with p=5. Overall, the model predicts the SPY range to raise slightly for the next 10 days, and the 3 month interest rates to change sharply.
+
+
+### Model 3 (ARIMAX)  IWM ~ Casualties + Hurricanes + Interest Rate 3-Months
+
+Let's compare the model returned by auto.arima, ARIMA(1,1,3), vs the model I found by hand, SARIMA(1,0,1)(1,1,0), on the residuals of the linear regression for model 3.
+
+```{r}
+model3comparison = crossVal(c(1,1,3), c(1,0,1), list(order = c(1,1,0)), resid3)
+
+mean(model3comparison$rmse1)
+mean(model3comparison$rmse2)
+```
+
+Once again, the simple ARIMA model beats out the SARIMA architecture in terms of average RMSE. The average for ARIMA(1,1,3) was 0.554, while for SARIMA(1,0,1)(1,1,0) it was 0.601. Let's look at a plot of the rmse values to see how the models fared:
+
+```{r}
+index3 = c(1:nrow(model3comparison))
+ggplot(data = model3comparison, aes(x = index3, y = rmse1), color = 'blue') + geom_line() + geom_line(aes(x = index3, y = rmse2), color = 'red') + labs(title = 'Comparing RMSE of ARIMAX(1,1,3) Black and SARIMAX(1,0,1)(1,1,0) Red') +  theme(text = element_text(size=14))
+
+```
+
+Just like for model 1, the two approaches performed similarly. If one model had a high RMSE for a particular value, the other model was likely to perform poorly as well. Overall however, we can see that for a given value the black line (ARIMA) tended to perform better. In the end, the ARIMAX models seems to fit the data well. As such, my chosen model for Model 3 is: ARIMAX(1,1,3)/.
+
+#### Predictions 
+
+Now, let's make predictions:
+```{r}
+#xMatrix3 = combinedData[,c('mo3delta', 'casualties', 'hurricaneWarnings')]
+
+mod3cas <- forecast(auto.arima(combinedData$casualties), 10)
+mod3delta3 <- forecast(auto.arima(combinedData$mo3delta), 10)
+mod3hurricane <- forecast(auto.arima(combinedData$hurricaneWarnings), 10)
+
+predictors3 <- data.frame(cbind(casualties = mod3cas$mean, mo3delta = mod3delta3$mean, hurricaneWarnings = mod3hurricane$mean))
+
+fit3 = arima(combinedData$iwmRange, order = c(1,1,3), xreg = xMatrix3)
+
+#summary(fit)
+#forecast(fit)
+mod3 = predict(fit3, newxreg = predictors3)
+
+autoplot(mod3$pred, main = "ARIMA(1,1,3) Predictions for IWM Range")
+```
+
+Here we can see the models predictions for the IWM daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a steep incline in IWM intraday ranges in the upcoming 10 days, especially in the first 5 before leveling off.
+
+### Model 4 ARIMAX 
+
+Let's compare the model returned by auto.arima, ARIMA(1,1,1), vs the model I found by hand, SARIMA(1,0,1)(1,1,0), on the residuals of the linear regression for model 4.
+
+```{r}
+model4comparison = crossVal(c(1,1,1), c(1,0,1), list(order = c(1,1,0)), resid4)
+
+mean(model4comparison$rmse1)
+mean(model4comparison$rmse2)
+```
+
+Unlike the previous model, the SARIMA architecture beat out the simple ARIMA model, with RMSEs of 0.16934 and 0.16937 respectively. Let's plot both RMSE values to see how this discrepancy emerged:
+
+```{r}
+index4 = c(1:nrow(model4comparison))
+ggplot(data = model4comparison, aes(x = index4, y = rmse1), color = 'blue') + geom_line() + geom_line(aes(x = index4, y = rmse2), color = 'red') + labs(title = 'Comparing RMSE of ARIMAX(1,1,1) Black and SARIMAX(1,0,1)(1,1,0) Red') +  theme(text = element_text(size=14))
+
+```
+
+Visible in the chart above, the two models performed almost identically on the cross validation data data. Overall however, we can see that for a given value the black line (ARIMA) and the red line (SARIMAX) tended to perform almost equivalently. However, due to its slight performance edge, my chosen model for Model 4 is: SARIMAX(1,0,1)(1,1,0).
+
+#### Predictions 
+
+Now, let's make predictions:
+```{r}
+xMatrix4 = combinedData[,c('events', 'mo12delta', 'mo6delta', 'mo3delta', 'dailyChange', 'workers')]
+
+mod4events <- forecast(auto.arima(combinedData$events), 10)
+mod4delta12 <- forecast(auto.arima(combinedData$mo12delta), 10)
+mod4delta6 <- forecast(auto.arima(combinedData$mo6delta), 10)
+mod4delta3 <- forecast(auto.arima(combinedData$mo3delta), 10)
+mod4dailyChange <- forecast(auto.arima(combinedData$dailyChange), 10)
+mod4workers <- forecast(auto.arima(combinedData$workers), 10)
+
+
+predictors4 <- data.frame(cbind(events = mod4events$mean, mo12delta = mod4delta12$mean, mo6delta = mod4delta6$mean, mo3delta = mod4delta3$mean, dailyChange = mod4dailyChange$mean, workers = mod4workers$mean))
+
+
+fit4 = arima(combinedData$qqqRange, order = c(1,0,1), seasonal = list(order = c(1,1,0)), xreg = xMatrix4)
+
+#summary(fit)
+#forecast(fit)
+mod4 = predict(fit4, newxreg = predictors4)
+
+autoplot(mod4$pred, main = "Predictions, Next 10 Timesteps, Model 4")
+```
+
+Here we can see the models predictions for the QQQ's daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a steep incline in QQQ intraday ranges in the upcoming several days, but then decreases again for the remained of the prediction window.
+
+
+
+### Model 5 ARIMAX 
+
+
+Let's compare the model returned by auto.arima, ARIMA(1,1,3), vs the model I found by hand, SARIMA(1,0,1)(1,1,0), on the residuals of the linear regression for model 4.
+
+```{r}
+model5comparison = crossVal(c(1,1,3), c(1,0,1), list(order = c(1,1,0)), resid5)
+
+mean(model5comparison$rmse1)
+mean(model5comparison$rmse2)
+```
+
+Unlike the previous model, the simple ARIMA model performs much better than the complicated SARIMA model, with an RMSE of 0.636 that is far lower than the SARIMA's 0.675. 
+
+```{r}
+index5 = c(1:nrow(model5comparison))
+ggplot(data = model5comparison, aes(x = index5, y = rmse1), color = 'blue') + geom_line() + geom_line(aes(x = index5, y = rmse2), color = 'red') + labs(title = 'Comparing RMSE of ARIMAX(1,1,3) Black and SARIMAX(1,0,1)(1,1,0) Red') +  theme(text = element_text(size=14))
+
+```
+
+Visible in the chart above, the ARIMA model (black line) performs much better than the SARIMA at most data points. Unlike previous comparisons, for model 5 the two approaches appear to diverge greatly, trading off in which has a more accurate prediction at each point. Overall however, we can see that for a given value the black line is more likely to be correct, and so I would choose the ARIMA(1,1,3) model for the IWM data.
+
+#### Predictions 
+
+Now, let's make predictions:
+```{r}
+xMatrix5 = combinedData[,c('events', 'mo12delta', 'mo6delta', 'mo3delta', 'dailyChange', 'workers')]
+
+mod5events <- forecast(auto.arima(combinedData$events), 10)
+mod5delta12 <- forecast(auto.arima(combinedData$mo12delta), 10)
+mod5delta6 <- forecast(auto.arima(combinedData$mo6delta), 10)
+mod5delta3 <- forecast(auto.arima(combinedData$mo3delta), 10)
+mod5dailyChange <- forecast(auto.arima(combinedData$dailyChange), 10)
+mod5workers <- forecast(auto.arima(combinedData$workers), 10)
+
+
+predictors5 <- data.frame(cbind(events = mod5events$mean, mo12delta = mod5delta12$mean, mo6delta = mod5delta6$mean, mo3delta = mod5delta3$mean, dailyChange = mod5dailyChange$mean, workers = mod5workers$mean))
+
+
+fit5 = arima(combinedData$iwmRange, order = c(1,1,3), xreg = xMatrix5)
+
+#summary(fit)
+#forecast(fit)
+mod5 = predict(fit5, newxreg = predictors5)
+
+autoplot(mod5$pred, main = "Predictions, Next 10 Timesteps, Model 5")
+```
+
+Here we can see the models predictions for the QQQ's daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a steep incline in QQQ intraday ranges in the upcoming several days, but then decreases again for the remained of the prediction window.
+
+
+I will dicsuss our conclusions from these 5 models further in the conclusions page.
+

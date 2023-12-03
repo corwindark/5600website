@@ -1,3 +1,49 @@
 ---
 title: "Conclusions"
 ---
+
+
+## Synthesizing Results from Across the Project
+
+
+![Results in Brief](./conclusions.png)
+
+The project attempted to model intraday volatility, measured as the range between the highest and lowest daily price recorded as a percentage of the opening price. In particular, it looked at this metric for popular exchange traded funds tracking the S&P 500, NASDAQ 100, and Russel 2000. To accomplish this, it introduced exogenous variables from four sources: extreme weather events, interest rate expectations, investor confidence, and labor stoppages. 
+
+Ultimately, the three ETFs proved to have similar dynamics both as univariate time series and also as elements in multivariate models. The external predictors, however, seemed substantially distinguished from eachother and almost all contained some relevant data in predicting the three outcome variables. When exploring the data, it became clear that the amount of variation in the indices intraday range was not constant, and at different points in time had been much higher or lower than average. Just as with the overall trend, however, the three indices shared this trait in common.
+
+In an attempt to model these variables and make predictions, the project began with ARIMA and SARIMA models. ARMA models proved immediately effective, with all of the main series having a variant of an ARMA model performing well. Somewhat surprisingly, however, the financial instruments did not have major seasonal components. This rendered SARIMA models largely ineffective in describind their behavior.
+
+The next step was to incorporate the exogenous datasets in order to explain more of the variation in the indices' intraday ranges. These exogenous predictors were combined in a number of ways, through both VAR and ARIMAX models. On this front, the role of the exogenous predictors was encouraging. All four datasets had relevant predictive power. In particular: the daily change in the VIX (investor sentiment), hurricane events (weather data), daily striking workers (labor stoppages), and three month interest rate changes (bond yield data). While these models did not explain all of the variation in the data by any means, they demonstrated that these external factors impact market volatility. 
+
+Financial time series modeling with ARCH and GARCH models made intuitive sense for the data. The intraday ranges exhibited similar behavior to daily stock market returns, which are often the focus of ARCH and GARCH models. All of the major indices were well suited to GARCH models in some form, which suggests that volatility can be modeled similar to traditional financial metrics.
+
+Finally, several deep learning methods, including RNN, GRU, and LSTM models, were applied to the dataset. Here, the LSTM models performed the best, and outperformed all traditional statistical models except for the VAR approaches. This demonstrated that univariate volatility is best understood with deep learning, although multivariate analysis is still best performed statistically.
+
+Overall, the work in this project has indicated that many external factors play a role in shaping market volatility, and the results contained herein suggest future work is merited in identifying other exogenous predictors that are shaping the markets which impact all of our lives.
+
+
+## Answering Research Questions
+
+
+Question | Answer
+-----|-----:
+1. Is the intraday volatility of major stock indices truly random, or does it contain patterns that can be modelled?| While no model can explain 100%, or even a majority of the volatility in these major indices, many different models can explain some part. This is evidenced by the many models in the project that achieved significant results.
+2. Do the major US stock indices differ greatly in the structure of their volatility over time?| According to this project, stock indices have not had major shifts in how their volatility is structured over time, although they do vary in the short term, with periods of increased or decreased volatility.
+3. How do markets react in response to chaining expectations about macroeconomic conditions?| It appears that changes in the pricing of bonds, especially short term bonds for the next three months, are reflected in volatility in major indices. This means markets react with increased volaitlity to changing macroeconomic conditions.
+4. How do markets incorporate extreme weather event warnings into their pricing of major indices, and how does this affect volatility?| It appears weather warnings do not have an effect, however hurricane events in particular may trigger increased volatility, although whether this is through their physical impacts remains an open question.
+5. How do markets react in response to major strikes and labor stoppages, and does this differ based on the size of the strike or the types of companies in question?| While the number of strikes was less important, I did find evidence that markets reacted to large numbers of workers being on strike in the economy.
+6. How does investor confidence impact markets?| Investor confidence (particularly the VIX index) has a clear, if small, effect on market volatility.
+7. Do the major US stock indices differ in their response to external stimuli, and are some more sensitive to external volitility?| Broadly speaking, I found the major indices to be very similar in their reaction to external stimuli and internal dynamics.
+8. Are the patterns exhibited by intraday volatility in major indices best-suited to traditional statistical models or deep learning? If deep learning models fit better, then what does that say about patterns in volatility?| It varies, deep learning models do perform competitively, but traditional models ultimately had the best results in this study.
+9. Have the relationships between the intraday ranges in the prices of securities and external factors changed over time?| This project did not find any evidence of a time-variant effect between the exogenous factors and securities, but the question was ultimately not addressed in the most detail possible. Further work would be nessecary to resolve this conclusively.
+10. How well can we explain variations in intraday volatility, when synthesizing as much external data and models as possible?| Overall, we could not explain even 10% of the variation in intraday volatility with models that accounted for many variables, although the results continued to improve as mode predictors were added to the models. 
+
+
+
+
+
+
+
+
+

@@ -25,6 +25,8 @@ def install(name):
 
 ## Declare Useful Functions 
 
+Here, I would like to mention that this code is based on the deep learning lab code we went over in class. I have adapted it here to apply it to my data, with modifications in some areas as my data functions slightly differently than the examples in the lab.
+
 ```{python}
 
 def history_plot(history):
@@ -238,9 +240,9 @@ D = 1
 batch_size = 10 
 
 
-spy_x,spy_y=form_arrays(spy_train,lookback=L,delay=D,step=S,unique=False,verbose=True)
+spy_x,spy_y=form_arrays(spy_train,lookback=L,delay=D,step=S,unique=False,verbose=False)
 
-spy_val_x, spy_val_y = form_arrays(spy_val,lookback=L,delay=D,step=S,unique=False,verbose=True)
+spy_val_x, spy_val_y = form_arrays(spy_val,lookback=L,delay=D,step=S,unique=False,verbose=False)
 
 
 ```
@@ -288,7 +290,7 @@ model.add(layers.Dense(1))
 model.compile(optimizer=RMSprop(), loss='mae')
 
 
-history_spy_1_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=30, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+history_spy_1_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=30, validation_data= (spy_val_x, spy_val_y), validation_steps=10, verbose = 0)
 
 
 ```
@@ -319,7 +321,7 @@ model.add(layers.Dense(1))
 model.compile(optimizer=RMSprop(), loss='mae')
 
 
-history_spy_1_reg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=30, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+history_spy_1_reg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=30, validation_data= (spy_val_x, spy_val_y), validation_steps=10, verbose = 0)
 
 
 ```
@@ -348,7 +350,7 @@ model.add(layers.Dense(1))
 model.compile(optimizer=RMSprop(), loss='mae')
 
 
-history_spy_2_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+history_spy_2_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10, verbose = 0)
 
 ```
 
@@ -377,7 +379,7 @@ model.add(layers.Dense(1))
 model.compile(optimizer=RMSprop(), loss='mae')
 
 
-history_spy_3_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+history_spy_3_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10, verbose = 0)
 
 
 ```
@@ -411,7 +413,7 @@ model.compile(optimizer=RMSprop(), loss='mae')
 
 #  trying diff shape
 
-history_spy_4_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10)
+history_spy_4_noreg = model.fit(x = spy_x, y = spy_y, steps_per_epoch=20, epochs=40, validation_data= (spy_val_x, spy_val_y), validation_steps=10, verbose = 0)
 
 
 ```
@@ -495,7 +497,6 @@ print("Neural Net: ", rmse(nnvals, spy_val_y))
 Looking at a chart of our best-performing Neural Network Model (LSTM) vs. my best performing ARIMA model (3,0,3) from earlier work, vs. the real observed values, a few things become clear. One, neither model type does a perfect job, especially of capturing extremely high or low values. Two, the ARIMA predictions increase and decrease more (have a higher range) thant he NN predictions. However, the ARIMA predictions tend to vary further from 0, while the NN predictions stay close to zero and only alter slightly. Because of this, the RSME of the neural network is actually lower than the ARIMA model, with the neural network having 0.71 RMSE and the ARIMA model having 0.78 RMSE.
 
 However, the neural network is still not the best model I have tested in this project, because the VAR model achieved an RMSE of 0.68 on the same dataset. This suggests that while Neural networks are powerful tools for univariate prediction, the most accurate model predictions may still be those that include exogenous variables.
-
 
 
 

@@ -16,7 +16,6 @@ website:
       - Financial Time Series Models (ARCH GARCH).qmd
       - Deep Learning for TS.qmd
       - Conclusions.qmd
-      - dv.qmd
 
 format:
   html:
@@ -25,9 +24,11 @@ format:
     css: styles.css
     code-fold: true
     code-summary: "Show Code"
+    embed-resources: true
+
 
 execute:
-  freeze: true 
+  freeze: false 
 
 
 
