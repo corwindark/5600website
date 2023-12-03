@@ -3,16 +3,23 @@ title: "Exploratory Data Analysis"
 
 ---
 
-<h2>  Time Series Analysis   </h2>
+##  Time Series Analysis  
 
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
 
 Let's start with reading in the intraday range data. First with the S&P 500.
 
 ``` {r}
 library(tidyverse)
 library(quantmod)
+library(forecast)
+library(ggplot2)
+```
 
 
+```{r}
 spyIn <- quantmod::getSymbols("SPY", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
 qqqIn <- quantmod::getSymbols("QQQ", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
 iwmIn <- quantmod::getSymbols("IWM", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
@@ -35,28 +42,59 @@ pacf(spyIn$spyRange)
 ```
 
 
-Upon initial review of the SPY intraday range data, it appears that there is some trend, but no seasonality. The decomposition function would not work on the data as it could not recognize periodicity. As a next step, we can difference the data.
+Upon initial review of the SPY intraday range data, it appears that there is some trend, but no seasonality. The decomposition function would not work on the data as it could not recognize periodicity. Let's review the lag plots of the data for SPY, QQQ, and IWM:
+
+```{r}
+spyLagPlot <- gglagplot(spyIn$spyRange, do.lines = FALSE, set.lags = c(1, 5, 10, 20)) + 
+  ggtitle('Lag Plots, SPY Daily Range') + labs(x = 'Intraday Range Lagged', y = 'Intraday Range Current')  +  theme(text = element_text(size=12))
+
+qqqLagPlot <- gglagplot(qqqIn$qqqRange, do.lines = FALSE, set.lags = c(1, 5, 10, 20)) + 
+  ggtitle('Lag Plots, QQQ Daily Range') + labs(x = 'Intraday Range Lagged', y = 'Intraday Range Current')  +  theme(text = element_text(size=12))
+  
+
+iwmLagPlot <- gglagplot(iwmIn$iwmRange, do.lines = FALSE, set.lags = c(1, 5, 10, 20)) + 
+  ggtitle('Lag Plots, IWM Daily Range') + labs(x = 'Intraday Range Lagged', y = 'Intraday Range Current')  +  theme(text = element_text(size=12))
+
+
+spyLagPlot
+qqqLagPlot
+iwmLagPlot
+```
+
+
+While these lag plots do not show a clear trend, they do show clear heteroskedacticity. We can see that the ranges are always positive, so this already means the distribution is one-sided. However, the positive ends of the spectrum (a higher percent range for the day) are much further spread out than those values closer to zero. If the data didn't always have to be positive, I could see the plots looking like Gaussian white noise (i.e. imagine the lag plots visualize, but with each one rotated to all 4 quadrants instead of +X/+Y and you would have a near-Gaussian distribution).
+
+
+As a next step, to study these relationships with the lag plots further, we can difference the data.
 
 ``` {r}
-library(forecast)
 
 
 diff1 <- diff(spyIn$spyRange)
+diffqqq <- diff(qqqIn$qqqRange)
+diffiwm <- diff(iwmIn$iwmRange)
 
 
+ggtsdisplay(diff1, main = "Differenced SPY Intraday Daily Range")
 
-#write.csv(diff1SPY, "/data/spyDiff.csv")
-#auto.arima(spyIn$spyRange)
-plot(diff1)
+
+ggtsdisplay(diffqqq, main = "Differenced QQQ Intraday Daily Range")
+
+
+ggtsdisplay(diffiwm, main = "Differenced IWM Intraday Daily Range")
+
 ```
 
-After differencing, the data appears to have lost its trend. However, there is still visible heteroskedacticity in the differences between intraday ranges.
+
+After differencing, the data appears to have lost its trend. Moverover, the first lag in the ACF plot has very strong correlation, suggesting we may have over-differenced. However, there is still visible heteroskedacticity in the differences between intraday ranges. These patterns are essentially the same between the three charts. 
 
 
 ``` {r}
-acf(diff1,    na.action = na.exclude)
+acf(diff1,    na.action = na.exclude, main = "")
+title("First Order Differenced ACF for SPY Daily Range")
 
-pacf(diff1,    na.action = na.exclude)
+pacf(diff1,    na.action = na.exclude, main = "")
+title("First Order Differenced PACF for SPY Daily Range")
 
 ```
 
@@ -68,16 +106,25 @@ library(tseries)
 diffnoNA <- diff1$spyRange[!is.na(diff1$spyRange)]
 adf.test(diffnoNA)
 
-#
+
+diffnoNAqqq <- diffqqq$qqqRange[!is.na(diffqqq$qqqRange)]
+
+adf.test(diffnoNAqqq)
+
+diffnoNAiwm <- diffiwm$iwmRange[!is.na(diffiwm$iwmRange)]
+
+adf.test(diffnoNAiwm)
+
 ```
 
 
-With dickey fuller test result of 0.01, we can reject the null hypothesis and conclude the series is stationary. 
+With dickey fuller test result of 0.01 for all three series, we can reject the null hypothesis and conclude that all of the series are stationary. 
 
 
 
-<h3> Moving Average Smoothing </h3>
+### Moving Average Smoothing
 
+Digging once again into the SPY data:
 ```{r}
 
 spyDiff1 <- as.ts(diffnoNA)
@@ -90,21 +137,21 @@ spyAvg50Diff1 <- stats::filter(spyDiff1, sides = 1, rep(1/50, 50))
 spyAvg100Diff1 <- stats::filter(spyDiff1, sides = 1, rep(1/100, 100))
 
 
-autoplot(spyAvg3Diff1)
+autoplot(spyAvg3Diff1, main = "3 Day Lag of SPY Daily Range")
 
-autoplot(spyAvg5Diff1)
-
-
-autoplot(spyAvg30Diff1)
+autoplot(spyAvg5Diff1, main = "5 Day Lag of SPY Daily Range")
 
 
-autoplot(spyAvg50Diff1)
+autoplot(spyAvg30Diff1, main = "30 Day Lag of SPY Daily Range")
 
-autoplot(spyAvg100Diff1)
+
+autoplot(spyAvg50Diff1, main = "50 Day Lag of SPY Daily Range")
+
+autoplot(spyAvg100Diff1, main = "100 Day Lag of SPY Daily Range")
 
 ```
 
 
-Overall the effect of the moving average at higher numbers is to reveal seasonality in the data. At lower smoothing levels (3 and 5 days), the time series looked almost unchanged, and still highly variant. Only at a 30 day average window did the seasonality start to appear, with clear periods in the data and a repeating pattern. Notably, even with a repeating pattern the data still showed obvious heteroskedasticity, with periods of increased varianced. The 50 and 100 day moving average windows began to obfuscate the periods, while keeping the heteroskedacticity, although they did have smaller variations and were nearer to 0 on average. In adition, the 50 and 100 days had discernable trends in the data.
-
+Overall the effect of the moving average at higher numbers is to reveal trend and seasonality in the data. At lower smoothing levels (3 and 5 days), the time series looked almost unchanged, and still highly variant. Only at a 30 day average window did the seasonality start to appear, with clear periods in the data and a repeating pattern. Notably, even with a repeating pattern the data still showed obvious heteroskedasticity, with periods of increased varianced. The 50 and 100 day moving average windows began to obfuscate the periods, while keeping the heteroskedacticity, although they did have smaller variations and were nearer to 0 on average. In adition, the 50 and 100 days had discernable trends in the data. We see similar results for QQQ and IWM, which I have abridged here.
+ 
 

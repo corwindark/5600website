@@ -8,7 +8,7 @@
 
 <meta name="author" content="Corwin Dark">
 
-<title>Corwin Dark - Time Series</title>
+<title>Corwin Dark - About Me</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -84,11 +84,7 @@ ul.task-list li input[type="checkbox"] {
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
- <span class="menu-text">Home</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./about me.html" rel="" target="">
- <span class="menu-text">About</span></a>
+ <span class="menu-text">About Me</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./Introduction.html" rel="" target="">
@@ -115,10 +111,6 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">ARIMAX SARIMAX VAR</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./Spectral Analysis and Filtering.html" rel="" target="">
- <span class="menu-text">Spectral Analysis and Filtering</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="./Financial Time Series Models (ARCH GARCH).html" rel="" target="">
  <span class="menu-text">Financial Time Series Models (ARCH GARCH)</span></a>
   </li>  
@@ -130,10 +122,8 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="./Conclusions.html" rel="" target="">
  <span class="menu-text">Conclusions</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./dv.html" rel="" target="">
- <span class="menu-text">Data Vizes in TS</span></a>
-  </li>  
+  <li class="dropdown-header">
+ <span class="menu-text">dv.qmd</span></li>
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -150,7 +140,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#what-is-a-time-series" id="toc-what-is-a-time-series" class="nav-link active" data-scroll-target="#what-is-a-time-series">What is a Time Series ?</a></li>
+  <li><a href="#about-me" id="toc-about-me" class="nav-link active" data-scroll-target="#about-me">About Me</a></li>
+  <li><a href="#interests" id="toc-interests" class="nav-link" data-scroll-target="#interests">Interests</a></li>
   </ul>
 </nav>
     </div>
@@ -159,7 +150,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Time Series</h1>
+<h1 class="title">About Me</h1>
 </div>
 
 
@@ -180,25 +171,23 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="what-is-a-time-series" class="level3">
-<h3 class="anchored" data-anchor-id="what-is-a-time-series">What is a Time Series ?</h3>
+<section id="about-me" class="level2">
+<h2 class="anchored" data-anchor-id="about-me">About Me</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="me.jpg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Hiking in the Cascades circa. 2020</figcaption>
+</figure>
+</div>
+<p>Hi Everyone, I am Corwin Dark and I am a first year master’s student in the Data Science and Analytics Program here at Georgetown. I grew up in Seattle, Washington before coming to DC for university. I attended American University for my undergraduate degree, which was in international relations. After graduating during COVID, I worked for a small consulting firm on data-related topics for international development programs. After a few years of working, I realized I had a strong curiosity to learn more about cutting edge data science methods, and so I have come back to school. Within data science, I am really interested in how algorithms and techniques can be combined to perform better than they would alone, which is why I really enjoyed creating this project for class and drawing on so many different techniques. I am super excited to be in the Georgetown program with you all, and I hope you enjoy my portfolio! <a href="./Introduction.html">Start reading with the introduction here.</a></p>
+</section>
+<section id="interests" class="level2">
+<h2 class="anchored" data-anchor-id="interests">Interests</h2>
 <ul>
-<li><p>Any metric that is measured over regular time intervals makes a Time Series. A time series is a sequence of data points or observations collected or recorded over a period of time at specific, equally spaced intervals. Each data point in a time series is associated with a particular timestamp or time period, making it possible to analyze and study how a particular variable or phenomenon changes over time. Time series data can be found in various domains and can represent a wide range of phenomena, including financial data, economic indicators, weather measurements, stock prices, sales figures, and more.</p>
-<ul>
-<li>Example: Weather data, Stock prices, Industry forecasts, etc are some of the common ones.</li>
-</ul></li>
-<li><p>The analysis of experimental data that have been observed at different points in time leads to new and unique problems in statistical modeling and inference.</p></li>
-<li><p>The obvious correlation introduced by the sampling of adjacent points in time can severely restrict the applicability of the many conventional statistical methods traditionally dependent on the assumption that these adjacent observations are independent and identically distributed.</p></li>
+<li>Deep learning and neural networks</li>
+<li>Ensembling and meta learning</li>
+<li>Financial data science</li>
 </ul>
-<p><strong>Key characteristics of time series data include:</strong></p>
-<p><strong>Temporal Order:</strong> Time series data is ordered chronologically, with each data point representing an observation at a specific point in time. The order of data points is critical for understanding trends and patterns over time.</p>
-<p><strong>Equally Spaced Intervals:</strong> In most cases, time series data is collected at regular intervals, such as hourly, daily, weekly, monthly, or yearly. However, irregularly spaced time series data can also exist.</p>
-<p><strong>Dependency:</strong> Time series data often exhibits temporal dependency, meaning that the value at a given time is influenced by or related to the values at previous times. This dependency can take various forms, including trends, seasonality. This serial correlation is called as autocorrelation.</p>
-<p><strong>Components:</strong> Time series data can typically be decomposed into various components, including:</p>
-<p><em>Trend:</em> The long-term movement or direction in the data. <em>Seasonality:</em> Repeating patterns or cycles that occur at fixed intervals. <em>Noise/Irregularity:</em> Random fluctuations or variability in the data that cannot be attributed to the trend or seasonality.</p>
-<p><strong>Applications:</strong> Time series data is widely used for various applications, including forecasting future values, identifying patterns and anomalies, understanding underlying trends, and making informed decisions based on historical data.</p>
-<p>Analyzing time series data involves techniques like time series decomposition, smoothing, statistical modeling, and forecasting. This class will cover but not be limited to traditional time series modeling including ARIMA, SARIMA, the multivariate Time Series modeling including; ARIMAX, SARIMAX, and VAR models, Financial Time Series modeling including; ARCH, GARCH models, and E-GARCH, M-GARCH..ect, Bayesian structural time series (BSTS) models, Spectral Analysis and Deep Learning Techniques for Time Series. Researchers and analysts use software tools like Python, R, and specialized time series libraries to work with and analyze time series data effectively.</p>
-<p>Time series analysis is essential in fields such as finance, economics, epidemiology, environmental science, engineering, and many others, as it provides insights into how variables change over time and allows for the development of predictive models to forecast future trends and outcomes.</p>
 
 
 </section>

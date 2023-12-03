@@ -6,15 +6,13 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Home
-      - about me.qmd
+        text: About Me
       - Introduction.qmd
       - Data Sources.qmd
       - Data Visualization.qmd
       - Exploratory Data Analysis.qmd
       - ARMA ARIMA SARIMA Models.qmd
       - ARIMAX SARIMAX VAR.qmd
-      - Spectral Analysis and Filtering.qmd
       - Financial Time Series Models (ARCH GARCH).qmd
       - Deep Learning for TS.qmd
       - Conclusions.qmd
@@ -23,8 +21,13 @@ website:
 format:
   html:
     theme: sandstone
-    css: styles.css
     toc: true
+    css: styles.css
+    code-fold: true
+    code-summary: "Show Code"
+
+execute:
+  freeze: true 
 
 
 

@@ -4,35 +4,53 @@ author: "Corwin Dark"
 ---
 
 
-<h2> S&P 500, Nasdaq 100, and Russel 2000, Daily Data  Yahoo Finance</h2>
-
-https://finance.yahoo.com/quote/%5EGSPC/history?p=%255EGSPC
-
-Financial data from tickers SPY, QQQ, and IWM. Data includes the open and close of stock prices for each day, as well as the highest and lowest price recorded for the day. These indices are widely used and will be a relevant outcome variable for the project to study. The main output value thaht will be calculated is the high-low range of the day.
+## United States Stock Indices - Intraday Volatility
 
 
-<h2> VIX Data, Yahoo Finance</h2>
+Financial data on the prices of different stocks are readily available in both R and Python through various packages, and amongst these the Yahoo Finance package is a particularly popular option. To approximate the daily range in value of major indices, I chose to look at popular low-cost ETFs which attempt to track the value of stocks contained in these indices. For the S&P 500, this is SPY, run by State Street, for the Russel 2000 this is iShare's IWM, and for the NASDAQ 100 it is the ever-popular Invesco QQQ fund. The data I haave gathered for these tickers includes the open and close of stock prices for each day, as well as the highest and lowest price recorded for the day. These indices are widely used and will be a relevant outcome variable for the project to study. The main output value that will be calculated is the high-low range of the day.
+
+### Sources 
+
+- [SPY Historical Data](https://finance.yahoo.com/quote/SPY/history?p=SPY)
+
+- [IWM Historical Data](https://finance.yahoo.com/quote/IWM/history?p=IWM)
+
+- [QQQ Historical Data](https://finance.yahoo.com/quote/QQQ/history?p=QQQ)
+
+
+## Investor Confidence - CBOE's VIX 
 
 https://finance.yahoo.com/quote/%5EVIX/history?p=%255EVIX
 
 The Chicago Board of Exchange (CBOE) VIX index is a widely-used tool to measure investor sentiment. The indicator itself represents the degree of volatility perceived by investors in the next month. It ranges from near zero up to about 60 in recent years, with scores at different intervals representing different levels of perceived volatility.
 
+### Sources
 
-<h2>  Work Stoppages  </h2>
-https://www.bls.gov/wsp/
+- [Methodology of the VIX](https://www.cfainstitute.org/-/media/documents/article/rf-brief/rfbr-moran-vix-volatility.ashx)
+
+- [VIX Historical Data](https://finance.yahoo.com/quote/%5EVIX/history?p=%255EVIX)
+
+
+## Work Stoppages
 
 This dataset contains all of the major strikes recorded by the bureau of labor statistics, such that I will be able to use the number of striking workers on any given day as a variable for analysis.
 
+### Sources
 
-<h2>  Daily Yield Curve Next 3 Months  </h2>
-https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&field_tdr_date_value=2023
+- [Labor Deparment Data](https://www.bls.gov/wsp/)
+
+## Daily 3 Month Yield Curve 
 
 While I originally considered the actual federal funds rate, the values did not change much day to day. Instead I would like to use the expectation of yield rates, measured through the pricing of bonds in the yield curve over the next few months. The data includes the prices of treasury bills 1, 2, and 3 months out on each date.
 
-<h2>  Storm Events by Day  </h2>
-https://www.ncdc.noaa.gov/stormevents/ftp.jsp
+### Sources
 
-NOAA maintains records on each storm warning they send out for the entire country. This dataset includes many types of storm warnings, such as for hurricanes, blizzards, flash floods, and tornadoes. Importantly, the dataset includes the day in which each weather event took place, as well as the property damage and bodily injury caused by the weather event.
+- [Treasury Department Data](https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&field_tdr_date_value=2023)
 
 
+## Storm Events by Day
+
+The National Oceanic and Atmospheric Administration (NOAA) maintains records on each storm warning they send out for the entire country. This dataset includes many types of storm warnings, such as for hurricanes, blizzards, flash floods, and tornadoes. Importantly, the dataset includes the day in which each weather event took place, as well as the property damage and bodily injury caused by the weather event.
+
+- [NOAA Data](https://www.ncdc.noaa.gov/stormevents/ftp.jsp)
 

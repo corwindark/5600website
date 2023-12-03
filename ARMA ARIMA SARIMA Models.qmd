@@ -1,12 +1,13 @@
 ---
 title: "ARMA ARIMA SARIMA MODELS"
-format:
-    html:
-        code-fold: true
-        code-summary: "Show Code"
 ---
 
 Loading packages
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
 
 ``` {r message = FALSE}
 library(tidyverse)
@@ -42,13 +43,14 @@ diff1IWM <- diff(iwmIn$iwmRange)
 
 
 
-<h2> Stationarity of the time series </h2>
+## Stationarity of the Time Series
 
-Based on previous results, and the fact that I am using "pseudo-differenced data" in that I am taking the percentage range in prices, in addition to a single differencing, means that the time series are stationary
+Based on previous results, and the fact that I am using "pseudo-differenced data" in that I am taking the percentage range in prices, in addition to a single differencing, means that the time series are stationary. As evidenced by Dickey-Fuller Tests.
 
 
-<h2> Building ARIMA Model </h2>
+## Building ARIMA Model
 
+### QQQ
 Since I did some of this work with SPY data on the EDA tab, I will focus on QQQ range data here.
 
 ``` {r}
@@ -132,8 +134,98 @@ plot(forecast(naiveModelQQQ, 10), xlim = c(650,750))
 
 Here, the naive method can only forecast 1 observation into the future, since the seasonal period is one. Which is an advantage to my model, but realistically means the naive model should be evaluated with cross validation.
 
+### SPY
 
-<h2> SARIMA </h2>
+
+Now, let's gather ARIMA models for the intraday range. First we declare the helper function
+```{r}
+arimaResults <- function(data) {
+    
+    i=1
+    temp= data.frame()
+    ls=matrix(rep(NA,6*100),nrow=100) # roughly nrow = 3x4x2
+
+
+    for (p in 1:6)# p=1,2,3 : 3
+    {
+        for(q in 1:6)# q=1,2,3,4 :4
+        {
+            for(d in 1:2) {
+                
+                if(p-1+d - 1+q-1<=8) #usual threshold
+                {
+                    
+                    model<- Arima(data,order=c(p-1,d-1,q-1),include.drift=FALSE) 
+                    ls[i,]= c(p-1,d-1,q-1,model$aic,model$bic,model$aicc)
+                    i=i+1
+                    #print(i)
+                    
+                }
+
+            }
+                
+        }
+    }
+
+
+    temp= as.data.frame(ls)
+    names(temp)= c("p","d","q","AIC","BIC","AICc")
+    return(temp[which.min(temp$AIC),])
+    #return(temp)
+}
+
+```
+
+Plotting the daily ranges:
+
+SPY
+```{r}
+
+plot(spyIn$spyRange, main = "SPY Daily Range")
+
+```
+
+The SPY data certainly appears to have clustered volatility, as there are large swings in close proximity to eachother. But it also has noticeable trend, with the intraday ranges being higher during the middle of the time series before dropping down again towards the end. To combat this, let's look at the differenced series:
+
+```{r}
+plot(spyIn$spyRange %>% diff(), main = "Differenced SPY Daily Range")
+```
+
+The differenced data looks noisy, and perhaps over differenced. As we saw on the previous page. Let's see which arima models had the lowest AIC and BIC scores.
+
+Now, let's find good-fitting models starting with SPY:
+```{r}
+arimaResults(spyIn$spyRange)
+```
+
+The best model returned by the function is ARMA(3,0,3). It is surprising that the models which differenced the data didn't perform better, but I manually reviewed those options and they all had worse AIC and BIC scores.
+
+### IWM
+
+Let's check IWM:
+```{r}
+plot(iwmIn$iwmRange)
+```
+
+IWM's intraday range looks slightly more stationary than the other 2 time series, and also has more extreme changes in volatility over time. However, we can still see somewhat of a trend, such that a moving average would be obviously nonstationary, so once again we difference the series.
+
+```{r}
+plot(iwmIn$iwmRange %>% diff())
+```
+
+While the variance looked elevated in the non-differenced plot, it is actually less hesteroskedastic in the differenced plot. This suggests IWM may not have as much autocorrelation in the variance as the other two indices. An ARIMA model alone might suffice here, lets look for the parameters that yield the lowest AIC and BIC.
+
+For IWM:
+```{r}
+arimaResults(iwmIn$iwmRange)
+```
+
+Fitting the pattern of the best models for the financial instruments being of the form ARMA(N, 0, N), the model with the lowest AIC for IWM was ARMA(4,0,4).
+
+
+
+
+## SARIMA 
 
 Let's look for a seasonal affect in the ACF plots, using the weather events data. First we prepare the data:
 ```{r}

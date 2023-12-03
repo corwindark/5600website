@@ -23,7 +23,7 @@ def install(name):
 ```
 
 
-<h2> Declare Useful Functions </h2>
+## Declare Useful Functions 
 
 ```{python}
 
@@ -47,7 +47,7 @@ def history_plot(history):
 
 
 
-<h2> Read in Data </h2>
+## Read in Data
 
 ```{python}
 
@@ -63,7 +63,7 @@ qqqRange = (qqq['High'] - qqq['Low']) / qqq['Close']
 
 ```
 
-<h2> Normalize </h2>
+## Normalize
 
 ```{python}
 
@@ -95,7 +95,7 @@ spy_test=(spy_test-spy_train_mean)/spy_train_std
 ```
 
 
-<h2> Fit Helper Function to Create Data in Desired Format </h2>
+## Fit Helper Function to Create Data in Desired Format 
 
 ```{python}
 # code from lab
@@ -266,7 +266,7 @@ print("validation: ", spy_val_x.shape,"-->",spy_v_1.shape)
 
 
 
-<h2> Fit GRU </h2>
+## Fit GRU 
 
 No regularlization
 
@@ -334,7 +334,7 @@ history_plot(history_spy_1_reg)
 Compared to the model without regularization, we can see that the training set error decreases more steadily, without regressing higher very often. The consequence of this is that the raining error goes lower than the validation error faster than without regularization, suggesting regularization is helping the model to learn more purposefully and successfully.
 
 
-<h2> Fit RNN </h2>
+## Fit RNN 
 
 ```{python}
 
@@ -362,7 +362,7 @@ We can see the validation loss of the simple RNN model is actually almost equiva
 
 
 
-<h2> Fit LSTM </h2>
+## Fit LSTM 
 
 ```{python}
 
@@ -435,8 +435,7 @@ history_plot(history_spy_4_noreg)
 With a much larger model of 3x64 neuron LSTM layers, we can see that the validation loss is still around 55. However, the training loss has a consistent curve down to the validation loss. It is interesting that even in the later epochs, the validation loss remains lower than the training.
 
 
-
-<h2> Comparing Results of Deep Learning Models </h2>
+## Comparing Results of Deep Learning Models 
 
 Of the three neural network models, the LSTM provided the most consistent performance, while the RNN provided the best performance. The GRU model performed slightly worse than the other two, as measured by its validation set performance. Interestingly, the complexity required for the model to avoid underfitting was much higher with the LSTM model, where 3 hidden layers of 64 neurons each were needed before I felt the training plot showed excess training performance over validation performance. With smaller models, the LSTM performed somewhat poorly on the training set in comparison to the validation set. In terms of accuracy, the RNN model was notable for sometimes reaching below 0.55 loss in performance on the validation set, while the LSTM model usually reached around 0.56 and the GRU model between 0.56 and 0.6. In terms of predictive power (extrapolating outside the validation set) I would tend to trust the LSTM model, because it had the most consistent performance once it was trained over a number of epochs, and even boasted the lowest loss on a particular epoch, sometimes reaching as low as 0.51 in the validation set, although these results were not the norm.
 
@@ -448,8 +447,7 @@ The deep learning modelling is more complicated than the univariate modeling fro
 
 
 
-<h2> Comparing Deep Learning and Traditional TS Models </h2>
-
+## Comparing Deep Learning and Traditional TS Models 
 
 
 We identified ARIMA(3,0,3) as a good model for the SPY data. Lets look at the one step ahead precition of the ARIMA and best-performing (LSTM) neural network model in the validation data:

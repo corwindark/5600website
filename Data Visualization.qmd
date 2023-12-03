@@ -1,19 +1,23 @@
 ---
 title: "Data Visualization"
+engine: knitr
 ---
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, echo = FALSE, message = FALSE) 
+```
 
+## Introduction 
 
 The central question of this research project is about stock market volatility. As such the following visualizations will explore this subject in different areas. To start with, let's define the outcome variables in question:
 
-For each security: S&P 500, QQQ Pro-Shares ETF, and Russell 200 index, we have several metrics
-1. Price
-2. Standard deviation (10 day window)
-3. True range (intraday difference between highest and lowest price/previous closing value)
-4. Trading volume
 
-The window of our investigation is January 1st 2021 - September 30th 2023.
+## Financial Data 
+
+For each security: S&P 500, QQQ Pro-Shares ETF, and Russell 200 index, we are looking at the true range (intraday difference between highest and lowest price/previous closing value). The window of our investigation is January 1st 2021 - September 30th 2023.
 
 ``` {r}
+
+
 library(tidyverse)
 library(quantmod)
 
@@ -21,9 +25,9 @@ spyIn <- quantmod::getSymbols("SPY", from = as.Date("2021/01/01"), to = as.Date(
 qqqIn <- quantmod::getSymbols("QQQ", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
 iwmIn <- quantmod::getSymbols("IWM", from = as.Date("2021/01/01"), to = as.Date("2023/09/30"), periodicity = "daily", src = "yahoo", auto.assign = FALSE)
 
-head(spyIn)
-head(qqqIn)
-head(iwmIn)
+#head(spyIn)
+#head(qqqIn)
+#head(iwmIn)
 
 
 ```
@@ -37,8 +41,9 @@ combinedCloses <- cbind(spyIn$SPY.Close, qqqIn$QQQ.Close, iwmIn$IWM.Close)
 
 
 ts.plot(combinedCloses, gpars = list(col = rainbow(3)))
+title("Price of Indices Over Time")
 
-legend("topleft", legend = c("SPY", "QQQ", "IWM"), col = 1:3, lty = 1)
+legend("topleft", legend = c("SPY", "QQQ", "IWM"), title = "Ticker", col = 1:3, lty = 1)
 ```
 
 
@@ -46,7 +51,7 @@ In these charts, we can see that the overall trend for all three securities has 
 
 
 
-Now, let us look at the intraday range volatility measure. 
+Now, let us look at the intraday range measure of volatility, which is expressed as a percent of the opening price: 
 ``` {r}
 
 spyIn$spyRange <- (spyIn$SPY.High - spyIn$SPY.Low)/ spyIn$SPY.Open
@@ -68,19 +73,134 @@ title("Daily High-Low Range as Percent of Open Price")
 In this chart, we can see that the three indices tended to move together, with the midpoint of the time window having a higher average range in daily prices than the beginning or end for all of the securities. However, we can also see again that volatility is not even between them, with SPY and IWM having higher daily ranges than QQQ on average (at least according to the naked eye).
 
 
+
+## 3-Year Bond Yields
+
+
 Now, let's review the trends in the federal funds rate:
 ``` {r}
 library(lubridate)
 
-dff <- read.csv("./dff.csv")
+yields <- read.csv("./data/treasuries.csv")
 
-dff <- dff %>%
-    mutate(DATE = ymd(DATE)) %>%
-    filter(DATE >= ymd("2021-01-01"))
-
-plot3 <- ggplot(dff, aes(x = DATE, y = DFF)) + geom_line() + labs(y = "Daily Federal Fund Rate", x = "Time", title = "Daily Federal Funds Rate over Time")
-ggplotly(plot3)
+yields <- yields %>%
+    mutate(Date = mdy(Date)) %>%
+    filter(Date >= ymd("2021-01-01"))
 
 
+yieldPlot <- ggplot(yields) + geom_line(aes(x = Date, y = X1.Mo, color = "1 Month")) + geom_line(aes(x  = Date, y = X3.Mo, color = "3 Month")) + geom_line(aes(x = Date, y = X6.Mo, color = "6 Month")) + labs(y = "Percentage Rate", x = "Time", title = "Interest Rates by Bond Duration over Time", legend = "Bond Duration")  +  theme(text = element_text(size=12))
+ggplotly(yieldPlot)
+
+
+ 
+```
+
+By reviewing the data, we can see that the 1, 3, and 6 month rates on bonds tend to move together. However, the shorter length bonds, namely the 1 month rate, have the greatest volatility. We can also see that these variables will be tricky to include in our analsis, as they remained near zero for the first half of the dataset, before jumping up quickly in mid 2022.
+
+
+## Labor Data
+
+Let's examine the strikes that we have contained in our labor dataset. First let's look at the number of strikes by year:
+``` {r}
+
+
+strikes <- read.csv("./data/strikes.csv")
+
+strikes <- strikes %>%
+    mutate(Date = mdy(Work.stoppage.beginning.date)) %>%
+    filter(Date >= ymd("2021-01-01"))
+
+
+strikePlot <- ggplot(strikes, aes(x = year(Date) )) + geom_bar() + labs(x = 'Year', y = "Number of Strikes", title = "Number of Strikes by Year") +  theme(text = element_text(size=12))
+
+strikePlot
+```
+
+We can see that the number of strikes varied year-to-year, although 2023 was not complete in the dataset. But what if we looked at the overlap in strikes, and the number of workers striking concurrently:
+```{r}
+strike_data <- read.csv('./data/strikes.csv')
+
+# clean date format
+strike_data$start = mdy(strike_data$Work.stoppage.beginning.date)
+strike_data$end = mdy(strike_data$Work.stoppage.ending.date)
+strike_data$workers = as.numeric(str_replace(strike_data$Number.of.workers.2., ",", "" ))
+
+
+#head(strike_data)
+
+target_dates <- ymd(index(spyIn))
+
+daily_workers <- vector(mode = "numeric", length = length(target_dates))
+
+for(i in seq_along(target_dates)) {
+    tempDat <- strike_data %>%
+        filter(start <= target_dates[i]) %>%
+        filter(end >= target_dates[i])
+
+    daily_workers[i] = sum(tempDat$workers)
+}
+
+workerDF <- data.frame('workers' = daily_workers, 'date' = target_dates)
+
+
+workerPlot <- ggplot(workerDF, aes(x = date, y = workers)) + geom_line() + labs(title = "Number of Daily Concurrent Striking Workers Over Time", y = "Number of Workers", x = "Date") +  theme(text = element_text(size=20))
+
+
+names = c("Portland Teacher Strike", "University of California\n Academic Strike", "Los Angeles\n Teacher Strike")
+dates = ymd(c("2021-11-18", "2022-11-14", "2023-3-22"))
+values = c(45500, 49700,65000)
+a <- list(
+  x = dates,
+  y = values,
+  text = names,
+  xref = "x",
+  yref = "y",
+  showarrow = TRUE,
+  arrowhead = 7,
+  ax = 10,
+  ay = -75
+)
+
+fig <-    plot_ly(workerDF, x = ~date, y = ~workers, mode = "lines") 
+#fig <- fig %>% add_markers()
+fig <- fig %>% layout(annotations = a, title = "Number of Daily Concurrent Striking Workers Over Time", yaxis = list(title = "Number of Workers"), xaxis = list(title = "Date"))
+
+fig
+```
+
+We can see that the number of striking concurrent workers has varied overtime, but it should be an interesting variable to study as there are definite peaks and troughs in the dataset. A few particular strikes had a big impact but lasted only a few days, such as the teachers strikes in Portland and Los Angeles, which each lasted less than a week.
+
+## Weather Data
+
+Finally, let's see what our weather data for this period looks like:
+```{r}
+weather_data <- read.csv('data/storms_clean.csv')
+
+
+weather_data$month <- weather_data$BEGIN_YEARMONTH %% 100
+
+weather_data <- weather_data %>%
+    mutate(realdate = make_date(YEAR, month, BEGIN_DAY)) %>%
+    mutate(DAMAGE_PROPERTY =  str_replace(DAMAGE_PROPERTY, "K", "") )  %>%
+    mutate(DAMAGE_PROPERTY = as.numeric(DAMAGE_PROPERTY)) %>%
+    mutate(DAMAGE_PROPERTY = replace_na(DAMAGE_PROPERTY, 0))
+
+
+# Daily Event Number
+month_weather <- weather_data %>%
+    group_by(BEGIN_YEARMONTH) %>%
+    summarize(events = length(EPISODE_ID), pdam = sum(DAMAGE_PROPERTY, na.rm = TRUE), casualties = sum(INJURIES_DIRECT) + sum(INJURIES_INDIRECT) + sum(DEATHS_DIRECT) + sum(DEATHS_INDIRECT))
+
+names(month_weather)[1] <- 'time'
+month_weather[,1] <- c(1:nrow(month_weather))
+weatherPlot <- ggplot(month_weather, aes(x = time, y = events)) + geom_line() + labs(x = "Months Since January 2021", y = "Number of Weather Events", title = "Total Number of Extreme \n Weather Events by Month") + theme(text = element_text(size=12))
+weatherPlot 
+
+weather2Plot <- ggplot(month_weather, aes(x = time, y = scale(casualties), color = "Casualties")) + geom_line() + geom_line(aes(x = time, y = scale(pdam), color = "Property Damage")) + labs(x = "Months Since January 2021", y = "Scaled Values", color = "Negative Impacts", title = "Normalized Casualties and \n Total Property Value Damage by Month")  +  theme(text = element_text(size=12))
+weather2Plot 
 
 ```
+
+Looking at the first weather data chart, we can see that the total number of weather events appears to have some weak seasonality (which makes sense since weather is seasonal). The lowest months are September through November, and the highest are December through August (winter + hurricane season).
+
+In the second chart, we can see that total property damage and casualties move together. Unlike the total number of storms, the data has more heteroskedacticity and less seasonality, suggesting these numbers are more volatile and linked to individual, severe storms. However, the two trends are associated, with periods of elevated property damage having higher casualties and vice versa.

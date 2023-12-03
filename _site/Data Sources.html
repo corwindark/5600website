@@ -84,11 +84,7 @@ ul.task-list li input[type="checkbox"] {
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link" href="./index.html" rel="" target="">
- <span class="menu-text">Home</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./about me.html" rel="" target="">
- <span class="menu-text">About</span></a>
+ <span class="menu-text">About Me</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./Introduction.html" rel="" target="">
@@ -115,10 +111,6 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">ARIMAX SARIMAX VAR</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./Spectral Analysis and Filtering.html" rel="" target="">
- <span class="menu-text">Spectral Analysis and Filtering</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="./Financial Time Series Models (ARCH GARCH).html" rel="" target="">
  <span class="menu-text">Financial Time Series Models (ARCH GARCH)</span></a>
   </li>  
@@ -130,10 +122,8 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="./Conclusions.html" rel="" target="">
  <span class="menu-text">Conclusions</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./dv.html" rel="" target="">
- <span class="menu-text">Data Vizes in TS</span></a>
-  </li>  
+  <li class="dropdown-header">
+ <span class="menu-text">dv.qmd</span></li>
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -146,7 +136,29 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#united-states-stock-indices---intraday-volatility" id="toc-united-states-stock-indices---intraday-volatility" class="nav-link active" data-scroll-target="#united-states-stock-indices---intraday-volatility">United States Stock Indices - Intraday Volatility</a>
+  <ul class="collapse">
+  <li><a href="#sources" id="toc-sources" class="nav-link" data-scroll-target="#sources">Sources</a></li>
+  </ul></li>
+  <li><a href="#investor-confidence---cboes-vix" id="toc-investor-confidence---cboes-vix" class="nav-link" data-scroll-target="#investor-confidence---cboes-vix">Investor Confidence - CBOE’s VIX</a>
+  <ul class="collapse">
+  <li><a href="#sources-1" id="toc-sources-1" class="nav-link" data-scroll-target="#sources-1">Sources</a></li>
+  </ul></li>
+  <li><a href="#work-stoppages" id="toc-work-stoppages" class="nav-link" data-scroll-target="#work-stoppages">Work Stoppages</a>
+  <ul class="collapse">
+  <li><a href="#sources-2" id="toc-sources-2" class="nav-link" data-scroll-target="#sources-2">Sources</a></li>
+  </ul></li>
+  <li><a href="#daily-3-month-yield-curve" id="toc-daily-3-month-yield-curve" class="nav-link" data-scroll-target="#daily-3-month-yield-curve">Daily 3 Month Yield Curve</a>
+  <ul class="collapse">
+  <li><a href="#sources-3" id="toc-sources-3" class="nav-link" data-scroll-target="#sources-3">Sources</a></li>
+  </ul></li>
+  <li><a href="#storm-events-by-day" id="toc-storm-events-by-day" class="nav-link" data-scroll-target="#storm-events-by-day">Storm Events by Day</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -174,33 +186,59 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<h2 class="anchored">
-S&amp;P 500, Nasdaq 100, and Russel 2000, Daily Data Yahoo Finance
-</h2>
-<p>https://finance.yahoo.com/quote/%5EGSPC/history?p=%255EGSPC</p>
-<p>Financial data from tickers SPY, QQQ, and IWM. Data includes the open and close of stock prices for each day, as well as the highest and lowest price recorded for the day. These indices are widely used and will be a relevant outcome variable for the project to study. The main output value thaht will be calculated is the high-low range of the day.</p>
-<h2 class="anchored">
-VIX Data, Yahoo Finance
-</h2>
+<section id="united-states-stock-indices---intraday-volatility" class="level2">
+<h2 class="anchored" data-anchor-id="united-states-stock-indices---intraday-volatility">United States Stock Indices - Intraday Volatility</h2>
+<p>Financial data on the prices of different stocks are readily available in both R and Python through various packages, and amongst these the Yahoo Finance package is a particularly popular option. To approximate the daily range in value of major indices, I chose to look at popular low-cost ETFs which attempt to track the value of stocks contained in these indices. For the S&amp;P 500, this is SPY, run by State Street, for the Russel 2000 this is iShare’s IWM, and for the NASDAQ 100 it is the ever-popular Invesco QQQ fund. The data I haave gathered for these tickers includes the open and close of stock prices for each day, as well as the highest and lowest price recorded for the day. These indices are widely used and will be a relevant outcome variable for the project to study. The main output value that will be calculated is the high-low range of the day.</p>
+<section id="sources" class="level3">
+<h3 class="anchored" data-anchor-id="sources">Sources</h3>
+<ul>
+<li><p><a href="https://finance.yahoo.com/quote/SPY/history?p=SPY">SPY Historical Data</a></p></li>
+<li><p><a href="https://finance.yahoo.com/quote/IWM/history?p=IWM">IWM Historical Data</a></p></li>
+<li><p><a href="https://finance.yahoo.com/quote/QQQ/history?p=QQQ">QQQ Historical Data</a></p></li>
+</ul>
+</section>
+</section>
+<section id="investor-confidence---cboes-vix" class="level2">
+<h2 class="anchored" data-anchor-id="investor-confidence---cboes-vix">Investor Confidence - CBOE’s VIX</h2>
 <p>https://finance.yahoo.com/quote/%5EVIX/history?p=%255EVIX</p>
 <p>The Chicago Board of Exchange (CBOE) VIX index is a widely-used tool to measure investor sentiment. The indicator itself represents the degree of volatility perceived by investors in the next month. It ranges from near zero up to about 60 in recent years, with scores at different intervals representing different levels of perceived volatility.</p>
-<h2 class="anchored">
-Work Stoppages
-</h2>
-<p>https://www.bls.gov/wsp/</p>
+<section id="sources-1" class="level3">
+<h3 class="anchored" data-anchor-id="sources-1">Sources</h3>
+<ul>
+<li><p><a href="https://www.cfainstitute.org/-/media/documents/article/rf-brief/rfbr-moran-vix-volatility.ashx">Methodology of the VIX</a></p></li>
+<li><p><a href="https://finance.yahoo.com/quote/%5EVIX/history?p=%255EVIX">VIX Historical Data</a></p></li>
+</ul>
+</section>
+</section>
+<section id="work-stoppages" class="level2">
+<h2 class="anchored" data-anchor-id="work-stoppages">Work Stoppages</h2>
 <p>This dataset contains all of the major strikes recorded by the bureau of labor statistics, such that I will be able to use the number of striking workers on any given day as a variable for analysis.</p>
-<h2 class="anchored">
-Daily Yield Curve Next 3 Months
-</h2>
-<p>https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&amp;field_tdr_date_value=2023</p>
+<section id="sources-2" class="level3">
+<h3 class="anchored" data-anchor-id="sources-2">Sources</h3>
+<ul>
+<li><a href="https://www.bls.gov/wsp/">Labor Deparment Data</a></li>
+</ul>
+</section>
+</section>
+<section id="daily-3-month-yield-curve" class="level2">
+<h2 class="anchored" data-anchor-id="daily-3-month-yield-curve">Daily 3 Month Yield Curve</h2>
 <p>While I originally considered the actual federal funds rate, the values did not change much day to day. Instead I would like to use the expectation of yield rates, measured through the pricing of bonds in the yield curve over the next few months. The data includes the prices of treasury bills 1, 2, and 3 months out on each date.</p>
-<h2 class="anchored">
-Storm Events by Day
-</h2>
-<p>https://www.ncdc.noaa.gov/stormevents/ftp.jsp</p>
-<p>NOAA maintains records on each storm warning they send out for the entire country. This dataset includes many types of storm warnings, such as for hurricanes, blizzards, flash floods, and tornadoes. Importantly, the dataset includes the day in which each weather event took place, as well as the property damage and bodily injury caused by the weather event.</p>
+<section id="sources-3" class="level3">
+<h3 class="anchored" data-anchor-id="sources-3">Sources</h3>
+<ul>
+<li><a href="https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&amp;field_tdr_date_value=2023">Treasury Department Data</a></li>
+</ul>
+</section>
+</section>
+<section id="storm-events-by-day" class="level2">
+<h2 class="anchored" data-anchor-id="storm-events-by-day">Storm Events by Day</h2>
+<p>The National Oceanic and Atmospheric Administration (NOAA) maintains records on each storm warning they send out for the entire country. This dataset includes many types of storm warnings, such as for hurricanes, blizzards, flash floods, and tornadoes. Importantly, the dataset includes the day in which each weather event took place, as well as the property damage and bodily injury caused by the weather event.</p>
+<ul>
+<li><a href="https://www.ncdc.noaa.gov/stormevents/ftp.jsp">NOAA Data</a></li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

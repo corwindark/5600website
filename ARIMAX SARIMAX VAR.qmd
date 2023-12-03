@@ -5,7 +5,11 @@ engine: knitr
 ---
 
 
-<h2> Planning Models </h2>
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+## Planning Models 
 
 We have the following independent variables:
 1. Interest Rate Expectation Changes - 3 Months 
@@ -24,7 +28,7 @@ We have the following independent variables:
 
 
 
-<h3> Preparing Exogenous Data </h3>
+### Preparing Exogenous Data 
 
 First we need to create all 12 predictors, then we can combine them to estimate the models as needed.
 ```{r}
@@ -146,7 +150,7 @@ for(i in seq_along(target_dates)) {
 }
 
 workerDF <- data.frame('workers' = daily_workers, 'date' = target_dates)
-plot(daily_workers, type = 'l')
+#plot(daily_workers, type = 'l')
      
 ```
 
@@ -182,11 +186,11 @@ head(combinedData)
 ```
 
 
-<h3> Select Models Based on These Exogenous Variables </h3>
+### Select Models Based on These Exogenous Variables
 
 We will combine these 12 predictors into 5 models, for SPY, QQQ, and IWM intraday volatility:
 
-<h4> Model 1: (ARIMAX) SPY ~ Interest Rate 1-Year + Daily Weather Property Damage + Daily VIX Change + Daily Striking Worker Total </h2>
+#### Model 1: (ARIMAX) SPY ~ Interest Rate 1-Year + Daily Weather Property Damage + Daily VIX Change + Daily Striking Worker Total
 
 This model is selected based on the literature review, which suggested that weather events and investor expecations could affect stock prices. This is the "kitchen sink" model, where I am throwing in variables from all data sources. However, looking at the variables individually, such as daily property damage vs. SPY daily price range, we don't nessecarily see clear correlation (see plot below which resembles white noise). But I am interested to see how these variables are related when taking many different contextual factors into account in the same model.
 
@@ -195,7 +199,7 @@ ggplot(combinedData, aes(x = log(spyRange), y = log(pdam)) ) + geom_point() + la
 ```
 
 
-<h4> Model 2: (VAR) SPY ~ Interest Rate 3-Months + Daily VIX Value </h4>
+#### Model 2: (VAR) SPY ~ Interest Rate 3-Months + Daily VIX Value
 
 This model is based on a belief that there is an interrelationship between VIX prices and bond yields. This is because both would increase and decrease based on investor expectations for macroeconomic performance in upcoming months. If investors feel the economy will perform poorly, then this might predict bond yields lowering, as well as increased volatility which would be reflected by increases in the VIX. We also see a weak linear correlation in these daily values, as pictured in the plot below. 
 
@@ -203,24 +207,22 @@ This model is based on a belief that there is an interrelationship between VIX p
 ggplot(combinedData, aes(x = mo3delta, y = dailyChange ) ) + geom_point() + labs(title = "3 Month Interest Rate Changes vs. VIX Change ", x = "Change in 3-Month Interest Rates", y = "Change in VIX Price")
 ```
 
-<h4> Model 3: (ARIMAX) IWM ~ Casualties + Hurricanes + Interest Rate 3-Months </h4>
+#### Model 3: (ARIMAX) IWM ~ Casualties + Hurricanes + Interest Rate 3-Months
 
 This model is all about exogenous shocks. New strikes beggining and hurricane warnings are infrequent but extreme events, which have been grouped together with short-term interest rates (3 month window) to try and capture extreme-but-short-termm influences on volatility.
 
-<h4> Model 4: (ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers </h4>
-<h4> Model 5: (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers </h4>
+#### Model 4: (ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers 
+#### Model 5: (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers
 
 Models 4 and 5 follow the same logic as model 1, being selected based off of the literature review, but looking at QQQ as oppposed to SPY to see whether large-cap tech companies are more likely to be affected by this kind of volatility.
 
-<h2> Model Selection </h2>
+## Model Selection 
 
 In this section, I will begin by identifying the candidate model structures for each of the 5 overarching models outlined above. I will identify candidate models through auto.arima for ARIMAX models, plus hand-selected values. For VAR models, I will identify 2 candidates for each overall model with the autoVAR function.
 
-<h3> Model Selection for ARIMAX Models </h3>
+### Model Selection for ARIMAX Models 
 
-
-
-<h4> Model 1: SPY ~ Interest Rate 1-Year + Daily Weather Property Damage + Daily VIX Change + Daily Striking Worker Total </h2>
+#### Model 1: SPY ~ Interest Rate 1-Year + Daily Weather Property Damage + Daily VIX Change + Daily Striking Worker Total
 ```{r}
 
 xMatrix = combinedData[,c('mo12delta', 'pdam', 'dailyChange', 'workers')]
@@ -310,7 +312,7 @@ The function to evaluate various p,d,q values returns SARIMA(1,0,1)(0,1,0)[12] w
 
 
 
-<h4> Model 3: (ARIMAX) IWM ~ Casualties + Hurricanes + Interest Rate 3-Months </h4>
+#### Model 3: (ARIMAX) IWM ~ Casualties + Hurricanes + Interest Rate 3-Months
 
 ```{r}
 
@@ -362,7 +364,7 @@ checkresiduals(residualsMod3Can2)
 The residuals for this model arent encouraging, as the Ljung Box test returns a p value of 0.03. THe residuals also do not look perfectly normally distributed.
 
 
-<h4> Model 4: (ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers </h4>
+#### Model 4: (ARIMAX) QQQ ~ All Interest Rates + All Extreme Weather Events + Daily VIX Change + Daily Striking Workers 
 
 Running an auto arima:
 ```{r}
@@ -419,13 +421,13 @@ checkresiduals(mod4candidate2fit)
 
 The residuals for this model look similar to the auto.arima model, so it will be interesting to compare them with cross validation. Otherwise, it is notable that the residuals display clustered volatility, while the lag plot shows significant correlations at some values, although the Ljung-Box test returns 0.795 so we can conclude there is no autocorrelation in the residuals.
 
-<h4> Model 5: (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers </h4>
+#### Model 5: (ARIMAX) QQQ ~ Interest Rate 3 months + Daily Property Damage + Daily VIX Change + Daily New Striking Workers 
 
 I am leaving this model to fit after the homework.
 
-<h3> Model Selection for VAR Models </h3>
+### Model Selection for VAR Models 
 
-<h4> Model 2: (VAR) SPY ~ Interest Rate 3-Months + Daily VIX Value <h4>
+#### Model 2: (VAR) SPY ~ Interest Rate 3-Months + Daily VIX Value 
 
 Step 1, let's fit VAR with p=1 just to see the relationship between our 3 variables (SPY intraday range, 3-month interest rate changes, and the real daily VIX values). 
 
@@ -455,7 +457,7 @@ vars::VARselect(xMatrix2, lag.max = 10, type = 'both')
 
 VAR select returns either p =5 or p = 1 as the best fits, with AIC and FPE selecting p=5, and HQ and SC selecting p =1. We will use cross validation to compare these options.
 
-<h2> Model Evaluation </h2>
+## Model Evaluation 
 
 In this section, I will use cross validation to select the best candidate model for each of the 5 overaching model designs. First, lets define a cross validation function 
 
@@ -505,7 +507,7 @@ crossVal <- function(arima1order, arima2order, sarima2order, data) {
 }
 ```
 
-<h3> Model 1 (ARIMAX) </h3>
+### Model 1 (ARIMAX) 
 
 Lets test the function out on the first model, comparing ARIMA(4,1,1) vs. SARIMA(1,0,1)(0,1,0) on the residuals of the linear regression.
 
@@ -527,7 +529,7 @@ ggplot(data = model1comparison, aes(x = index1, y = rmse1), color = 'blue') + ge
 
 As we can see in the cross-validation chart, the two models perform similarly, and tend to have higher and lower errors at the same time, with both of the models performing poorly near the middle of the cross validation data sets. But overall, the ARIMA (ARIMAX) model performs the best at predicting the residuals. As such, my chosen model for Model 1 is ARIMAX(4,1,1).
 
-<h4> Predictions </h4>
+#### Predictions 
 
 Now, let's make predictions:
 ```{r}
@@ -554,7 +556,7 @@ autoplot(mod1$pred)
 Here we can see the models predictions for the SPY daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a precipitous drop in the daily range in SPY prices in the upcoming 10 days.
 
 
-<h3> Model 3 (ARIMAX)  IWM ~ Casualties + Hurricanes + Interest Rate 3-Months </h3>
+### Model 3 (ARIMAX)  IWM ~ Casualties + Hurricanes + Interest Rate 3-Months
 
 Let's compare the model returned by auto.arima, ARIMA(1,1,3), vs the model I found by hand, SARIMA(1,0,1)(1,1,0), on the residuals of the linear regression for model 3.
 
@@ -575,7 +577,7 @@ ggplot(data = model3comparison, aes(x = index3, y = rmse1), color = 'blue') + ge
 
 Just like for model 1, the two approaches performed similarly. If one model had a high RMSE for a particular value, the other model was likely to perform poorly as well. Overall however, we can see that for a given value the black line (ARIMA) tended to perform better. In the end, the ARIMAX models seems to fit the data well. As such, my chosen model for Model 3 is: ARIMAX(1,1,3)/.
 
-<h4> Predictions </h4>
+#### Predictions 
 
 Now, let's make predictions:
 ```{r}
@@ -598,12 +600,12 @@ autoplot(mod3$pred)
 
 Here we can see the models predictions for the IWM daily upcoming range, using auto.arima generated models to predict the external regressors. Overall, the model predicts a steep incline in IWM intraday ranges in the upcoming 10 days, especially in the first 5 before leveling off.
 
-<h3> Model 4 ARIMAX </h3>
+### Model 4 ARIMAX 
 Leaving for future work.
-<h3> Model 5 ARIMAX </h3>
+### Model 5 ARIMAX 
 Leaving for future work.
 
-<h3> Model 2 VAR </h3>
+### Model 2 VAR 
 
 Let's forecast our VAR model, which used 3-month interest rate changes and daily VIX values to predict SPY's intraday range. For this model we wanted to compare the p values of 1 and 5 to find the best model.
 

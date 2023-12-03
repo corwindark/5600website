@@ -117,11 +117,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link" href="./index.html" rel="" target="">
- <span class="menu-text">Home</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./about me.html" rel="" target="">
- <span class="menu-text">About</span></a>
+ <span class="menu-text">About Me</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./Introduction.html" rel="" target="">
@@ -148,10 +144,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">ARIMAX SARIMAX VAR</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./Spectral Analysis and Filtering.html" rel="" target="">
- <span class="menu-text">Spectral Analysis and Filtering</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link active" href="./Financial Time Series Models (ARCH GARCH).html" rel="" target="" aria-current="page">
  <span class="menu-text">Financial Time Series Models (ARCH GARCH)</span></a>
   </li>  
@@ -163,10 +155,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="./Conclusions.html" rel="" target="">
  <span class="menu-text">Conclusions</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./dv.html" rel="" target="">
- <span class="menu-text">Data Vizes in TS</span></a>
-  </li>  
+  <li class="dropdown-header">
+ <span class="menu-text">dv.qmd</span></li>
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -676,7 +666,7 @@ Call:
 
 Mean and Variance Equation:
  data ~ arma(3, 3) + garch(4, 1)
-&lt;environment: 0x000000003e8a0fb0&gt;
+&lt;environment: 0x00000000387fa8e0&gt;
  [data = spyIn$spyRange]
 
 Conditional Distribution:
@@ -715,7 +705,7 @@ Log Likelihood:
  2619.748    normalized:  3.796736 
 
 Description:
- Thu Nov 30 17:07:03 2023 by user: corwi </code></pre>
+ Fri Dec 01 22:44:15 2023 by user: corwi </code></pre>
 </div>
 </div>
 <p>The final evaluation of all the parameters together, however, suggests that the GARCH model should be (0,1). SO I will write the final correct formula as:</p>
@@ -788,7 +778,7 @@ Call:
 
 Mean and Variance Equation:
  data ~ arma(1, 1) + garch(1, 1)
-&lt;environment: 0x0000000038071ad8&gt;
+&lt;environment: 0x000000003ae13dd0&gt;
  [data = qqqIn$qqqRange]
 
 Conditional Distribution:
@@ -816,7 +806,7 @@ Log Likelihood:
  2441.621    normalized:  3.538581 
 
 Description:
- Thu Nov 30 17:07:03 2023 by user: corwi </code></pre>
+ Fri Dec 01 22:44:15 2023 by user: corwi </code></pre>
 </div>
 </div>
 <p>Final formula is: Rt = 0.00061 + 0.962 * R(t-1) - 0.741 * W(t-1) + At</p>
@@ -899,7 +889,7 @@ Call:
 
 Mean and Variance Equation:
  data ~ arma(4, 2) + garch(1, 1)
-&lt;environment: 0x000000003ce613f0&gt;
+&lt;environment: 0x000000002da012f0&gt;
  [data = iwmIn$iwmRange]
 
 Conditional Distribution:
@@ -933,7 +923,7 @@ Log Likelihood:
  2457.18    normalized:  3.56113 
 
 Description:
- Thu Nov 30 17:07:04 2023 by user: corwi </code></pre>
+ Fri Dec 01 22:44:16 2023 by user: corwi </code></pre>
 </div>
 </div>
 <p>When pulling all of the variables together, the final model diagnostic suggests that the moving average terms 3 and 4 are not significant. As such, I will write the equation for the final selected model of ARMA(4,2) + GARCH(1,1):</p>

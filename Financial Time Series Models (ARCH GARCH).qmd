@@ -1,23 +1,19 @@
 ---
 title: "Financial Time Series Models (ARCH GARCH)"
-format:
-    html:
-        code-fold: true
-        code-summary: "Show Code"
 ---
 
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 ```
 
-<h2> Introduction </h2>
+## Introduction 
 
 On this page, I will look to see whether ARCH and GARCH models may be a good fit for the change in intraday range of popular stock market indices. While these models would usually be fitted on the returns of financial intstruments, the day over day change in intraday percent range also exhibits volatility clustering, and intraday range is the exact subject of my project. This means that modelling these time series successfully would be complementary with the other models I have tried to fit, and I am eager to investigate whether these methods will work well at answering my research questions. I will look to fit 3 models: 1 each for the daily range of SPY, QQQ, and IWM.
 
 
 
 
-<h2> Stationarity and Volatility </h2>
+## Stationarity and Volatility 
 
 Load packages
 ```{r}
@@ -90,7 +86,7 @@ plot(iwmIn$iwmRange %>% diff())
 While the variance looked elevated in the non-differenced plot, it is actually less hesteroskedastic in the differenced plot. This suggests IWM may not have as much autocorrelation in the variance as the other two indices. An ARIMA model alone might suffice here.
 
 
-<h2>  Look at past arima model for the data (fit here and copy to that tab later) </h2>
+##  Past ARIMA Models Regerenced
 
 Now, let's gather ARIMA models for the intraday range. First we declare the helper function
 ```{r}
@@ -156,7 +152,7 @@ Fitting the pattern of the best models for the financial instruments being of th
 
 
 
-<h2> Reviewing Residuals to Identify ARCH/GARCH Models </h2>
+## Reviewing Residuals to Identify ARCH/GARCH Models
 
 Now, lets look at the residuals of all of these models, to identify clustering and see if we need to fit ARCH/GARCH models on the residuals.
 
@@ -222,7 +218,7 @@ ArchTest(iwmARMA$residuals)
 
 The IWM residuals look similar to the spy residuals, but suggest an ARCH (1) model. The squared residuals suggest GARCH(1,1).
 
-<h2> Finding and evaluating ARCH and GARCH Fits </h2>
+## Finding and evaluating ARCH and GARCH Fits 
 
 Let's start by declaring a GARCH helper function that checks possible values:
 ```{r}
@@ -250,7 +246,7 @@ garchResults <- function(data) {
 ```
 
 
-<h3> SPY GARCH Model Fitting, Diagnostics, and Equation </h3>
+## SPY GARCH Model Fitting, Diagnostics, and Equation 
 Let's check our ARCH(1) model hypothesis for SPY:
 ```{r}
 library(vars)
@@ -280,7 +276,7 @@ At = Sigma(t) * Epsilon(t)
 Sigma(t) ^ 2 =   0.00000033 +  0.94 * Sigma(t-1)^2
 
 
-<h3> QQQ GARCH Model Fitting, Diagnostics, and Equation </h3>
+## QQQ GARCH Model Fitting, Diagnostics, and Equation
 ```{r}
 qqqMod <- garchResults(qqqARMA$residuals)
 summary(qqqMod)
@@ -303,7 +299,7 @@ At = Sigma(t) * Epsilon(t)
 
 Sigma(t) ^ 2 =   0.00000035 +  .034 * a(t-1)^2  +  0.96 * Sigma(t-1)^2
 
-<h3> IWM GARCH Model Fitting, Diagnostics, and Equation </h3>
+## IWM GARCH Model Fitting, Diagnostics, and Equation 
 ```{r}
 iwmMod <- garchResults(iwmARMA$residuals)
 summary(iwmMod)

@@ -1,3 +1,0 @@
----
-title: "Spectral Analysis and Filtering"
----
