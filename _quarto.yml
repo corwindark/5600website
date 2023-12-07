@@ -2,20 +2,37 @@ project:
   type: website
 
 website:
-  title: "Corwin Dark"
-  navbar:
-    left:
-      - href: index.qmd
-        text: About Me
-      - Introduction.qmd
-      - Data Sources.qmd
-      - Data Visualization.qmd
-      - Exploratory Data Analysis.qmd
-      - ARMA ARIMA SARIMA Models.qmd
-      - ARIMAX SARIMAX VAR.qmd
-      - Financial Time Series Models (ARCH GARCH).qmd
-      - Deep Learning for TS.qmd
-      - Conclusions.qmd
+  title: "Intraday Volatility"
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - section: "Project Overview"
+        contents:
+        - href: index.qmd
+          text: About Me
+        - href: Introduction.qmd
+          text: Introduction
+      - section: "Data Processing"
+        contents:
+        - href: Data Sources.qmd
+          text: Data Sources
+        - href: Data Visualization.qmd
+          text: Data Visualization
+        - href: Exploratory Data Analysis.qmd
+          text: Exploratory Data Analysis
+      - section: "Project Overview"
+        contents:
+        - href: ARMA ARIMA SARIMA Models.qmd
+          text: ARMA, ARIMA, SARIMA Models
+        - href: ARIMAX SARIMAX VAR.qmd
+          text: ARIMAX SARIMAX VAR
+        - href: Financial Time Series Models (ARCH GARCH).qmd
+          text: Finanncial Time Series (ARCH GARCH)
+        - href: Deep Learning for TS.qmd
+          text: Deep Learning for TS
+      - href: Conclusions.qmd
+        text: Conclusions
 
 format:
   html:
@@ -25,8 +42,6 @@ format:
     code-fold: true
     code-summary: "Show Code"
     embed-resources: true
-
-
 execute:
   freeze: false 
 
