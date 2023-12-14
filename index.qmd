@@ -7,7 +7,7 @@ author: "Corwin Dark"
 
 
 ::: {.column width="50%"}
-![Hiking in the Cascades circa. 2020](me.jpg)
+![Hiking in the Cascades circa 2020](me.jpg)
 :::
 
 
