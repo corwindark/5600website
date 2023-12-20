@@ -361,7 +361,7 @@ checkresiduals(mod2 )
 The residual diagnostics for model 2 (1,1,1)(0,1,0) are similar to model 1, except that they have even less correlatoin visible in the residual plots. The residual's distribution is still skewed to the right, with a fatter positive tail. The ACF plot, however, has even less correlation visible, with only two values even coming marginally close to the significance line. There is still some heteroskedacticity in the plot over time, however, suggesting clustering of volatility.
 
 
-Now, let's use an Auto.Arima function to determine the correct model:
+Now, let's use an Auto Arima function to determine the correct model:
 ```{r}
 aaData <- ts(weather_merged$events)
 mod3 <- auto.arima(aaData, seasonal = TRUE, trace = FALSE)
